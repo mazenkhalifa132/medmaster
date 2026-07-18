@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Med Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+</head>
+<body>
+    {% if messages %}
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+            {% for message in messages %}
+                <div class="toast show align-items-center text-white bg-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}primary{% endif %} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">{{ message }}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="app-wrapper">
+            {% include 'parts/navbar.html' %}
+            <div class="main-content-area">
+                <header class="topbar">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class='bx bx-menu menu-toggle' id="menuToggle"></i>
+                        <div class="search-box">
+                            <i class='bx bx-search text-muted'></i>
+                            <input type="text" placeholder="Search courses, modules...">
+                            <span>Ctrl /</span>
+                        </div>
+                    </div>
+                    <div class="user-area">
+                        <div class="dropdown position-relative">
+                            <i class='bx bx-bell text-muted' style="font-size: 20px; cursor: pointer;" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="font-size: 10px;"><span class="visually-hidden">New alerts</span></span>
+                            </i>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 280px; padding: 10px 0;">
+                                <li><h6 class="dropdown-header fw-bold">Notifications</h6></li>
+                                <li><a class="dropdown-item py-2 border-bottom" href="#"><div class="d-flex flex-column"><span class="fw-bold">New Quiz Available</span><small class="text-muted">Anatomy Module 1 is ready</small></div></a></li>
+                                <li><a class="dropdown-item py-2 border-bottom" href="#"><div class="d-flex flex-column"><span class="fw-bold">OSCE Feedback</span><small class="text-muted">Your performance reviewed</small></div></a></li>
+                                <li><a class="dropdown-item py-2" href="#"><div class="d-flex flex-column"><span class="fw-bold">New Badge Earned</span><small class="text-muted">You earned a new star!</small></div></a></li>
+                                <li><hr class="dropdown-divider mx-0"></li>
+                                <li><a class="dropdown-item text-center text-primary fw-bold py-2" href="#">View All</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <div class="d-flex align-items-center gap-2" style="cursor: pointer;" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=random" alt="User">
+                                <div class="lh-1 d-none d-md-block">
+                                    <h6 class="m-0 fs-6">{{ request.user.first_name|default:request.user.username }}</h6>
+                                    <small class="text-muted">{{ request.user.get_role_display }}</small>
+                                </div>
+                                <i class='bx bx-chevron-down text-muted'></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="#"><i class='bx bx-user-circle me-2'></i>Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class='bx bx-log-out me-2'></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="page-container">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+            {% block right_panel %}{% include 'parts/right-panel.html' %}{% endblock %}
+        </div>
+    {% else %}
+        {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .review-answer { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+    .review-answer.correct { background: #d1fae5; border-color: #059669; }
+    .review-answer.wrong { background: #fee2e2; border-color: #dc2626; }
+    .question-image { max-width: 500px; max-height: 500px; object-fit: contain; }
+    .exam-right-panel { width: 320px; background: #fff; border-left: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; flex-shrink: 0; flex-direction: column; gap: 16px; }
+    .q-grid-header { display: flex; justify-content: space-between; margin-bottom: 12px; }.q-grid-header span { font-size: 14px; font-weight: 600; }.q-grid-header small { font-size: 12px; color: var(--text-gray); }
+    .result-question-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    .result-grid-btn { aspect-ratio: 1; border: 1px solid #e5e7eb; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: transform .15s; }
+    .result-grid-btn:hover { color: #fff; transform: translateY(-1px); }
+    .result-grid-btn.correct { background: #059669; border-color: #059669; }
+    .result-grid-btn.wrong { background: #dc2626; border-color: #dc2626; }
+    .result-grid-btn.saq { background: #f3f4f6; border-color: #e5e7eb; color: #374151; }
+</style>
+<div class="card border-0 shadow-sm mx-auto text-center mb-4" style="max-width:720px;border-radius:var(--border-radius);">
+    <div class="card-body p-5">
+        <i class='bx bxs-check-circle text-success' style="font-size:70px;"></i>
+        <h2 class="fw-bold mt-3">Exam submitted</h2>
+        <p class="text-muted">{{ exam.name }}</p>
+        <div class="display-4 fw-bold text-primary my-4">{% if exam.exam_type == 'saq' %}-/-{% else %}{{ attempt.result }}{% endif %}</div>
+        {% if exam.exam_type == 'saq' %}<p class="text-muted">Your written answers have been submitted for review.</p>{% else %}<p class="text-muted">You answered {{ attempt.score }} out of {{ attempt.total_questions }} questions correctly.</p>{% endif %}
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a class="btn btn-outline-secondary px-4" href="{% url 'module-detail' exam.module_id %}">Back to module</a>
+            {% if attempts_remaining %}<a class="btn btn-primary px-4" href="{% url 'exam-detail' exam.pk %}"><i class='bx bx-refresh'></i> Test Again ({{ attempts_remaining }} left)</a>{% endif %}
+        </div>
+    </div>
+</div>
+
+<h4 class="fw-bold mb-3">Answer review</h4>
+{% for item in question_results %}
+    <section class="card border-0 shadow-sm mb-3" id="review-question-{{ forloop.counter }}" style="border-radius:var(--border-radius); scroll-margin-top:20px;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between gap-3 mb-3"><h6 class="fw-bold mb-0">{{ forloop.counter }}. {{ item.answer_record.question.text }}</h6>{% if exam.exam_type != 'saq' %}{% if item.is_correct %}<span class="badge bg-success align-self-start">Correct</span>{% else %}<span class="badge bg-danger align-self-start">Incorrect</span>{% endif %}{% endif %}</div>
+            {% if item.answer_record.question.image_url %}
+                <img src="{{ item.answer_record.question.image_url }}" class="question-image rounded mb-3" alt="Question {{ forloop.counter }} illustration">
+            {% endif %}
+            {% if exam.exam_type == 'saq' %}
+                <div class="review-answer"><strong>Your answer:</strong><br>{{ item.answer_record.text_answer|default:"No answer provided."|linebreaksbr }}</div>
+                <div class="alert alert-info mb-0 mt-3"><strong>Explanation:</strong> {{ item.answer_record.question.answer_explanation|default:"No explanation has been provided." }}</div>
+            {% else %}
+                {% for answer in item.answer_record.question.answers.all %}
+                    <div class="review-answer{% if answer.is_correct %} correct{% elif answer.pk == item.answer_record.selected_answer_id %} wrong{% endif %}">
+                        {% if answer.is_correct %}<i class='bx bx-check-circle text-success me-1'></i>{% elif answer.pk == item.answer_record.selected_answer_id %}<i class='bx bx-x-circle text-danger me-1'></i>{% endif %}
+                        {{ answer.text }}{% if answer.is_correct %} <strong class="ms-1">(Correct answer)</strong>{% elif answer.pk == item.answer_record.selected_answer_id %} <strong class="ms-1">(Your answer)</strong>{% endif %}
+                    </div>
+                {% endfor %}
+                <div class="alert {% if item.is_correct %}alert-success{% else %}alert-danger{% endif %} mb-0 mt-3"><strong>Because:</strong> {{ item.answer_record.question.answer_explanation|default:"This is the correct answer based on the exam material." }}</div>
+            {% endif %}
+        </div>
+    </section>
+{% endfor %}
+{% endblock %}
+{% block right_panel %}
+<aside class="exam-right-panel d-none d-xl-flex">
+    <div class="q-grid-header"><span>Question Grid</span><small>Jump to review</small></div>
+    <div class="result-question-grid">
+        {% for item in question_results %}
+            <a href="#review-question-{{ forloop.counter }}" class="result-grid-btn {% if exam.exam_type == 'saq' %}saq{% elif item.is_correct %}correct{% else %}wrong{% endif %}" title="Question {{ forloop.counter }}{% if exam.exam_type != 'saq' %}: {% if item.is_correct %}Correct{% else %}Incorrect{% endif %}{% endif %}">{{ forloop.counter }}</a>
+        {% endfor %}
+    </div>
+    {% if exam.exam_type != 'saq' %}<div class="mt-2 small text-muted">
+        <div class="mb-1"><i class='bx bxs-circle text-success'></i> Correct</div>
+        <div><i class='bx bxs-circle text-danger'></i> Incorrect</div>
+    </div>{% endif %}
+</aside>
+{% endblock %}

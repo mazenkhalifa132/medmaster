@@ -1,0 +1,27 @@
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class='bx bxs-graduation'></i>
+        <div>Med Master <small>Master Your Future</small></div>
+    </div>
+
+    <div class="sidebar-menu">
+        <a class="nav-link active" data-page="dashboard"><i class='bx bxs-dashboard'></i> Dashboard</a>
+        <a class="nav-link" data-page="courses"><i class='bx bx-book-content'></i> My Courses</a>
+        <a class="nav-link" data-page="osce"><i class='bx bx-first-aid'></i> OSCE Simulator</a>
+        <a class="nav-link" data-page="quizzes"><i class='bx bx-edit-alt'></i> Quizzes</a>
+        <a class="nav-link" data-page="bookmarks"><i class='bx bx-bookmark'></i> Bookmarks</a>
+        <a class="nav-link" data-page="notes"><i class='bx bx-note'></i> Notes</a>
+        <a class="nav-link" data-page="progress"><i class='bx bx-bar-chart-alt-2'></i> Progress</a>
+        <a class="nav-link" data-page="community"><i class='bx bx-user-voice'></i> Community</a>
+        <a class="nav-link" data-page="calendar"><i class='bx bx-calendar'></i> Calendar</a>
+        {% if request.user.is_admin %}
+            <a class="nav-link" href="/admin/" target="_blank"><i class='bx bx-shield'></i> Admin Panel</a>
+        {% endif %}
+    </div>
+
+    <div class="premium-box">
+        <h6 class="text-white"><i class='bx bxs-crown'></i> Premium</h6>
+        <p class="text-white-50 small mb-3">Unlock all modules & cases.</p>
+        <a href="#" class="btn btn-upgrade">Upgrade Now</a>
+    </div>
+</nav>

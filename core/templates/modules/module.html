@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    /* Keep the module tabs and lesson-status pills identical to the supplied design. */
+    .module-sections-card .nav-tabs .nav-link {
+        color: var(--text-gray);
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        padding: 12px 20px;
+        transition: 0.2s;
+    }
+    .module-sections-card .nav-tabs .nav-link:hover { border-color: transparent; color: var(--text-dark); }
+    .module-sections-card .nav-tabs .nav-link.active {
+        color: var(--primary-blue);
+        border: none;
+        border-bottom: 2px solid var(--primary-blue);
+        background: transparent;
+    }
+</style>
+<a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-secondary px-0 mb-3 d-inline-flex align-items-center gap-1">
+    <i class='bx bx-arrow-back fs-5'></i> Back to Dashboard
+</a>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;font-weight:600;">X</div>
+        <div><h6 class="fw-bold m-0">Dr. X</h6><small class="text-muted">Professor of {{ module.name }}</small></div>
+    </div>
+    <small class="text-muted"><i class='bx bx-time'></i> Last updated feature is coming soon</small>
+</div>
+
+<div class="card shadow-sm border-0 mb-4 p-4" style="border-radius: var(--border-radius);">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-4">
+            <div class="module-icon-box mb-0" style="background:{{ module.bg_color }};color:{{ module.color }};width:64px;height:64px;font-size:32px;"><i class="bx {{ module.icon_class }}"></i></div>
+            <div><h4 class="fw-bold mb-1">{{ module.name }}</h4><p class="text-muted m-0">{{ module.description|default:"Medical Science" }} &middot; Year {{ module.year }}</p></div>
+        </div>
+        <div class="text-end">
+            <div class="d-flex align-items-center justify-content-end gap-2 mb-1"><h2 class="fw-bold text-primary m-0" style="font-size:24px;">{{ exam_progress }}%</h2><span class="status-badge {% if exam_progress == 100 %}status-completed{% else %}status-progress{% endif %}">{% if exam_progress == 100 %}Completed{% else %}In Progress{% endif %}</span></div>
+            <div class="progress" style="width:140px;height:6px;margin-left:auto;"><div class="progress-bar" style="width:{{ exam_progress }}%;background:{{ module.color }};"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold m-0">{{ total_files }}</h4><small class="text-muted">Total Files</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-success m-0">{{ completed_exams }}/{{ total_exams }}</h4><small class="text-muted">Exams Completed</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-warning m-0">coming soon</h4><small class="text-muted">OSCE Exams</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-primary m-0">{{ average_exam_score }}%</h4><small class="text-muted">Average Exams Score</small></div></div>
+</div>
+
+<div class="card shadow-sm border-0 overflow-hidden module-sections-card" style="border-radius:var(--border-radius);">
+    <div class="card-header bg-white border-bottom px-4 pt-3 pb-0"><ul class="nav nav-tabs border-0" id="moduleTabs" role="tablist">
+        {% if module.has_lessons %}<li class="nav-item" role="presentation"><button class="nav-link active" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons" type="button" role="tab" aria-selected="true"><i class='bx bx-book-content me-1'></i> Lessons</button></li>{% endif %}
+        {% if module.has_videos %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons %} active{% endif %}" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab" aria-selected="{% if module.has_lessons %}false{% else %}true{% endif %}"><i class='bx bx-video me-1'></i> Videos</button></li>{% endif %}
+        {% if module.has_files %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos %} active{% endif %}" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos %}false{% else %}true{% endif %}"><i class='bx bx-file me-1'></i> Files</button></li>{% endif %}
+        {% if module.has_exams %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files %} active{% endif %}" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files %}false{% else %}true{% endif %}"><i class='bx bx-edit-alt me-1'></i> Exams</button></li>{% endif %}
+        {% if module.has_text %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} active{% endif %}" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files or module.has_exams %}false{% else %}true{% endif %}"><i class='bx bx-file-blank me-1'></i> Text Content</button></li>{% endif %}
+        {% if module.has_osce %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} active{% endif %}" id="osce-tab" data-bs-toggle="tab" data-bs-target="#osce" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files or module.has_exams or module.has_text %}false{% else %}true{% endif %}"><i class='bx bx-first-aid me-1'></i> OSCE</button></li>{% endif %}
+    </ul></div>
+    <div class="card-body px-4"><div class="tab-content" id="moduleTabsContent">
+        {% if module.has_lessons %}<div class="tab-pane fade show active module-tab-pane" id="lessons" role="tabpanel"><div class="list-group list-group-flush border-0">
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom"><div class="d-flex align-items-center gap-3"><i class='bx bxs-check-circle fs-4 text-success'></i><div><h6 class="fw-bold m-0">1. Upper Limb Bones</h6><small class="text-muted d-block">45 minutes &middot; 3 videos</small></div></div><span class="status-badge status-completed">Completed</span></div>
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom"><div class="d-flex align-items-center gap-3"><i class='bx bxs-check-circle fs-4 text-success'></i><div><h6 class="fw-bold m-0">2. Muscles of the Back</h6><small class="text-muted d-block">30 minutes &middot; 2 videos</small></div></div><span class="status-badge status-completed">Completed</span></div>
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom"><div class="d-flex align-items-center gap-3"><i class='bx bxs-time fs-4 text-primary'></i><div><h6 class="fw-bold m-0">3. Brachial Plexus</h6><small class="text-muted d-block">1 hour &middot; 4 videos</small></div></div><span class="status-badge status-progress">In Progress</span></div>
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom"><div class="d-flex align-items-center gap-3"><i class='bx bxs-lock fs-4 text-muted'></i><div><h6 class="fw-bold m-0 text-muted">4. Cranial Nerves</h6><small class="text-muted d-block">45 minutes &middot; 3 videos</small></div></div><span class="status-badge status-locked">Locked</span></div>
+            <div class="list-group-item px-0 d-flex justify-content-between align-items-center"><div class="d-flex align-items-center gap-3"><i class='bx bxs-lock fs-4 text-muted'></i><div><h6 class="fw-bold m-0 text-muted">5. Clinical Correlates</h6><small class="text-muted d-block">1 hour &middot; 2 videos</small></div></div><span class="status-badge status-locked">Locked</span></div>
+        </div></div>{% endif %}
+        {% if module.has_videos %}<div class="tab-pane fade{% if not module.has_lessons %} show active{% endif %} module-tab-pane" id="videos" role="tabpanel"><div class="row g-3"><div class="col-md-6"><div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 border"><i class='bx bx-play-circle fs-2 text-primary'></i><div><h6 class="fw-bold m-0">Introduction to Upper Limb</h6><small class="text-muted">15 min &middot; 2.4k views</small><div class="mt-1"><span class="status-badge status-completed">Watched</span></div></div></div></div><div class="col-md-6"><div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 border"><i class='bx bx-play-circle fs-2 text-primary'></i><div><h6 class="fw-bold m-0">Bones of the Hand &amp; Wrist</h6><small class="text-muted">20 min &middot; 1.8k views</small><div class="mt-1"><span class="status-badge status-progress">Resume</span></div></div></div></div></div></div>{% endif %}
+        {% if module.has_files %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos %} show active{% endif %} module-tab-pane" id="files" role="tabpanel"><div class="d-flex flex-column gap-3">{% for study_file in study_files %}<div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border"><div class="d-flex align-items-center gap-3">{% if study_file.file_type == 'pdf' %}<i class='bx bxs-file-pdf fs-3 text-danger'></i>{% elif study_file.file_type == 'word' %}<i class='bx bxs-file-doc fs-3 text-primary'></i>{% else %}<i class='bx bxs-file fs-3 text-warning'></i>{% endif %}<div><h6 class="fw-bold m-0">{{ study_file.file_name }}</h6><small class="text-muted">{{ study_file.get_file_type_display }} &middot; {{ study_file.file_size }}</small></div></div><a class="btn btn-outline-primary btn-sm" href="{{ study_file.file_link }}" target="_blank" rel="noopener"><i class='bx bx-download'></i> Download</a></div>{% empty %}<p class="text-muted mb-0">No files are available for this module yet.</p>{% endfor %}</div></div>{% endif %}
+        {% if module.has_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files %} show active{% endif %} module-tab-pane" id="exams" role="tabpanel">
+            {% for group in exam_groups %}
+                <section class="mb-4{% if forloop.last %} mb-0{% endif %}">
+                    <h5 class="fw-bold mb-3">{{ group.label }} Exams</h5>
+                    <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th style="width:40%;">Exam Name</th><th>Questions</th><th>Time</th><th>Result</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>
+                        {% for exam in group.exams %}<tr><td class="fw-bold">{{ exam.name }}</td><td>{{ exam.question_count }}</td><td>{{ exam.time_limit }} min</td><td>{{ exam.student_result }}</td><td>{{ exam.retries_remaining }} remaining</td><td class="text-end">{% if exam.can_start %}<a href="{% url 'exam-detail' exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>Completed</button>{% endif %}</td></tr>{% endfor %}
+                    </tbody></table></div>
+                </section>
+            {% endfor %}
+        </div>{% endif %}
+        {% if module.has_text %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} show active{% endif %} module-tab-pane" id="text" role="tabpanel"><div class="p-3 bg-light rounded-3 border mb-3"><h6 class="fw-bold">Summary of Upper Limb Muscles</h6><p class="small text-muted mb-0">The upper limb consists of 4 main muscle compartments: shoulder, arm, forearm, and hand. The brachial plexus (C5-T1) innervates these muscles...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div><div class="p-3 bg-light rounded-3 border"><h6 class="fw-bold">Clinical Notes: Nerve Injuries</h6><p class="small text-muted mb-0">Radial nerve injury results in wrist drop. Median nerve injury leads to "ape hand" deformity...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div></div>{% endif %}
+        {% if module.has_osce %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="p-3 bg-light rounded-3 border"><h6 class="fw-bold">Upper Limb OSCE Station</h6><p class="small text-muted mb-0">Practice your clinical examination skills.</p><button class="btn btn-primary btn-sm mt-3">Start Simulation</button></div></div>{% endif %}
+    </div></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sidebar Mobile Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block auth_content %}
+<div class="container py-5">
+    <div class="auth-card mx-auto">
+        <div class="auth-logo">
+            <i class='bx bxs-graduation'></i>
+            <div>
+                <h1>Med Master</h1>
+                <span>Master Your Future</span>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} small">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div id="signin-form" class="auth-form">
+            <h5 class="fw-bold text-center mb-4">Welcome Back</h5>
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="signin-email" class="form-label text-muted small">Email Address</label>
+                    <input type="email" class="form-control" id="signin-email" name="email" placeholder="mazen.med@medmaster.com" required>
+                </div>
+                <div class="mb-4">
+                    <label for="signin-password" class="form-label text-muted small">Password</label>
+                    <input type="password" class="form-control" id="signin-password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div class="auth-toggle">
+                Don't have an account? <a onclick="toggleForm('signup')">Sign Up</a>
+            </div>
+        </div>
+
+        <div id="signup-form" class="auth-form hidden">
+            <h5 class="fw-bold text-center mb-4">Create Account</h5>
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="signup-fname" class="form-label text-muted small">First Name</label>
+                        <input type="text" class="form-control" id="signup-fname" name="first_name" placeholder="Mazen" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="signup-sname" class="form-label text-muted small">Last Name</label>
+                        <input type="text" class="form-control" id="signup-sname" name="last_name" placeholder="Ahmed" required>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label for="signup-email" class="form-label text-muted small">Email Address</label>
+                    <input type="email" class="form-control" id="signup-email" name="email" placeholder="mazen.med@medmaster.com" required>
+                </div>
+                <div class="mt-3">
+                    <label for="signup-phone" class="form-label text-muted small">Phone Number</label>
+                    <input type="tel" class="form-control" id="signup-phone" name="phone" placeholder="+20 123 456 7890" required>
+                </div>
+                <div class="mt-3">
+                    <label for="signup-year" class="form-label text-muted small">Academic Year</label>
+                    <select class="form-select" id="signup-year" name="academic_year" required>
+                        <option value="" disabled selected>Select your year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                    </select>
+                </div>
+                <div class="mt-3">
+                    <label for="signup-password1" class="form-label text-muted small">Password</label>
+                    <input type="password" class="form-control" id="signup-password1" name="password1" placeholder="••••••••" required>
+                </div>
+                <div class="mt-3 mb-3">
+                    <label for="signup-password2" class="form-label text-muted small">Confirm Password</label>
+                    <input type="password" class="form-control" id="signup-password2" name="password2" placeholder="••••••••" required>
+                </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="signup-terms" name="agree_terms" required>
+                    <label class="form-check-label small text-muted" for="signup-terms">
+                        I agree to the terms and conditions.
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+            <div class="auth-toggle">
+                Already have an account? <a onclick="toggleForm('signin')">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleForm(formType) {
+        const signinForm = document.getElementById('signin-form');
+        const signupForm = document.getElementById('signup-form');
+        if (formType === 'signin') {
+            signinForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        } else if (formType === 'signup') {
+            signupForm.classList.remove('hidden');
+            signinForm.classList.add('hidden');
+        }
+    }
+    window.addEventListener('load', function() {
+        toggleForm('signin');
+    });
+</script>
+{% endblock %}
