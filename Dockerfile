@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN python core/manage.py collectstatic --noinput
 
-CMD ["sh", "-c", "gunicorn --chdir core core.wsgi:application --bind 0.0.0.0:${PORT:-8080}"]
+CMD ["sh", "-c", "python core/manage.py migrate --noinput && gunicorn --chdir core core.wsgi:application --bind 0.0.0.0:${PORT:-8080}"]
