@@ -17,6 +17,20 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+# Railway terminates HTTPS at its proxy. Trust the public Railway domain for
+# CSRF-protected POST requests (including Django admin file uploads), while
+# allowing additional custom domains to be supplied as a comma-separated list.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+railway_public_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if railway_public_domain:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{railway_public_domain}')
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
