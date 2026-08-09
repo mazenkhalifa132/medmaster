@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, render
 
 from exams.models import Exam
 from files.models import StudyFile
+from osce.models import OSCEAttempt, OSCEExam
 
 from .models import Module
 
@@ -11,6 +12,7 @@ from .models import Module
 def module_detail(request, pk):
     module = get_object_or_404(Module, pk=pk, is_active=True)
     exams = Exam.objects.filter(module=module, is_active=True).prefetch_related('questions')
+    osce_exams = OSCEExam.objects.filter(module=module, is_active=True).prefetch_related('questions')
     study_files = StudyFile.objects.filter(module=module)
     exams_by_type = {}
     total_exams = exams.count()
@@ -40,6 +42,21 @@ def module_detail(request, pk):
         exam.can_start = exam.retries_remaining > 0
         exams_by_type.setdefault(exam.exam_type, []).append(exam)
 
+    for osce_exam in osce_exams:
+        first_attempt = OSCEAttempt.objects.filter(
+            exam=osce_exam, student=request.user, total_questions__gt=0
+        ).order_by('submitted_at', 'pk').first()
+        total_grade = osce_exam.graded_question_count
+        osce_exam.student_result = first_attempt.grade_result if first_attempt else f'0/{total_grade}'
+        if first_attempt:
+            total_score += first_attempt.total_score
+            total_possible_score += first_attempt.total_possible_score
+        osce_exam.attempts_used = OSCEAttempt.objects.filter(
+            exam=osce_exam, student=request.user
+        ).count()
+        osce_exam.retries_remaining = max(osce_exam.retry_times - osce_exam.attempts_used, 0)
+        osce_exam.can_start = osce_exam.question_count > 0 and osce_exam.retries_remaining > 0
+
     exam_progress = round((completed_exams / total_exams) * 100) if total_exams else 0
     average_exam_score = round((total_score / total_possible_score) * 100) if total_possible_score else 0
 
@@ -63,5 +80,7 @@ def module_detail(request, pk):
             'average_exam_score': average_exam_score,
             'study_files': study_files,
             'total_files': study_files.count(),
+            'osce_exams': osce_exams,
+            'total_osce_exams': osce_exams.count(),
         },
     )

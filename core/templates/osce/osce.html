@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .osce-page { max-width: 1280px; margin: 0 auto; }
+    .sim-container { background:#fff; border-radius:12px; border:1px solid #e5e7eb; padding:20px; }
+    .sim-area { position:relative; background:linear-gradient(145deg,#a9c2cf,#5f8598); border-radius:12px; overflow:hidden; }
+    .sim-area::after { content:""; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,rgba(255,255,255,.65) 1px,transparent 1.25px); background-size:18px 18px; opacity:.5; }
+    .sim-area > * { position:relative; z-index:1; }
+    #osce-station #canvas-container { border-radius:10px; overflow:hidden; position:relative; height:min(820px,calc(100vh - 160px)); min-height:540px; }
+    #osce-station canvas { display:block; width:100%!important; height:100%!important; }
+    #osce-station .canvas-toolbar { position:absolute; top:10px; left:10px; display:flex; gap:8px; z-index:30; pointer-events:auto; }
+    #osce-station .canvas-toolbar button { width:42px; height:42px; border-radius:50%; border:1px solid rgba(0,0,0,.12); box-shadow:0 3px 10px rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; font-size:18px; padding:0; }
+    #osce-station .canvas-toolbar button.active { background:#0d6efd; color:#fff; border-color:#0d6efd; }
+    #osce-station .station-logic-only { display:none; }
+    .control-panel .card { border:1px solid #e5e7eb; border-radius:12px; }
+    .mcq-answers-wrapper { position:relative; background:#f8f9fa; padding:20px; border-radius:12px; border:1px solid #e5e7eb; }
+    .timer-overlay-answers { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.88); z-index:10; border-radius:12px; }
+    .timer-overlay-answers.hide { opacity:0; visibility:hidden; pointer-events:none; transition:opacity .3s; }
+    .osce-option { border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; cursor:pointer; background:#fff; }
+    .osce-option:hover { border-color:#93c5fd; background:#eff6ff; }
+    .osce-option input { margin-right:9px; }
+    .osce-timer { min-width:92px; text-align:center; }
+    @media (max-width:991.98px) { #osce-station #canvas-container { height:600px; min-height:500px; } }
+</style>
+
+<div class="osce-page">
+    <a href="{% url 'module-detail' exam.module_id %}" class="btn btn-link text-decoration-none text-secondary px-0 mb-3 d-flex align-items-center gap-1"><i class='bx bx-arrow-back fs-5'></i> Back to {{ exam.module.name }}</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">{{ exam.name }}</h4>
+            <p class="text-muted small mb-0">{{ exam.graded_question_count }} question{{ exam.graded_question_count|pluralize }} · {{ attempts_remaining }} attempt{{ attempts_remaining|pluralize }} remaining</p>
+        </div>
+        <div class="osce-timer"><small class="text-muted d-block">MCQ time</small><strong class="text-primary" id="examTimer"></strong></div>
+    </div>
+
+    <div id="phase-practical"{% if exam.osce_station == 'none' %} class="d-none"{% endif %}>
+        <div class="sim-container">
+            <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                <div><h6 class="fw-bold mb-1" id="stationTitle">Simulation Area</h6><p class="text-muted small mb-0" id="stationInstructions"></p></div>
+                <span class="badge text-bg-primary">Practical</span>
+            </div>
+            <div id="osce-station"><div class="container-fluid p-0"><div class="row g-3"><div id="canvas-container" class="sim-area col-lg-9 col-12"></div><div id="station-control-panel" class="control-panel col-lg-3 col-12"></div></div></div></div>
+        </div>
+    </div>
+
+    {% if exam.osce_station == 'none' %}
+        <div id="no-practical" class="card border-0 shadow-sm p-4 text-center"><i class='bx bx-task fs-1 text-primary mb-2'></i><h5 class="fw-bold">MCQ OSCE assessment</h5><p class="text-muted mb-3">This assessment has no practical station. Start the question phase when ready.</p><button type="button" class="btn btn-primary align-self-center" id="beginMcq">Begin MCQ phase</button></div>
+    {% endif %}
+
+    <div id="phase-mcq" class="d-none mt-4">
+        <form method="post" action="{% url 'osce-submit' exam.pk %}" id="osceForm">
+            {% csrf_token %}
+            <input type="hidden" name="attempt_id" value="{{ attempt_id }}">
+            <input type="hidden" name="practical_passed" id="practicalPassed">
+            <input type="hidden" name="practical_details" id="practicalDetails">
+            <input type="hidden" name="practical_score" id="practicalScore">
+            <input type="hidden" name="practical_total" id="practicalTotal">
+            <div id="storedAnswers"></div>
+            <div id="mcqQuestionsWrap" class="card shadow-sm border-0 p-4"></div>
+        </form>
+    </div>
+</div>
+
+{{ question_data|json_script:'osce-questions' }}
+<script>
+    window.OSCE_INITIAL_STATION = {% if exam.osce_station == 'bp' %}'blood-pressure'{% elif exam.osce_station == 'ecg' %}'ecg-station'{% else %}null{% endif %};
+    window.OSCE_BLOOD_PRESSURE = { systolic: {{ exam.systolic_pressure|default:'null' }}, diastolic: {{ exam.diastolic_pressure|default:'null' }} };
+    window.OSCE_ECG_LEADS = [{% if exam.ecg_v1 %}'v1',{% endif %}{% if exam.ecg_v2 %}'v2',{% endif %}{% if exam.ecg_v3 %}'v3',{% endif %}{% if exam.ecg_v4 %}'v4',{% endif %}{% if exam.ecg_v5 %}'v5',{% endif %}{% if exam.ecg_v6 %}'v6',{% endif %}];
+</script>
+{% if exam.osce_station != 'none' %}
+<script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
+<script src="{% static 'js/new_station.js' %}" defer></script>
+{% if exam.osce_station == 'bp' %}<script src="{% static 'osce/bp/blood_pressure.js' %}" defer></script>{% endif %}
+{% if exam.osce_station == 'ecg' %}<script src="{% static 'osce/ecg/ecg.js' %}" defer></script>{% endif %}
+{% endif %}
+<script>
+    const QUESTIONS = JSON.parse(document.getElementById('osce-questions').textContent);
+    let currentQuestion = 0;
+    let revealTimer = null;
+    // The timer is stored in minutes in the admin, while the countdown runs in seconds.
+    let examSeconds = {{ exam.mcq_timer }} * 60;
+    const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+
+    function startMCQ() {
+        document.getElementById('phase-practical')?.classList.add('d-none');
+        document.getElementById('no-practical')?.classList.add('d-none');
+        document.getElementById('phase-mcq').classList.remove('d-none');
+        const station = window.Testing?.activeStation;
+        document.getElementById('practicalPassed').value = window.oscePracticalResult === true ? 'on' : '';
+        document.getElementById('practicalDetails').value = station?.getPracticalResultDetails?.() || 'No practical station configured.';
+        const practicalGrade = station?.getPracticalGrade?.() || { score: 0, total: 0 };
+        document.getElementById('practicalScore').value = practicalGrade.score || 0;
+        document.getElementById('practicalTotal').value = practicalGrade.total || 0;
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (currentQuestion >= QUESTIONS.length) { document.getElementById('osceForm').submit(); return; }
+        const question = QUESTIONS[currentQuestion];
+        const answers = question.answers.map(answer => `<label class="osce-option d-block"><input type="radio" name="answer" value="${answer.id}"> ${escapeHtml(answer.text)}</label>`).join('');
+        document.getElementById('mcqQuestionsWrap').innerHTML = `<div class="d-flex justify-content-between gap-3 mb-3"><div><span class="text-muted small">Question ${currentQuestion + 1} of ${QUESTIONS.length}</span><h6 class="fw-bold mt-1 mb-0">${escapeHtml(question.text)}</h6></div></div>${question.image_link ? `<img src="${escapeHtml(question.image_link)}" class="img-fluid rounded mb-3" alt="Question illustration">` : ''}<div class="mcq-answers-wrapper"><div class="d-flex flex-column gap-2" id="answerOptions" style="opacity:0;pointer-events:none">${answers}</div><div class="timer-overlay-answers" id="answerOverlay"><div class="text-center"><h1 class="display-4 fw-bold text-primary" id="revealCountdown">10</h1><p class="text-muted">Reading time remaining</p><button type="button" class="btn btn-primary btn-sm" id="revealAnswers">Reveal answers now</button></div></div></div><button type="button" class="btn btn-outline-primary mt-3 float-end" id="confirmAnswer" disabled>Confirm answer</button><div class="clearfix"></div>`;
+        document.getElementById('revealAnswers').onclick = revealAnswers;
+        document.getElementById('confirmAnswer').onclick = confirmAnswer;
+        let seconds = 10;
+        revealTimer = setInterval(() => { seconds--; document.getElementById('revealCountdown').textContent = seconds; if (seconds <= 0) revealAnswers(); }, 1000);
+    }
+
+    function revealAnswers() {
+        if (revealTimer) clearInterval(revealTimer);
+        revealTimer = null;
+        document.getElementById('answerOverlay')?.classList.add('hide');
+        const options = document.getElementById('answerOptions');
+        if (options) { options.style.opacity = '1'; options.style.pointerEvents = 'auto'; }
+        document.getElementById('confirmAnswer').disabled = false;
+    }
+
+    function confirmAnswer() {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (!selected) { alert('Please select an answer first.'); return; }
+        const question = QUESTIONS[currentQuestion];
+        document.getElementById('storedAnswers').insertAdjacentHTML('beforeend', `<input type="hidden" name="question_${question.id}" value="${selected.value}">`);
+        currentQuestion++;
+        renderQuestion();
+    }
+
+    function tick() {
+        const timer = document.getElementById('examTimer');
+        timer.textContent = `${Math.floor(examSeconds / 60)}:${String(examSeconds % 60).padStart(2, '0')}`;
+        if (examSeconds <= 0) { document.getElementById('osceForm')?.submit(); return; }
+        examSeconds--; setTimeout(tick, 1000);
+    }
+    document.getElementById('beginMcq')?.addEventListener('click', startMCQ);
+    tick();
+</script>
+{% endblock %}
+
+{% block right_panel %}{% endblock %}

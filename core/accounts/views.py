@@ -3,6 +3,7 @@ import re
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -108,3 +109,26 @@ def logout_view(request):
     auth_logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('auth')
+
+
+@login_required(login_url='auth')
+@require_http_methods(['GET', 'POST'])
+def profile_view(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        academic_year = request.POST.get('academic_year', '').strip()
+
+        if not first_name or not last_name:
+            messages.error(request, 'First name and last name are required.')
+        elif not academic_year.isdigit() or int(academic_year) not in range(1, 6):
+            messages.error(request, 'Choose a valid academic year.')
+        else:
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.academic_year = int(academic_year)
+            request.user.save(update_fields=['first_name', 'last_name', 'academic_year'])
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('profile')
+
+    return render(request, 'accounts/profile.html')

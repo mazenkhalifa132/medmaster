@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <div id="content-main">
+    <form method="post">
+      {% csrf_token %}
+      <fieldset class="module aligned">
+        <h2>Import questions into {{ exam.name }}</h2>
+        <div class="form-row">
+          <div>
+            <label for="id_questions"><strong>Questions</strong></label>
+            <textarea name="questions" id="id_questions" rows="16" cols="100" required>{{ raw_text }}</textarea>
+            <p class="help">Paste one question per line: <code>Question,Answer 1,Answer 2+,Answer 3,Answer 4,Explanation</code></p>
+            <p class="help">Put <code>+</code> at the end of the one correct answer. Leave an answer blank with <code>,,</code>; a final comma means no explanation. Values containing commas must be enclosed in double quotes.</p>
+          </div>
+        </div>
+      </fieldset>
+      <div class="submit-row">
+        <input type="submit" value="Import questions" class="default">
+        <a href="{% url 'admin:exams_exam_change' exam.pk %}" class="closelink">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

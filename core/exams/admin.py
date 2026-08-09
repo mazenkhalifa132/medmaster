@@ -1,8 +1,15 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.forms import BaseInlineFormSet, ModelForm, Select
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
+from django.db.models import Max
 import nested_admin
 
+from .bulk_import import BulkQuestionImportError, parse_questions
 from .models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, MCQAnswer
 
 
@@ -59,11 +66,81 @@ class ExamQuestionInline(nested_admin.NestedStackedInline):
 class ExamAdmin(nested_admin.NestedModelAdmin):
     form = ExamAdminForm
     inlines = (ExamQuestionInline,)
+    change_form_template = 'admin/exams/exam/change_form.html'
     list_display = ('name', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'result', 'is_active')
     list_filter = ('exam_type', 'year', 'module', 'is_active')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'name')
     fields = ('year', 'module', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_active')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/bulk-upload/',
+                self.admin_site.admin_view(self.bulk_upload_view),
+                name='exams_exam_bulk_upload',
+            ),
+        ]
+        return custom_urls + urls
+
+    def bulk_upload_view(self, request, object_id):
+        exam = self.get_object(request, object_id)
+        if exam is None:
+            return HttpResponseRedirect(reverse('admin:exams_exam_changelist'))
+        if not self.has_change_permission(request, exam):
+            raise PermissionDenied
+        if exam.exam_type == 'saq':
+            self.message_user(
+                request, 'Bulk MCQ import is not available for SAQ exams.', messages.ERROR
+            )
+            return HttpResponseRedirect(reverse('admin:exams_exam_change', args=(exam.pk,)))
+
+        raw_text = request.POST.get('questions', '')
+        if request.method == 'POST':
+            try:
+                question_rows = parse_questions(raw_text)
+                with transaction.atomic():
+                    exam = Exam.objects.select_for_update().get(pk=exam.pk)
+                    last_order = exam.questions.aggregate(max_order=Max('order'))['max_order'] or 0
+                    questions = [
+                        ExamQuestion(
+                            exam=exam,
+                            order=last_order + index,
+                            text=row['text'],
+                            answer_explanation=row['explanation'],
+                        )
+                        for index, row in enumerate(question_rows, start=1)
+                    ]
+                    created_questions = ExamQuestion.objects.bulk_create(questions)
+                    answers = [
+                        MCQAnswer(
+                            question=question,
+                            order=answer_order,
+                            text=answer['text'],
+                            is_correct=answer['is_correct'],
+                        )
+                        for question, row in zip(created_questions, question_rows)
+                        for answer_order, answer in enumerate(row['answers'], start=1)
+                    ]
+                    MCQAnswer.objects.bulk_create(answers)
+            except BulkQuestionImportError as error:
+                self.message_user(request, str(error), messages.ERROR)
+            else:
+                self.message_user(
+                    request,
+                    f'Imported {len(question_rows)} question(s) and their answers.',
+                    messages.SUCCESS,
+                )
+                return HttpResponseRedirect(reverse('admin:exams_exam_change', args=(exam.pk,)))
+
+        context = {
+            **self.admin_site.each_context(request),
+            'title': f'Import questions: {exam.name}',
+            'exam': exam,
+            'raw_text': raw_text,
+        }
+        return TemplateResponse(request, 'admin/exams/exam/bulk_upload.html', context)
 
 @admin.register(ExamQuestion)
 class ExamQuestionAdmin(nested_admin.NestedModelAdmin):

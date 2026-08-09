@@ -1,5 +1,6 @@
+{% load static %}
 <aside class="right-panel d-none d-xl-block">
-    <div class="quick-access">
+    <!--<div class="quick-access">
         <h6 class="fw-bold mb-3">Quick Access</h6>
         <div class="quick-grid">
             <div class="quick-item" style="color:#3b82f6;"><i class='bx bx-help-circle'></i> Questions</div>
@@ -7,6 +8,18 @@
             <div class="quick-item" style="color:#8b5cf6;"><i class='bx bx-video-recording'></i> Videos</div>
             <div class="quick-item" style="color:#f97316;"><i class='bx bx-file'></i> Text Content</div>
         </div>
+    </div>
+    <hr>-->
+    <div class="mb-4">
+        <h6 class="fw-bold mb-3">Upcoming <!--<small class="text-primary fw-normal" style="cursor:pointer;">View All</small>--></h6>
+        {% for event in upcoming_events %}
+            <div class="d-flex gap-3 mb-3">
+                <i class='bx {{ event.icon }} text-primary fs-4'></i>
+                <div><h6 class="m-0 fs-6 fw-bold">{{ event.title }}</h6><small class="text-muted">{{ event.scheduled_at|date:"M j, Y - g:i A" }}</small></div>
+            </div>
+        {% empty %}
+            <small class="text-muted">No upcoming events.</small>
+        {% endfor %}
     </div>
     <hr>
     <div class="mb-4">
@@ -26,15 +39,12 @@
         </div>
     </div>
     <hr>
-    <div class="mb-4">
-        <h6 class="fw-bold mb-3">Upcoming <small class="text-primary fw-normal" style="cursor:pointer;">View All</small></h6>
-        <div class="d-flex gap-3 mb-3">
-            <i class='bx bx-edit text-primary fs-4'></i>
-            <div><h6 class="m-0 fs-6 fw-bold">Quiz: Anatomy</h6><small class="text-muted">Tomorrow, 10:00 AM</small></div>
-        </div>
-        <div class="d-flex gap-3">
-            <i class='bx bx-first-aid text-primary fs-4'></i>
-            <div><h6 class="m-0 fs-6 fw-bold">OSCE Practice</h6><small class="text-muted">May 26, 2024 - 2:00 PM</small></div>
+    <div class="quick-access">
+        <h6 class="fw-bold mb-3">Dr. X</h6>
+        <div style="text-align: center;">
+            <img src="{% static 'imgs/dr.x/curious.jpg' %}" alt="Dr. X" style="width: 50%; height: auto;">
+            <h6 class="fw-bold m-0">Keep Going</h6>
+            <small class="text-muted">"Discipline today, success tomorrow"</small>
         </div>
     </div>
     <hr>
@@ -44,6 +54,8 @@
             <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#7c3aed;background:#ede9fe;"><i class='bx bxs-shield'></i></div>
             <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#f59e0b;background:#fef3c7;"><i class='bx bxs-star'></i></div>
             <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#f97316;background:#fff7ed;"><i class='bx bxs-book-open'></i></div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#3b82f6;background:#eff6ff;"><i class='bx bxs-trophy'></i></div>
+            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#7c3aed;background:#ede9fe;"><i class='bx bxs-shield'></i></div>
             <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#3b82f6;background:#eff6ff;"><i class='bx bxs-trophy'></i></div>
         </div>
     </div>

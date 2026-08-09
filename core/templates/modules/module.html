@@ -46,7 +46,7 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold m-0">{{ total_files }}</h4><small class="text-muted">Total Files</small></div></div>
     <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-success m-0">{{ completed_exams }}/{{ total_exams }}</h4><small class="text-muted">Exams Completed</small></div></div>
-    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-warning m-0">coming soon</h4><small class="text-muted">OSCE Exams</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-warning m-0">{{ total_osce_exams }}</h4><small class="text-muted">OSCE Exams</small></div></div>
     <div class="col-6 col-md-3"><div class="card border-0 shadow-sm bg-white p-3 text-center" style="border-radius:var(--border-radius);"><h4 class="fw-bold text-primary m-0">{{ average_exam_score }}%</h4><small class="text-muted">Average Exams Score</small></div></div>
 </div>
 
@@ -57,7 +57,7 @@
         {% if module.has_files %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos %} active{% endif %}" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos %}false{% else %}true{% endif %}"><i class='bx bx-file me-1'></i> Files</button></li>{% endif %}
         {% if module.has_exams %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files %} active{% endif %}" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files %}false{% else %}true{% endif %}"><i class='bx bx-edit-alt me-1'></i> Exams</button></li>{% endif %}
         {% if module.has_text %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} active{% endif %}" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files or module.has_exams %}false{% else %}true{% endif %}"><i class='bx bx-file-blank me-1'></i> Text Content</button></li>{% endif %}
-        {% if module.has_osce %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} active{% endif %}" id="osce-tab" data-bs-toggle="tab" data-bs-target="#osce" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files or module.has_exams or module.has_text %}false{% else %}true{% endif %}"><i class='bx bx-first-aid me-1'></i> OSCE</button></li>{% endif %}
+        {% if module.has_osce or total_osce_exams %}<li class="nav-item" role="presentation"><button class="nav-link{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} active{% endif %}" id="osce-tab" data-bs-toggle="tab" data-bs-target="#osce" type="button" role="tab" aria-selected="{% if module.has_lessons or module.has_videos or module.has_files or module.has_exams or module.has_text %}false{% else %}true{% endif %}"><i class='bx bx-first-aid me-1'></i> OSCE</button></li>{% endif %}
     </ul></div>
     <div class="card-body px-4"><div class="tab-content" id="moduleTabsContent">
         {% if module.has_lessons %}<div class="tab-pane fade show active module-tab-pane" id="lessons" role="tabpanel"><div class="list-group list-group-flush border-0">
@@ -80,23 +80,7 @@
             {% endfor %}
         </div>{% endif %}
         {% if module.has_text %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} show active{% endif %} module-tab-pane" id="text" role="tabpanel"><div class="p-3 bg-light rounded-3 border mb-3"><h6 class="fw-bold">Summary of Upper Limb Muscles</h6><p class="small text-muted mb-0">The upper limb consists of 4 main muscle compartments: shoulder, arm, forearm, and hand. The brachial plexus (C5-T1) innervates these muscles...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div><div class="p-3 bg-light rounded-3 border"><h6 class="fw-bold">Clinical Notes: Nerve Injuries</h6><p class="small text-muted mb-0">Radial nerve injury results in wrist drop. Median nerve injury leads to "ape hand" deformity...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div></div>{% endif %}
-        {% if module.has_osce %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="p-3 bg-light rounded-3 border"><h6 class="fw-bold">Upper Limb OSCE Station</h6><p class="small text-muted mb-0">Practice your clinical examination skills.</p><button class="btn btn-primary btn-sm mt-3">Start Simulation</button></div></div>{% endif %}
+        {% if module.has_osce or total_osce_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>OSCE assessment</th><th>Station</th><th>Questions</th><th>Grade</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>{% for osce_exam in osce_exams %}<tr><td class="fw-bold">{{ osce_exam.name }}</td><td>{{ osce_exam.get_osce_station_display }}</td><td>{{ osce_exam.graded_question_count }}</td><td>{{ osce_exam.student_result }}</td><td>{{ osce_exam.retries_remaining }} remaining</td><td class="text-end">{% if osce_exam.can_start %}<a href="{% url 'osce-detail' osce_exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>{% if osce_exam.question_count %}Completed{% else %}Unavailable{% endif %}</button>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted text-center py-4">No OSCE assessments are available for this module yet.</td></tr>{% endfor %}</tbody></table></div></div>{% endif %}
     </div></div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Sidebar Mobile Toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
-        }
-
-        menuToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
-    });
-</script>
 {% endblock %}
