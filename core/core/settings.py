@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'osce',
     'upcoming',
     'notes',
+    'progress',
 ]
 
 MIDDLEWARE = [

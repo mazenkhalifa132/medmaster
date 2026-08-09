@@ -181,23 +181,361 @@
 
 <div id="page-progress" class="app-page">
     <h4 class="fw-bold mb-4">Academic Progress</h4>
+
+    <!-- Top Stats Row -->
     <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm p-3 text-center"><h4 class="fw-bold text-primary m-0">64h</h4><small class="text-muted">Study Hours</small></div></div>
-        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm p-3 text-center"><h4 class="fw-bold text-success m-0">1.2k</h4><small class="text-muted">Questions</small></div></div>
-        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm p-3 text-center"><h4 class="fw-bold text-warning m-0">12</h4><small class="text-muted">Badges</small></div></div>
-        <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm p-3 text-center"><h4 class="fw-bold text-dark m-0">4</h4><small class="text-muted">Week Streak</small></div></div>
+        <div class="col-6 col-lg">
+            <div class="acad-stat-card text-center">
+                <div class="text-warning d-flex align-items-center justify-content-center gap-1 fw-bold" style="font-size: 20px;"><i class='bx bxs-crown'></i> {{ rank.name }}</div>
+                <span class="stat-label">Rank</span>
+                <div class="progress w-75 mx-auto bg-light"><div class="progress-bar bg-warning" style="width: {{ rank_percent }}%;"></div></div>
+                <span class="stat-change text-muted small">{{ student_progress.total_points }} / {{ rank.next }} XP</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="acad-stat-card">
+                <div class="stat-val text-success">{{ student_progress.questions_answered }}</div>
+                <span class="stat-label">Questions Solved</span>
+                <span class="stat-change text-success small"><i class='bx bx-up-arrow-alt'></i> 120 this week</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="acad-stat-card">
+                <div class="stat-val text-primary">12</div>
+                <span class="stat-label">Badges Earned</span>
+                <span class="stat-change text-primary small"><i class='bx bx-up-arrow-alt'></i> 2 new</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="acad-stat-card">
+                <div class="stat-val text-warning">4</div>
+                <span class="stat-label">Day Streak</span>
+                <span class="stat-change text-warning small">Keep it up! <i class='bx bxs-hot'></i></span>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="acad-stat-card">
+                <div class="stat-val text-primary">78%</div>
+                <span class="stat-label">Average Score</span>
+                <span class="stat-change text-success small"><i class='bx bx-up-arrow-alt'></i> 5% vs last week</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Row: 3 Columns -->
+    <div class="row g-4 mb-4">
+        <!-- Left: XP Progress -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold m-0">XP Progress</h6>
+                    <span class="badge bg-light text-dark fw-normal">This week <i class='bx bx-chevron-down'></i></span>
+                </div>
+                <small class="text-muted d-block mb-3" style="font-size: 11px;">Earn XP by solving questions and completing exams</small>
+                <div class="w-100" style="height: 100px;">
+                    <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M0,80 Q40,50 80,65 T160,40 T240,30 L300,60 V100 H0 Z" fill="url(#chartGrad)"/>
+                        <polyline points="0,80 40,50 80,65 120,75 160,40 200,45 240,30 300,60" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                        <circle cx="300" cy="60" r="3" fill="#3b82f6"/>
+                        <text x="0" y="98" font-size="8" fill="#9ca3af">May 10</text>
+                        <text x="120" y="98" font-size="8" fill="#9ca3af">May 13</text>
+                        <text x="240" y="98" font-size="8" fill="#9ca3af">May 16</text>
+                        <text x="305" y="55" font-size="9" fill="#3b82f6" font-weight="bold">1,250 XP</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Performance Overview -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0">Performance Overview</h6>
+                </div>
+                <div class="d-flex flex-column align-items-center">
+                    <div class="donut-wrap">
+                        <div class="donut-chart"></div>
+                        <div class="donut-inner">
+                            <span class="donut-text-num">78%</span>
+                            <span class="donut-text-label">Average</span>
+                        </div>
+                    </div>
+                    <div class="donut-legend w-100 mt-2 px-3">
+                        <div class="donut-legend-item">
+                            <span><span class="dot bg-primary"></span> Correct</span>
+                            <span class="text-muted small">936 (78%)</span>
+                        </div>
+                        <div class="donut-legend-item">
+                            <span><span class="dot bg-danger"></span> Incorrect</span>
+                            <span class="text-muted small">234 (19%)</span>
+                        </div>
+                        <div class="donut-legend-item">
+                            <span><span class="dot bg-success"></span> Unattempted</span>
+                            <span class="text-muted small">30 (3%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Subjects Performance -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0">Subjects Performance</h6>
+                    <a href="#" class="text-primary small fw-bold text-decoration-none">View All</a>
+                </div>
+                <div class="d-flex flex-column">
+                    <div class="subj-bar-item">
+                        <div class="subj-header"><span>Cardiology</span><span class="text-primary">85%</span></div>
+                        <div class="subj-track"><div class="subj-fill bg-primary" style="width: 85%;"></div></div>
+                    </div>
+                    <div class="subj-bar-item">
+                        <div class="subj-header"><span>Neurology</span><span class="text-success">72%</span></div>
+                        <div class="subj-track"><div class="subj-fill bg-success" style="width: 72%;"></div></div>
+                    </div>
+                    <div class="subj-bar-item">
+                        <div class="subj-header"><span>Respiratory</span><span class="text-warning">68%</span></div>
+                        <div class="subj-track"><div class="subj-fill bg-warning" style="width: 68%;"></div></div>
+                    </div>
+                    <div class="subj-bar-item">
+                        <div class="subj-header"><span>Endocrinology</span><span class="text-secondary">65%</span></div>
+                        <div class="subj-track"><div class="subj-fill bg-secondary" style="width: 65%;"></div></div>
+                    </div>
+                    <div class="subj-bar-item mb-0">
+                        <div class="subj-header"><span>Gastroenterology</span><span class="text-danger">58%</span></div>
+                        <div class="subj-track"><div class="subj-fill bg-danger" style="width: 58%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row: 3 Columns -->
+    <div class="row g-4 mb-4">
+        <!-- Left: Recent Activity -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="fw-bold m-0">Recent Activity</h6>
+                    <a href="#" class="text-primary small fw-bold text-decoration-none">View All</a>
+                </div>
+                <div class="d-flex flex-column">
+                    <div class="activity-item">
+                        <div class="act-icon" style="background: #ede9fe; color: #7c3aed;"><i class='bx bx-book'></i></div>
+                        <div class="act-text">
+                            <strong>Completed quiz: ECG Basics</strong>
+                            <small>Score: 90%</small>
+                        </div>
+                        <span class="act-time">2h ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background: #fef3c7; color: #d97706;"><i class='bx bxs-star'></i></div>
+                        <div class="act-text">
+                            <strong>Earned badge: Quiz Master</strong>
+                            <small>+5 XP</small>
+                        </div>
+                        <span class="act-time">5h ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background: #dbeafe; color: #2563eb;"><i class='bx bx-book-content'></i></div>
+                        <div class="act-text">
+                            <strong>Completed OSCE: Cardiovascular Exam</strong>
+                            <small>Score: 95%</small>
+                        </div>
+                        <span class="act-time">1d ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background: #dcfce7; color: #16a34a;"><i class='bx bx-check-circle'></i></div>
+                        <div class="act-text">
+                            <strong>Answered question correctly</strong>
+                            <small>+2 XP</small>
+                        </div>
+                        <span class="act-time">1d ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background: #fee2e2; color: #dc2626;"><i class='bx bx-x-circle'></i></div>
+                        <div class="act-text">
+                            <strong>Answered question incorrectly</strong>
+                            <small>-1 XP</small>
+                        </div>
+                        <span class="act-time">1d ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Weekly Goal -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-4 d-flex flex-column justify-content-center align-items-center text-center">
+                <div class="d-flex justify-content-between w-100 align-items-start mb-3">
+                    <h6 class="fw-bold m-0">Weekly Goal</h6>
+                    <small class="text-muted">Ends in 2 days</small>
+                </div>
+                <div class="text-start w-100">
+                    <span class="text-muted small">Solve 200 questions</span>
+                </div>
+                <div class="my-2" style="font-size: 32px; font-weight: 700; color: #3b82f6; line-height: 1;">
+                    120 <span class="text-muted" style="font-weight: 400; font-size: 20px;">/ 200</span>
+                </div>
+                <div class="progress w-100" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 60%;"></div></div>
+                <div class="mt-3 text-warning small fw-bold">You're doing great! Keep going 💪</div>
+            </div>
+        </div>
+
+        <!-- Right: Achievements Progress -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0">Achievements Progress</h6>
+                    <a href="#" class="text-primary small fw-bold text-decoration-none">View All</a>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background:#dbeafe;color:#2563eb;"><i class='bx bx-target-lock' style="font-size: 14px;"></i></div>
+                            <div class="flex-grow-1"><h6 class="m-0 fw-bold" style="font-size: 13px;">Perfect Score</h6><small class="text-muted d-block" style="font-size: 10px;">Score 100% in any exam</small></div>
+                            <span class="text-muted small">2 / 5</span>
+                        </div>
+                        <div class="subj-track w-100 mt-1"><div class="subj-fill bg-primary" style="width: 40%;"></div></div>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background:#fef3c7;color:#d97706;"><i class='bx bxs-flame' style="font-size: 14px;"></i></div>
+                            <div class="flex-grow-1"><h6 class="m-0 fw-bold" style="font-size: 13px;">Streak Master</h6><small class="text-muted d-block" style="font-size: 10px;">Maintain a 7-day streak</small></div>
+                            <span class="text-muted small">4 / 7</span>
+                        </div>
+                        <div class="subj-track w-100 mt-1"><div class="subj-fill bg-warning" style="width: 57%;"></div></div>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background:#e0e7ff;color:#4f46e5;"><i class='bx bxs-trophy' style="font-size: 14px;"></i></div>
+                            <div class="flex-grow-1"><h6 class="m-0 fw-bold" style="font-size: 13px;">Quiz Challenger</h6><small class="text-muted d-block" style="font-size: 10px;">Complete 50 quizzes</small></div>
+                            <span class="text-muted small">28 / 50</span>
+                        </div>
+                        <div class="subj-track w-100 mt-1"><div class="subj-fill bg-primary" style="width: 56%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Badges Row -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold m-0">All Badges</h6>
+            <!--<a href="#" class="text-primary small fw-bold text-decoration-none">View All</a>-->
+        </div>
+        <div class="bottom-badge-grid">
+            <div class="badge-card">
+                <div class="badge-box" style="background: #ede9fe; color: #7c3aed;"><i class='bx bxs-star'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quiz Master</h6>
+                <small class="text-muted" style="font-size: 9px;">+5 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 2h ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #fef3c7; color: #d97706;"><i class='bx bxs-trophy'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Perfect Score</h6>
+                <small class="text-muted" style="font-size: 9px;">+10 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 1d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #ffedd5; color: #ea580c;"><i class='bx bxs-flame'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Streak Keeper</h6>
+                <small class="text-muted" style="font-size: 9px;">+5 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 2d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dbeafe; color: #2563eb;"><i class='bx bxs-diamond'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Exam Ace</h6>
+                <small class="text-muted" style="font-size: 9px;">+15 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 3d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+            <div class="badge-card">
+                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
+                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
+                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
+                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="page-community" class="app-page">
+    
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold">Community</h4>
-        <button class="btn btn-primary btn-sm"><i class='bx bx-plus'></i> Create Post</button>
+        <a href="https://t.me/medmaster012" target="_blank" class="btn btn-outline-primary btn-sm">
+            <i class='bx bxl-telegram'></i> Open in Telegram
+        </a>
     </div>
+
+    <!-- Main Card -->
     <div class="card shadow-sm border-0 p-3">
-        <h6 class="fw-bold">Dr. John Doe</h6>
-        <p class="small text-muted">Does anyone have the latest guidelines for Hypertension management?</p>
+
+        <!-- Info -->
+        <div class="mb-3 text-muted small">
+            This feed is read-only • Messages are imported from Telegram
+        </div>
     </div>
+    <br>
+
+    <!-- Messages Container -->
+    <div id="telegram-messages" class="d-flex flex-column gap-3">
+
+        
+
+    </div>
+
 </div>
 
 <div id="page-calendar" class="app-page">
@@ -299,5 +637,66 @@
         if (newNoteButton) newNoteButton.addEventListener('click', () => newNoteCard.classList.remove('d-none'));
         if (cancelNoteButton) cancelNoteButton.addEventListener('click', () => { newNoteCard.reset(); updateNoteModules(); newNoteCard.classList.add('d-none'); });
     });
+
+    async function loadMessages() {
+        const res = await fetch("/api/telegram/");
+        const data = await res.json();
+
+        const container = document.getElementById("telegram-messages");
+        container.innerHTML = "";
+
+        data.forEach(msg => {
+            container.innerHTML += `
+                <div class="card shadow-sm border-0 p-3 mb-3">
+
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        
+                        <!-- Avatar -->
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 40px; font-weight: 600;">
+                            X
+                        </div>
+
+                        <!-- Name + Time -->
+                        <div>
+                            <h6 class="m-0 fw-bold">Dr. X</h6>
+                            <small class="text-muted">${formatTime(msg.date)}</small>
+                        </div>
+
+                    </div>
+
+                    <!-- Message -->
+                    <p class="small mb-3">
+                        ${msg.text || "📎 File attached"}
+                    </p>
+
+                    <!-- File زرار -->
+                    ${
+                        msg.hasFile
+                        ? `<a href="${msg.link}" target="_blank" class="btn btn-outline-primary btn-sm px-2 py-1">
+                                View File
+                        </a>`
+                        : ""
+                    }
+
+                </div>
+            `;
+        });
+    }
+
+    loadMessages();
+
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+
+        const diff = Math.floor((now - date) / 1000);
+
+        if (diff < 60) return "just now";
+        if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+        if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
+
+        return Math.floor(diff / 86400) + " days ago";
+    }
 </script>
 {% endblock %}
