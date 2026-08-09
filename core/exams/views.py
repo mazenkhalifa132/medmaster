@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Exam, ExamAnswer, ExamAttempt, MCQAnswer
+from progress.services import record_answer_points
 
 
 def _attempts_used(exam, user):
@@ -87,6 +88,17 @@ def submit_exam(request, pk):
     answer_records = attempt.answers.select_related('question', 'selected_answer').prefetch_related(
         'question__answers'
     ).order_by('question__order', 'question__pk')
+    if exam.exam_type != 'saq':
+        for answer_record in answer_records:
+            # An unanswered item was not solved, so it earns neither points nor a deduction.
+            if answer_record.selected_answer_id:
+                is_correct = answer_record.selected_answer.is_correct
+                record_answer_points(
+                    student=request.user,
+                    source_key=f'exam-answer:{attempt.pk}:{answer_record.question_id}',
+                    source_label=f'{exam.name} — question {answer_record.question.order}',
+                    is_correct=is_correct,
+                )
     question_results = []
     for answer_record in answer_records:
         correct_answer = next(

@@ -8,6 +8,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import OSCEAnswerRecord, OSCEAttempt, OSCEExam
+from progress.services import record_answer_points
 
 
 class PracticalDetailsSanitizer(HTMLParser):
@@ -137,6 +138,23 @@ def submit_osce(request, pk):
     attempt.save(update_fields=('practical_passed', 'practical_details', 'practical_score', 'practical_total', 'mcq_score', 'total_questions'))
 
     answer_records = attempt.answers.select_related('question', 'selected_answer').prefetch_related('question__answers')
+    for answer_record in answer_records:
+        # Do not penalize MCQs that the student did not answer.
+        if answer_record.selected_answer_id:
+            is_correct = answer_record.selected_answer.is_correct
+            record_answer_points(
+                student=request.user,
+                source_key=f'osce-mcq:{attempt.pk}:{answer_record.question_id}',
+                source_label=f'{exam.name} — MCQ {answer_record.question.order}',
+                is_correct=is_correct,
+            )
+    if exam.osce_station != 'none':
+        record_answer_points(
+            student=request.user,
+            source_key=f'osce-station:{attempt.pk}',
+            source_label=f'{exam.name} — {exam.get_osce_station_display()} station',
+            is_correct=attempt.practical_score == attempt.practical_total == 1,
+        )
     question_results = []
     for answer_record in answer_records:
         correct_answer = next((answer for answer in answer_record.question.answers.all() if answer.is_correct), None)

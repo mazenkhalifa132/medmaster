@@ -8,10 +8,19 @@ from exams.models import Exam
 from modules.models import Module
 from notes.models import Note
 from osce.models import OSCEAttempt, OSCEExam
+from progress.models import StudentProgress
+
+import requests
+from bs4 import BeautifulSoup
+from django.http import JsonResponse
 
 
 @login_required(login_url='auth')
 def home(request):
+    student_progress, _ = StudentProgress.objects.get_or_create(student=request.user)
+    rank = student_progress.rank
+    rank_span = rank['next'] - rank['minimum']
+    rank_percent = min(max(((max(student_progress.total_points, 0) - rank['minimum']) / rank_span) * 100, 0), 100)
     modules_by_year = {year: [] for year in range(1, 6)}
     quizzes_by_year = {year: [] for year in range(1, 6)}
     osce_exams_by_year = {year: [] for year in range(1, 6)}
@@ -151,6 +160,9 @@ def home(request):
     ]
     return render(request, 'dashboard/home.html', {
         'active_page': 'dashboard',
+        'student_progress': student_progress,
+        'rank': rank,
+        'rank_percent': round(rank_percent),
         'years': years,
         'modules_by_year': modules_by_year,
         'quizzes_by_year': quizzes_by_year,
@@ -158,3 +170,42 @@ def home(request):
         'notes': Note.objects.filter(student=request.user).select_related('module'),
         'note_modules': Module.objects.filter(is_active=True).order_by('year', 'order', 'name'),
     })
+
+def telegram_feed(request):
+    url = "https://t.me/s/medmaster012"
+    res = requests.get(url)
+
+    soup = BeautifulSoup(res.text, "html.parser")
+
+    messages = []
+
+    for msg in soup.select(".tgme_widget_message"):
+
+        text_el = msg.select_one(".tgme_widget_message_text")
+        text = text_el.get_text(" ", strip=True) if text_el else ""
+
+        date_el = msg.select_one("time")
+        date = date_el["datetime"] if date_el else ""
+
+        post_attr = msg.get("data-post")
+        link = f"https://t.me/{post_attr}" if post_attr else ""
+
+        # 🔥 detect files
+        has_document = msg.select_one(".tgme_widget_message_document")
+        has_photo = msg.select_one(".tgme_widget_message_photo")
+        has_video = msg.select_one(".tgme_widget_message_video")
+
+        has_file = any([has_document, has_photo, has_video])
+
+        # 💀 أهم سطر
+        if not text and not has_file:
+            continue  # تجاهل الفاضي
+
+        messages.append({
+            "text": text if text else "📎 File attached",
+            "date": date,
+            "hasFile": has_file,
+            "link": link
+        })
+
+    return JsonResponse(messages[:10], safe=False)
