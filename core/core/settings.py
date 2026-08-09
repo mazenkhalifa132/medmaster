@@ -33,6 +33,27 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# RunSite terminates HTTPS at its proxy.  Trust the public app origin for
+# POST requests (login, admin, forms, etc.) while keeping local development
+# unchanged.  A comma-separated CSRF_TRUSTED_ORIGINS value can override this.
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() if '://' in origin else f'https://{origin.strip()}'
+    for origin in csrf_origins
+    if origin.strip()
+]
+if not CSRF_TRUSTED_ORIGINS and not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{host}'
+        for host in ALLOWED_HOSTS
+        if host not in ('localhost', '127.0.0.1', '*')
+    ]
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
 
 # Application definition
 
