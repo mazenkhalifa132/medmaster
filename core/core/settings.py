@@ -107,6 +107,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'upcoming.context_processors.upcoming_events',
+                'progress.context_processors.recent_badges',
             ],
         },
     },
