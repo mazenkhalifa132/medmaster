@@ -3,12 +3,14 @@ from html.parser import HTMLParser
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import OSCEAnswerRecord, OSCEAttempt, OSCEExam
-from progress.services import record_answer_points
+from progress.services import award_exam_badges, record_answer_points
+from verification.services import can_access_content
 
 
 class PracticalDetailsSanitizer(HTMLParser):
@@ -57,6 +59,8 @@ def osce_detail(request, pk):
         is_active=True,
         module__is_active=True,
     )
+    if not can_access_content(request.user, exam):
+        raise PermissionDenied('This OSCE requires activation for your academic year.')
     if not exam.questions.exists():
         messages.error(request, 'This OSCE has no questions yet.')
         return redirect('module-detail', pk=exam.module_id)
@@ -97,6 +101,8 @@ def submit_osce(request, pk):
         raise Http404
 
     exam = get_object_or_404(OSCEExam.objects.prefetch_related('questions__answers'), pk=pk, is_active=True)
+    if not can_access_content(request.user, exam):
+        raise PermissionDenied('This OSCE requires activation for your academic year.')
     attempt = OSCEAttempt.objects.filter(pk=request.POST.get('attempt_id'), exam=exam, student=request.user).first()
     if not attempt:
         messages.error(request, 'This OSCE attempt is no longer available.')
@@ -154,6 +160,18 @@ def submit_osce(request, pk):
             source_key=f'osce-station:{attempt.pk}',
             source_label=f'{exam.name} — {exam.get_osce_station_display()} station',
             is_correct=attempt.practical_score == attempt.practical_total == 1,
+        )
+    is_first_completed_attempt = not OSCEAttempt.objects.filter(
+        exam=exam,
+        student=request.user,
+        total_questions__gt=0,
+    ).exclude(pk=attempt.pk).exists()
+    if is_first_completed_attempt:
+        award_exam_badges(
+            student=request.user,
+            score=attempt.total_score,
+            total_questions=attempt.total_possible_score,
+            attempt_key=f'osce:{attempt.pk}',
         )
     question_results = []
     for answer_record in answer_records:

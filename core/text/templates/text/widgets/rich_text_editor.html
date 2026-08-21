@@ -1,0 +1,17 @@
+{% load static %}
+<div class="rich-text-editor" data-upload-url="{{ widget.upload_url }}">
+    <div class="rich-text-editor__toolbar" role="toolbar" aria-label="Rich text editor toolbar">
+        <button type="button" data-command="bold"><strong>B</strong></button><button type="button" data-command="italic"><em>I</em></button><button type="button" data-command="underline"><u>U</u></button>
+        <select data-command="heading" aria-label="Heading"><option value="0">Paragraph</option><option value="1">Heading 1</option><option value="2">Heading 2</option><option value="3">Heading 3</option></select>
+        <button type="button" data-command="bulletList">• List</button><button type="button" data-command="orderedList">1. List</button><button type="button" data-command="blockquote">Quote</button><button type="button" data-command="horizontalRule">Divider</button>
+        <select data-command="align" aria-label="Text alignment"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option><option value="justify">Justify</option></select>
+        <button type="button" data-command="link">Link</button><button type="button" data-command="image">Image</button><button type="button" data-command="table">Table</button>
+        <input type="color" data-command="color" aria-label="Text colour"><button type="button" data-command="highlight">Highlight</button>
+        <select data-command="callout" aria-label="Medical content block"><option value="">Medical block…</option><option value="medical-key-point">Key Point</option><option value="medical-clinical-pearl">Clinical Pearl</option><option value="medical-warning">Important / Warning</option><option value="medical-clinical-case">Clinical Case</option><option value="medical-definition">Definition</option><option value="medical-diagnosis">Diagnosis</option><option value="medical-treatment">Treatment</option><option value="medical-pathophysiology">Pathophysiology</option></select>
+        <button type="button" data-command="undo">Undo</button><button type="button" data-command="redo">Redo</button>
+    </div>
+    <div class="rich-text-editor__canvas" contenteditable="true" aria-label="Rich text content"></div>
+    <div class="rich-text-editor__status" aria-live="polite">Ready to save</div>
+    <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %} hidden>{{ widget.value|default_if_none:'' }}</textarea>
+</div>
+<script type="module" src="{% static 'text/admin/rich_text_editor.js' %}?v=20260821-toolbar-fix"></script>

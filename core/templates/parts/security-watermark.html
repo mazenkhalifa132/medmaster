@@ -1,0 +1,7 @@
+{% if request.user.phone %}
+<div class="security-watermark-layer" aria-hidden="true">
+    {% for _ in "12345678901234567890" %}
+        <div class="security-watermark-cell"><span class="security-watermark">{{ request.user.phone }}</span></div>
+    {% endfor %}
+</div>
+{% endif %}

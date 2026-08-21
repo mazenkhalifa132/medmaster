@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Exam, ExamAnswer, ExamAttempt, MCQAnswer
-from progress.services import record_answer_points
+from progress.services import award_exam_badges, record_answer_points
+from verification.services import can_access_content
 
 
 def _attempts_used(exam, user):
@@ -20,6 +22,8 @@ def exam_detail(request, pk):
         is_active=True,
         module__is_active=True,
     )
+    if not can_access_content(request.user, exam):
+        raise PermissionDenied('This exam requires activation for your academic year.')
     allowed_attempts = exam.retry_times
     attempts_used = _attempts_used(exam, request.user)
     if attempts_used >= allowed_attempts:
@@ -58,6 +62,8 @@ def submit_exam(request, pk):
     if request.method != 'POST':
         raise Http404
     exam = get_object_or_404(Exam.objects.prefetch_related('questions__answers'), pk=pk, is_active=True)
+    if not can_access_content(request.user, exam):
+        raise PermissionDenied('This exam requires activation for your academic year.')
     attempt = ExamAttempt.objects.filter(
         pk=request.POST.get('attempt_id'), exam=exam, student=request.user, total_questions=0
     ).first()
@@ -99,6 +105,18 @@ def submit_exam(request, pk):
                     source_label=f'{exam.name} — question {answer_record.question.order}',
                     is_correct=is_correct,
                 )
+        is_first_completed_attempt = not ExamAttempt.objects.filter(
+            exam=exam,
+            student=request.user,
+            total_questions__gt=0,
+        ).exclude(pk=attempt.pk).exists()
+        if is_first_completed_attempt:
+            award_exam_badges(
+                student=request.user,
+                score=attempt.score,
+                total_questions=attempt.total_questions,
+                attempt_key=f'exam:{attempt.pk}',
+            )
     question_results = []
     for answer_record in answer_records:
         correct_answer = next(

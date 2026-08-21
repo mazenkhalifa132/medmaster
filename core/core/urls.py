@@ -9,5 +9,7 @@ urlpatterns = [
     path('exams/', include('exams.urls')),
     path('osce/', include('osce.urls')),
     path('notes/', include('notes.urls')),
+    path('text/', include('text.urls')),
+    path('notifications/', include('notifications.urls')),
     path('', include('dashboard.urls')),
 ]

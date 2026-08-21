@@ -1,9 +1,26 @@
 from django.contrib import admin
+from django import forms
+
 from .models import Module
+
+
+class ModuleAdminForm(forms.ModelForm):
+    class Meta:
+        model = Module
+        fields = '__all__'
+        widgets = {
+            'color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Module color'}),
+            'bg_color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Module background color'}),
+        }
+        labels = {
+            'color': 'Icon color',
+            'bg_color': 'Background color',
+        }
 
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
+    form = ModuleAdminForm
     list_display = (
         'name', 'year', 'order', 'has_lessons', 'has_videos', 'has_files', 'has_text',
         'has_exams', 'has_osce', 'is_active',

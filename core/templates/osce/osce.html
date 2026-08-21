@@ -22,6 +22,10 @@
     .osce-option:hover { border-color:#93c5fd; background:#eff6ff; }
     .osce-option input { margin-right:9px; }
     .osce-timer { min-width:92px; text-align:center; }
+    @media (max-width:1200px) {
+        #station-control-panel[data-mobile-panel] { position:fixed; z-index:1000; top:0; right:-340px; width:320px!important; height:100vh; height:100dvh; padding:16px; overflow-y:auto; background:#fff; box-shadow:-8px 0 24px rgba(0,0,0,.12); transition:right .3s ease; }
+        #station-control-panel[data-mobile-panel].open { right:0; }
+    }
     @media (max-width:991.98px) { #osce-station #canvas-container { height:600px; min-height:500px; } }
 </style>
 
@@ -41,7 +45,7 @@
                 <div><h6 class="fw-bold mb-1" id="stationTitle">Simulation Area</h6><p class="text-muted small mb-0" id="stationInstructions"></p></div>
                 <span class="badge text-bg-primary">Practical</span>
             </div>
-            <div id="osce-station"><div class="container-fluid p-0"><div class="row g-3"><div id="canvas-container" class="sim-area col-lg-9 col-12"></div><div id="station-control-panel" class="control-panel col-lg-3 col-12"></div></div></div></div>
+            <div id="osce-station"><div class="container-fluid p-0"><div class="row g-3"><div id="canvas-container" class="sim-area col-lg-9 col-12"></div><div id="station-control-panel" class="control-panel col-lg-3 col-12"{% if exam.osce_station != 'none' %} data-mobile-panel{% endif %}></div></div></div></div>
         </div>
     </div>
 

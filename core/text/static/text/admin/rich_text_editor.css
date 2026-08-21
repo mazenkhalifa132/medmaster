@@ -1,0 +1,13 @@
+.rich-text-editor { border: 1px solid #dbe2ea; border-radius: 12px; overflow: hidden; background: #fff; max-width: 980px; }
+.rich-text-editor__toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border-bottom: 1px solid #e5e7eb; background: #f8f9fc; }
+.rich-text-editor__toolbar button, .rich-text-editor__toolbar select, .rich-text-editor__toolbar input { min-height: 30px; border: 1px solid #cbd5e1 !important; border-radius: 6px; background: #fff !important; color: #1f2937 !important; padding: 3px 8px; cursor: pointer; font-size: 13px; font-weight: 600; line-height: 1.25; text-shadow: none; }
+.rich-text-editor__toolbar button { display: inline-flex !important; align-items: center; justify-content: center; min-width: 32px; }
+.rich-text-editor__toolbar button *, .rich-text-editor__toolbar select option { color: inherit !important; }
+.rich-text-editor__toolbar button:hover, .rich-text-editor__toolbar button:focus-visible { background: #dbeafe !important; border-color: #2563eb !important; color: #1d4ed8 !important; outline: none; }
+.rich-text-editor__toolbar input[type=color] { padding: 2px; width: 36px; }
+.rich-text-editor__canvas { min-height: 360px; padding: 24px; color: #1f2937; font: 16px/1.7 Inter, Arial, sans-serif; outline: none; }
+.rich-text-editor__canvas img { display: block; max-width: 100%; height: auto; margin: 16px auto; border-radius: 8px; }
+.rich-text-editor__canvas table { width: 100%; border-collapse: collapse; margin: 16px 0; background: #fff !important; color: #1f2937 !important; }.rich-text-editor__canvas th, .rich-text-editor__canvas td { padding: 9px; border: 1px solid #d1d5db; background: #fff !important; color: #1f2937 !important; }.rich-text-editor__canvas th { background: #eff6ff !important; color: #1e3a8a !important; font-weight: 700; }
+.rich-text-editor__status { padding: 8px 12px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+.medical-callout { margin: 16px 0; padding: 14px 16px; border-left: 4px solid #2563eb; border-radius: 8px; background: #eff6ff; }.medical-callout p { margin: 6px 0 0; }
+.medical-clinical-pearl { border-color: #059669; background: #ecfdf5; }.medical-warning { border-color: #d97706; background: #fffbeb; }.medical-clinical-case { border-color: #7c3aed; background: #f5f3ff; }.medical-diagnosis { border-color: #dc2626; background: #fef2f2; }.medical-treatment { border-color: #0891b2; background: #ecfeff; }.medical-pathophysiology { border-color: #4f46e5; background: #eef2ff; }

@@ -10,7 +10,7 @@ from django.db.models import Max
 import nested_admin
 
 from .bulk_import import BulkQuestionImportError, parse_questions
-from .models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, MCQAnswer
+from .models import Exam, ExamQuestion, MCQAnswer
 
 
 class ModuleByYearSelect(Select):
@@ -67,11 +67,11 @@ class ExamAdmin(nested_admin.NestedModelAdmin):
     form = ExamAdminForm
     inlines = (ExamQuestionInline,)
     change_form_template = 'admin/exams/exam/change_form.html'
-    list_display = ('name', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'result', 'is_active')
-    list_filter = ('exam_type', 'year', 'module', 'is_active')
+    list_display = ('name', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'is_trial', 'result', 'is_active')
+    list_filter = ('exam_type', 'year', 'module', 'is_trial', 'is_active')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'name')
-    fields = ('year', 'module', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_active')
+    fields = ('year', 'module', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_trial', 'is_active')
 
     def get_urls(self):
         urls = super().get_urls()
@@ -152,24 +152,4 @@ class ExamQuestionAdmin(nested_admin.NestedModelAdmin):
 
     def has_module_permission(self, request):
         """Questions are managed from the Exam editor, not as a top-level section."""
-        return False
-
-
-@admin.register(ExamAttempt)
-class ExamAttemptAdmin(admin.ModelAdmin):
-    list_display = ('student', 'exam', 'score', 'total_questions', 'submitted_at')
-    list_filter = ('exam', 'submitted_at')
-    search_fields = ('student__username', 'student__email', 'exam__name')
-    readonly_fields = ('exam', 'student', 'score', 'total_questions', 'submitted_at')
-
-    def has_add_permission(self, request):
-        return False
-
-
-@admin.register(ExamAnswer)
-class ExamAnswerAdmin(admin.ModelAdmin):
-    list_display = ('attempt', 'question', 'selected_answer', 'text_answer')
-    readonly_fields = ('attempt', 'question', 'selected_answer', 'text_answer')
-
-    def has_add_permission(self, request):
         return False

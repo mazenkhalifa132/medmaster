@@ -51,6 +51,8 @@ if not CSRF_TRUSTED_ORIGINS and not DEBUG:
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
@@ -69,11 +71,15 @@ INSTALLED_APPS = [
     'accounts',
     'modules',
     'files',
+    'videos',
+    'text',
     'exams',
     'osce',
     'upcoming',
     'notes',
     'progress',
+    'notifications.apps.NotificationsConfig',
+    'verification.apps.VerificationConfig',
 ]
 
 MIDDLEWARE = [

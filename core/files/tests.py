@@ -1,3 +1,15 @@
 from django.test import TestCase
 
-# Create your tests here.
+from .admin import StudyFileAdminForm
+from .models import FileSubcategory
+from modules.models import Module
+
+
+class StudyFileAdminFormTests(TestCase):
+    def test_subcategory_options_include_their_module_id(self):
+        module = Module.objects.create(year=1, name='Anatomy', icon_class='bx-heart')
+        subcategory = FileSubcategory.objects.create(module=module, name='Lectures')
+
+        form_html = StudyFileAdminForm().as_p()
+
+        self.assertIn(f'value="{subcategory.pk}" data-module="{module.pk}"', form_html)

@@ -17,6 +17,8 @@
         border-bottom: 2px solid var(--primary-blue);
         background: transparent;
     }
+    .video-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .video-card:hover { transform: translateY(-2px); box-shadow: 0 .25rem .75rem rgba(0, 0, 0, 0.08); }
 </style>
 <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-secondary px-0 mb-3 d-inline-flex align-items-center gap-1">
     <i class='bx bx-arrow-back fs-5'></i> Back to Dashboard
@@ -67,20 +69,109 @@
             <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom"><div class="d-flex align-items-center gap-3"><i class='bx bxs-lock fs-4 text-muted'></i><div><h6 class="fw-bold m-0 text-muted">4. Cranial Nerves</h6><small class="text-muted d-block">45 minutes &middot; 3 videos</small></div></div><span class="status-badge status-locked">Locked</span></div>
             <div class="list-group-item px-0 d-flex justify-content-between align-items-center"><div class="d-flex align-items-center gap-3"><i class='bx bxs-lock fs-4 text-muted'></i><div><h6 class="fw-bold m-0 text-muted">5. Clinical Correlates</h6><small class="text-muted d-block">1 hour &middot; 2 videos</small></div></div><span class="status-badge status-locked">Locked</span></div>
         </div></div>{% endif %}
-        {% if module.has_videos %}<div class="tab-pane fade{% if not module.has_lessons %} show active{% endif %} module-tab-pane" id="videos" role="tabpanel"><div class="row g-3"><div class="col-md-6"><div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 border"><i class='bx bx-play-circle fs-2 text-primary'></i><div><h6 class="fw-bold m-0">Introduction to Upper Limb</h6><small class="text-muted">15 min &middot; 2.4k views</small><div class="mt-1"><span class="status-badge status-completed">Watched</span></div></div></div></div><div class="col-md-6"><div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 border"><i class='bx bx-play-circle fs-2 text-primary'></i><div><h6 class="fw-bold m-0">Bones of the Hand &amp; Wrist</h6><small class="text-muted">20 min &middot; 1.8k views</small><div class="mt-1"><span class="status-badge status-progress">Resume</span></div></div></div></div></div></div>{% endif %}
-        {% if module.has_files %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos %} show active{% endif %} module-tab-pane" id="files" role="tabpanel"><div class="d-flex flex-column gap-3">{% for study_file in study_files %}<div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border"><div class="d-flex align-items-center gap-3">{% if study_file.file_type == 'pdf' %}<i class='bx bxs-file-pdf fs-3 text-danger'></i>{% elif study_file.file_type == 'word' %}<i class='bx bxs-file-doc fs-3 text-primary'></i>{% else %}<i class='bx bxs-file fs-3 text-warning'></i>{% endif %}<div><h6 class="fw-bold m-0">{{ study_file.file_name }}</h6><small class="text-muted">{{ study_file.get_file_type_display }} &middot; {{ study_file.file_size }}</small></div></div><a class="btn btn-outline-primary btn-sm" href="{{ study_file.file_link }}" target="_blank" rel="noopener"><i class='bx bx-download'></i> Download</a></div>{% empty %}<p class="text-muted mb-0">No files are available for this module yet.</p>{% endfor %}</div></div>{% endif %}
+        {% if module.has_videos %}<div class="tab-pane fade{% if not module.has_lessons %} show active{% endif %} module-tab-pane" id="videos" role="tabpanel"><div class="d-flex flex-column gap-4">
+            {% for group in video_groups %}<section><h5 class="fw-bold mb-3">{{ group.name }}</h5><div class="row g-3">
+                {% for video in group.videos %}<div class="col-md-6"><button class="video-card d-flex align-items-start gap-3 p-3 bg-light rounded-3 border text-start w-100{% if video.is_locked %} opacity-75{% endif %}" type="button"{% if video.is_locked %} disabled aria-disabled="true"{% else %} data-bs-toggle="modal" data-bs-target="#videoModal" data-video-url="{{ video.embed_url }}" data-video-title="{{ video.name }}" data-video-description="{{ video.description }}" data-watch-url="{% url 'video-mark-watched' video.pk %}{% endif %}"><i class='bx {% if video.is_locked %}bx-lock-alt text-muted{% else %}bx-play-circle text-primary{% endif %} fs-2'></i><span><span class="fw-bold d-block">{{ video.name }}</span><small class="text-muted d-block">Year {{ video.year }} &middot; {{ video.module.name }} &middot; {{ group.name }}</small>{% if video.is_locked %}<small class="text-warning-emphasis d-block">Premium subscription required</small>{% else %}<small class="text-muted d-block">{{ video.description|default:"No description available."|truncatechars:90 }}</small><span class="mt-1 d-block"><span class="status-badge {% if video.is_watched %}status-completed{% else %}status-progress{% endif %}" data-watch-status>{% if video.is_watched %}Watched{% else %}Not Watched{% endif %}</span></span>{% endif %}</span></button></div>{% endfor %}
+            </div></section>{% empty %}<p class="text-muted mb-0">No videos are available for this module yet.</p>{% endfor %}
+        </div></div>{% endif %}
+        {% if module.has_files %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos %} show active{% endif %} module-tab-pane" id="files" role="tabpanel"><div class="d-flex flex-column gap-4">
+            {% for group in file_groups %}
+                <section>
+                    <h5 class="fw-bold mb-3">{{ group.name }}</h5>
+                    <div class="d-flex flex-column gap-3">
+                        {% for study_file in group.files %}<div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border"><div class="d-flex align-items-center gap-3">{% if study_file.file_type == 'pdf' %}<i class='bx bxs-file-pdf fs-3 text-danger'></i>{% elif study_file.file_type == 'word' %}<i class='bx bxs-file-doc fs-3 text-primary'></i>{% else %}<i class='bx bxs-file fs-3 text-warning'></i>{% endif %}<div><h6 class="fw-bold m-0">{{ study_file.file_name }}</h6><small class="text-muted">{{ study_file.get_file_type_display }} &middot; {{ study_file.file_size }}</small>{% if study_file.is_locked %}<small class="text-warning-emphasis d-block">Premium subscription required</small>{% endif %}</div></div>{% if study_file.is_locked %}<button class="btn btn-outline-secondary btn-sm" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% else %}<a class="btn btn-outline-primary btn-sm" href="{{ study_file.file_link }}" target="_blank" rel="noopener"><i class='bx bx-download'></i> Download</a>{% endif %}</div>{% endfor %}
+                    </div>
+                </section>
+            {% empty %}<p class="text-muted mb-0">No files are available for this module yet.</p>{% endfor %}
+        </div></div>{% endif %}
         {% if module.has_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files %} show active{% endif %} module-tab-pane" id="exams" role="tabpanel">
             {% for group in exam_groups %}
                 <section class="mb-4{% if forloop.last %} mb-0{% endif %}">
                     <h5 class="fw-bold mb-3">{{ group.label }} Exams</h5>
                     <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th style="width:40%;">Exam Name</th><th>Questions</th><th>Time</th><th>Result</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>
-                        {% for exam in group.exams %}<tr><td class="fw-bold">{{ exam.name }}</td><td>{{ exam.question_count }}</td><td>{{ exam.time_limit }} min</td><td>{{ exam.student_result }}</td><td>{{ exam.retries_remaining }} remaining</td><td class="text-end">{% if exam.can_start %}<a href="{% url 'exam-detail' exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>Completed</button>{% endif %}</td></tr>{% endfor %}
+                        {% for exam in group.exams %}<tr><td class="fw-bold">{{ exam.name }}{% if exam.is_locked %}<small class="text-warning-emphasis d-block fw-normal">Premium subscription required</small>{% endif %}</td><td>{{ exam.question_count }}</td><td>{{ exam.time_limit }} min</td><td>{{ exam.student_result }}</td><td>{{ exam.retries_remaining }} remaining</td><td class="text-end">{% if exam.is_locked %}<button class="btn btn-secondary btn-sm px-3" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% elif exam.can_start %}<a href="{% url 'exam-detail' exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>Completed</button>{% endif %}</td></tr>{% endfor %}
                     </tbody></table></div>
                 </section>
             {% endfor %}
         </div>{% endif %}
-        {% if module.has_text %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} show active{% endif %} module-tab-pane" id="text" role="tabpanel"><div class="p-3 bg-light rounded-3 border mb-3"><h6 class="fw-bold">Summary of Upper Limb Muscles</h6><p class="small text-muted mb-0">The upper limb consists of 4 main muscle compartments: shoulder, arm, forearm, and hand. The brachial plexus (C5-T1) innervates these muscles...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div><div class="p-3 bg-light rounded-3 border"><h6 class="fw-bold">Clinical Notes: Nerve Injuries</h6><p class="small text-muted mb-0">Radial nerve injury results in wrist drop. Median nerve injury leads to "ape hand" deformity...</p><a href="#" class="small text-primary fw-bold mt-2 d-inline-block">Read Full Text <i class='bx bx-right-arrow-alt'></i></a></div></div>{% endif %}
-        {% if module.has_osce or total_osce_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>OSCE assessment</th><th>Station</th><th>Questions</th><th>Grade</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>{% for osce_exam in osce_exams %}<tr><td class="fw-bold">{{ osce_exam.name }}</td><td>{{ osce_exam.get_osce_station_display }}</td><td>{{ osce_exam.graded_question_count }}</td><td>{{ osce_exam.student_result }}</td><td>{{ osce_exam.retries_remaining }} remaining</td><td class="text-end">{% if osce_exam.can_start %}<a href="{% url 'osce-detail' osce_exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>{% if osce_exam.question_count %}Completed{% else %}Unavailable{% endif %}</button>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted text-center py-4">No OSCE assessments are available for this module yet.</td></tr>{% endfor %}</tbody></table></div></div>{% endif %}
+        {% if module.has_text %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} show active{% endif %} module-tab-pane" id="text" role="tabpanel"><div class="d-flex flex-column gap-4">{% for group in text_groups %}<section><h5 class="fw-bold mb-3">{{ group.name }}</h5><div class="d-flex flex-column gap-3">{% for text_content in group.text_contents %}<div class="p-3 bg-light rounded-3 border{% if text_content.is_locked %} opacity-75{% endif %}"><h6 class="fw-bold">{{ text_content.title }}</h6>{% if text_content.is_locked %}<p class="small text-warning-emphasis mb-0">Premium subscription required</p><button class="btn btn-outline-secondary btn-sm mt-2" type="button" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% else %}<p class="small text-muted mb-0">{{ text_content.content|striptags|truncatechars:180 }}</p><button class="btn btn-link small text-primary fw-bold mt-2 p-0" type="button" data-bs-toggle="modal" data-bs-target="#textContentModal" data-text-title="{{ text_content.title }}" data-text-content="textContent{{ text_content.pk }}">Read Full Text <i class='bx bx-right-arrow-alt'></i></button>{% endif %}</div>{% endfor %}</div></section>{% empty %}<p class="text-muted mb-0">No published text content is available for this module yet.</p>{% endfor %}</div></div>{% endif %}
+        {% if module.has_osce or total_osce_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>OSCE assessment</th><th>Station</th><th>Questions</th><th>Result</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>{% for osce_exam in osce_exams %}<tr><td class="fw-bold">{{ osce_exam.name }}{% if osce_exam.is_locked %}<small class="text-warning-emphasis d-block fw-normal">Premium subscription required</small>{% endif %}</td><td>{{ osce_exam.get_osce_station_display }}</td><td>{{ osce_exam.graded_question_count }}</td><td>{{ osce_exam.student_result }}</td><td>{{ osce_exam.retries_remaining }} remaining</td><td class="text-end">{% if osce_exam.is_locked %}<button class="btn btn-secondary btn-sm px-3" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% elif osce_exam.can_start %}<a href="{% url 'osce-detail' osce_exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>{% if osce_exam.question_count %}Completed{% else %}Unavailable{% endif %}</button>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted text-center py-4">No OSCE assessments are available for this module yet.</td></tr>{% endfor %}</tbody></table></div></div>{% endif %}
     </div></div>
 </div>
+<template id="upperLimbText">
+    <p>The upper limb is arranged into four functional regions: the shoulder, arm, forearm, and hand. Together, these regions position the hand in space and allow movements ranging from powerful lifting to delicate fine motor control.</p>
+    <p>The shoulder complex includes the clavicle, scapula, and humerus. Its large range of motion depends on coordinated movement at the sternoclavicular, acromioclavicular, and glenohumeral joints. The rotator cuff muscles stabilise the humeral head while larger muscles such as deltoid, pectoralis major, and latissimus dorsi generate movement.</p>
+    <p>In the arm, the anterior compartment contains biceps brachii, brachialis, and coracobrachialis. These muscles are primarily supplied by the musculocutaneous nerve and commonly act to flex the elbow. The posterior compartment contains triceps brachii, supplied by the radial nerve, which extends the elbow.</p>
+    <p>The forearm contains flexor-pronator muscles anteriorly and extensor-supinator muscles posteriorly. Their tendons pass across the wrist into the hand, where intrinsic hand muscles refine finger movement. Remember that median, ulnar, and radial nerves provide the key motor and sensory supply to this region.</p>
+    <p>For revision, identify each major bone landmark, trace the brachial plexus from roots C5 to T1, and practise linking a muscle's origin, insertion, action, and nerve supply. Relating each structure to a clinical movement makes the anatomy easier to remember.</p>
+    <p>The upper limb is arranged into four functional regions: the shoulder, arm, forearm, and hand. Together, these regions position the hand in space and allow movements ranging from powerful lifting to delicate fine motor control.</p>
+    <p>The shoulder complex includes the clavicle, scapula, and humerus. Its large range of motion depends on coordinated movement at the sternoclavicular, acromioclavicular, and glenohumeral joints. The rotator cuff muscles stabilise the humeral head while larger muscles such as deltoid, pectoralis major, and latissimus dorsi generate movement.</p>
+    <p>In the arm, the anterior compartment contains biceps brachii, brachialis, and coracobrachialis. These muscles are primarily supplied by the musculocutaneous nerve and commonly act to flex the elbow. The posterior compartment contains triceps brachii, supplied by the radial nerve, which extends the elbow.</p>
+    <p>The forearm contains flexor-pronator muscles anteriorly and extensor-supinator muscles posteriorly. Their tendons pass across the wrist into the hand, where intrinsic hand muscles refine finger movement. Remember that median, ulnar, and radial nerves provide the key motor and sensory supply to this region.</p>
+    <p>The upper limb is arranged into four functional regions: the shoulder, arm, forearm, and hand. Together, these regions position the hand in space and allow movements ranging from powerful lifting to delicate fine motor control.</p>
+    <p>The shoulder complex includes the clavicle, scapula, and humerus. Its large range of motion depends on coordinated movement at the sternoclavicular, acromioclavicular, and glenohumeral joints. The rotator cuff muscles stabilise the humeral head while larger muscles such as deltoid, pectoralis major, and latissimus dorsi generate movement.</p>
+    <p>In the arm, the anterior compartment contains biceps brachii, brachialis, and coracobrachialis. These muscles are primarily supplied by the musculocutaneous nerve and commonly act to flex the elbow. The posterior compartment contains triceps brachii, supplied by the radial nerve, which extends the elbow.</p>
+    <p>The forearm contains flexor-pronator muscles anteriorly and extensor-supinator muscles posteriorly. Their tendons pass across the wrist into the hand, where intrinsic hand muscles refine finger movement. Remember that median, ulnar, and radial nerves provide the key motor and sensory supply to this region.</p>
+    <p>The upper limb is arranged into four functional regions: the shoulder, arm, forearm, and hand. Together, these regions position the hand in space and allow movements ranging from powerful lifting to delicate fine motor control.</p>
+    <p>The shoulder complex includes the clavicle, scapula, and humerus. Its large range of motion depends on coordinated movement at the sternoclavicular, acromioclavicular, and glenohumeral joints. The rotator cuff muscles stabilise the humeral head while larger muscles such as deltoid, pectoralis major, and latissimus dorsi generate movement.</p>
+    <p>In the arm, the anterior compartment contains biceps brachii, brachialis, and coracobrachialis. These muscles are primarily supplied by the musculocutaneous nerve and commonly act to flex the elbow. The posterior compartment contains triceps brachii, supplied by the radial nerve, which extends the elbow.</p>
+    <p>The forearm contains flexor-pronator muscles anteriorly and extensor-supinator muscles posteriorly. Their tendons pass across the wrist into the hand, where intrinsic hand muscles refine finger movement. Remember that median, ulnar, and radial nerves provide the key motor and sensory supply to this region.</p>
+</template>
+<template id="nerveInjuriesText">
+    <p>Peripheral nerve injuries in the upper limb can be recognised by combining the pattern of weakness with sensory loss. Always compare both sides and examine the injury mechanism before deciding which nerve is involved.</p>
+    <p>Radial nerve injury may occur with a mid-shaft humeral fracture. Loss of wrist and finger extension can produce wrist drop, while sensation may be reduced in the dorsal first web space. A more distal lesion can spare elbow extension because the branches to triceps arise proximally.</p>
+    <p>Median nerve injury can affect thenar muscle function and thumb opposition. A proximal lesion may weaken forearm pronation and finger flexion, whereas a lesion at the wrist mainly affects the thenar muscles and sensation over the lateral palm and fingers.</p>
+    <p>Ulnar nerve injury often causes weakness of the interossei, reducing finger abduction and adduction. Sensory change is commonly present in the little finger and the medial half of the ring finger. Ask the patient to spread their fingers against resistance when assessing this nerve.</p>
+    <p>These examples are for learning and revision. In clinical practice, document the complete motor, sensory, and vascular examination, then arrange urgent assessment when trauma, progressive weakness, or vascular compromise is present.</p>
+</template>
+{% for text_content in text_contents %}<template id="textContent{{ text_content.pk }}">{{ text_content.content|safe }}</template>{% endfor %}
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header"><h5 class="modal-title fw-bold" id="videoModalTitle"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9"><iframe id="videoModalPlayer" title="YouTube video player" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+                <p class="text-muted mb-0 mt-3" id="videoModalDescription"></p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="textContentModal" tabindex="-1" aria-labelledby="textContentModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header"><h5 class="modal-title fw-bold" id="textContentModalTitle"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body text-secondary" id="textContentModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('videoModal').addEventListener('show.bs.modal', function (event) {
+        const video = event.relatedTarget;
+        this.querySelector('#videoModalTitle').textContent = video.dataset.videoTitle;
+        this.querySelector('#videoModalDescription').textContent = video.dataset.videoDescription;
+        const videoUrl = new URL(video.dataset.videoUrl);
+        videoUrl.searchParams.set('autoplay', '1');
+        this.querySelector('#videoModalPlayer').src = videoUrl.toString();
+        fetch(video.dataset.watchUrl, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
+            credentials: 'same-origin',
+        }).then(function (response) {
+            if (!response.ok) return;
+            const status = video.querySelector('[data-watch-status]');
+            status.textContent = 'Watched';
+            status.classList.remove('status-progress');
+            status.classList.add('status-completed');
+        });
+    });
+    document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+        this.querySelector('#videoModalPlayer').src = '';
+    });
+    document.getElementById('textContentModal').addEventListener('show.bs.modal', function (event) {
+        const text = event.relatedTarget;
+        const content = document.getElementById(text.dataset.textContent);
+        this.querySelector('#textContentModalTitle').textContent = text.dataset.textTitle;
+        this.querySelector('#textContentModalBody').innerHTML = content.innerHTML;
+    });
+</script>
 {% endblock %}

@@ -63,16 +63,16 @@ class OSCEExamAdmin(nested_admin.NestedModelAdmin):
     form = OSCEExamAdminForm
     inlines = (OSCEQuestionInline,)
     fields = (
-        'year', 'module', 'name', 'retry_times', 'mcq_timer', 'osce_station',
+        'year', 'module', 'name', 'retry_times', 'mcq_timer', 'is_trial', 'osce_station',
         'systolic_pressure', 'diastolic_pressure',
         'ecg_v1', 'ecg_v2', 'ecg_v3', 'ecg_v4', 'ecg_v5', 'ecg_v6',
         'is_active',
     )
     list_display = (
         'name', 'year', 'module', 'mcq_timer', 'osce_station',
-        'retry_times', 'question_count', 'is_active',
+        'retry_times', 'question_count', 'is_trial', 'is_active',
     )
-    list_filter = ('year', 'module', 'osce_station', 'is_active')
+    list_filter = ('year', 'module', 'osce_station', 'is_trial', 'is_active')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'name')
 

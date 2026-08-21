@@ -35,6 +35,7 @@ class OSCEExam(models.Model):
     mcq_timer = models.PositiveIntegerField(
         help_text='Time allowed for the MCQ section, in minutes.',
     )
+    is_trial = models.BooleanField(default=False, help_text='Make this OSCE available to every authenticated student.')
     osce_station = models.CharField(
         max_length=4,
         choices=STATION_CHOICES,

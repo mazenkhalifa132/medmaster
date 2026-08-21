@@ -1,5 +1,5 @@
 {% load static %}
-<aside class="right-panel d-none d-xl-block">
+<aside class="right-panel" id="rightPanel">
     <!--<div class="quick-access">
         <h6 class="fw-bold mb-3">Quick Access</h6>
         <div class="quick-grid">
@@ -10,12 +10,13 @@
         </div>
     </div>
     <hr>-->
+    
     <div class="mb-4">
-        <h6 class="fw-bold mb-3">Upcoming <!--<small class="text-primary fw-normal" style="cursor:pointer;">View All</small>--></h6>
+        <h6 class="fw-bold mb-3">Coming Soon<!--<small class="text-primary fw-normal" style="cursor:pointer;">View All</small>--></h6>
         {% for event in upcoming_events %}
             <div class="d-flex gap-3 mb-3">
                 <i class='bx {{ event.icon }} text-primary fs-4'></i>
-                <div><h6 class="m-0 fs-6 fw-bold">{{ event.title }}</h6><small class="text-muted">{{ event.scheduled_at|date:"M j, Y - g:i A" }}</small></div>
+                <div><h6 class="m-0 fs-6 fw-bold">{{ event.title }}</h6><small class="text-muted">{% if event.scheduled_at %}{{ event.scheduled_at|date:"M j, Y - g:i A" }}{% else %}Coming soon{% endif %}</small></div>
             </div>
         {% empty %}
             <small class="text-muted">No upcoming events.</small>
@@ -23,40 +24,51 @@
     </div>
     <hr>
     <div class="mb-4">
-        <h6 class="fw-bold mb-3">My Progress</h6>
+        <h6 class="fw-bold mb-3">Performance Overview</h6>
         <div class="d-flex align-items-center gap-3">
-            <div style="width:100px; height:100px; border-radius:50%; background:conic-gradient(from -90deg, #2563eb 0deg 116deg, #fff 116deg 120deg, #8b5cf6 120deg 288deg, #fff 288deg 292deg, #e5e7eb 292deg 360deg); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div style="width:100px; height:100px; border-radius:50%; background:conic-gradient(from -90deg, #2563eb 0% {{ performance_overview.correct_percentage }}%, #8b5cf6 {{ performance_overview.correct_percentage }}% {{ performance_overview.answered_percentage }}%, #e5e7eb {{ performance_overview.answered_percentage }}% 100%); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <div style="width:68px; height:68px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                    <h5 class="m-0 fw-bold">soon%</h5>
-                    <small style="font-size:9px; color:#6b7280;">Done</small>
+                    <h5 class="m-0 fw-bold">{{ performance_overview.accuracy }}%</h5>
+                    <small style="font-size:9px; color:#6b7280;">Accuracy</small>
                 </div>
             </div>
             <div style="font-size:12px; width:100%;">
-                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2563eb;"></span> Completed</span> <span>32%</span></div>
-                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span> In Progress</span> <span>48%</span></div>
-                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e7eb;"></span> Not Started</span> <span>20%</span></div>
+                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2563eb;"></span> Correct</span> <span>{{ performance_overview.correct }}</span></div>
+                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span> Incorrect</span> <span>{{ performance_overview.incorrect }}</span></div>
+                <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e7eb;"></span> Unattempted</span> <span>{{ performance_overview.unattempted }}</span></div>
             </div>
         </div>
+        <small class="text-muted d-block mt-2" style="font-size:10px;">First completed attempt only.</small>
     </div>
     <hr>
     <div class="quick-access">
-        <h6 class="fw-bold mb-3">Dr. X</h6>
+        <!--<h6 class="fw-bold mb-3">Dr. X</h6>
         <div style="text-align: center;">
             <img src="{% static 'imgs/dr.x/curious.jpg' %}" alt="Dr. X" style="width: 50%; height: auto;">
             <h6 class="fw-bold m-0">Keep Going</h6>
             <small class="text-muted">"Discipline today, success tomorrow"</small>
+        </div>-->
+        <div style="text-align: center;">
+            <img src="https://res.cloudinary.com/dxmbqh0mc/image/upload/v1787288850/bc85f6b0-bdf5-4683-994b-c08010035377_zphzi1.png" alt="Soon" style="width: 100%; height: auto; border-radius: 10px;">
+            
         </div>
     </div>
     <hr>
     <div>
-        <h6 class="fw-bold mb-3">Recent Badges <small class="text-primary fw-normal" style="cursor:pointer;">View All</small></h6>
-        <div class="d-flex gap-2">
-            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#7c3aed;background:#ede9fe;"><i class='bx bxs-shield'></i></div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#f59e0b;background:#fef3c7;"><i class='bx bxs-star'></i></div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#f97316;background:#fff7ed;"><i class='bx bxs-book-open'></i></div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#3b82f6;background:#eff6ff;"><i class='bx bxs-trophy'></i></div>
-            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#7c3aed;background:#ede9fe;"><i class='bx bxs-shield'></i></div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;color:#3b82f6;background:#eff6ff;"><i class='bx bxs-trophy'></i></div>
+        <h6 class="fw-bold mb-3 d-flex justify-content-between align-items-center">Recent Badges
+            <a href="#progress" class="text-primary fw-normal text-decoration-none" style="font-size: 12px;" onclick="document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']').click(); return false;">View More</a>
+        </h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for badge in recent_badges %}
+                <div class="position-relative" title="{{ badge.name }}" style="width:40px;height:40px;flex-shrink:0;">
+                    {% if badge.earned_count > 1 %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="z-index:1;font-size:9px;min-width:18px;">{{ badge.earned_count }}</span>{% endif %}
+                    <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden" style="width:40px;height:40px;background: color-mix(in srgb, {{ badge.color }} 15%, white);">
+                        <img src="{{ badge.image_url }}" alt="{{ badge.name }}" style="width: 26px; height: 26px; object-fit: contain;">
+                    </div>
+                </div>
+            {% empty %}
+                <small class="text-muted">No badges earned yet.</small>
+            {% endfor %}
         </div>
     </div>
 </aside>

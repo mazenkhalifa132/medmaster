@@ -34,6 +34,7 @@ class Exam(models.Model):
         default=0,
         help_text='Total number of attempts allowed for each student.',
     )
+    is_trial = models.BooleanField(default=False, help_text='Make this exam available to every authenticated student.')
     is_active = models.BooleanField(default=True)
 
     class Meta:

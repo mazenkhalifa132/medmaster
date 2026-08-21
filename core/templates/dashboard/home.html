@@ -16,19 +16,19 @@
     </div>
 
     <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h5 class="fw-bold m-0">Years of Study</h5>
             <small class="text-muted">5 Years Program</small>
         </div>
-        <div class="row g-3">
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
             {% for year in years %}
-            <div class="col"><div class="year-card{% if year.number == request.user.academic_year|default:1 %} active{% endif %}" data-year="{{ year.number }}" onclick="selectYear({{ year.number }})"><i class='bx bxs-graduation'></i><h6>Year {{ year.number }}</h6><small>{{ year.module_count }} Module{{ year.module_count|pluralize }}</small></div></div>
+            <div class="col d-flex"><div class="year-card w-100{% if year.number == request.user.academic_year|default:1 %} active{% endif %}" data-year="{{ year.number }}" onclick="selectYear({{ year.number }})"><i class='bx bxs-graduation'></i><h6>Year {{ year.number }}</h6><small>{{ year.module_count }} Module{{ year.module_count|pluralize }}</small></div></div>
             {% endfor %}
         </div>
     </div>
 
     <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h5 class="fw-bold m-0" id="modules-section-title">Year 1 Modules</h5>
             <div class="d-flex align-items-center gap-2 bg-white p-1 rounded-3 shadow-sm" style="border: 1px solid #e5e7eb;">
                 <button class="btn module-nav-btn btn-light text-muted" id="module-prev" onclick="changeModulePage(-1)" disabled><i class='bx bx-chevron-left'></i></button>
@@ -114,6 +114,7 @@
             <button class="btn btn-outline-danger btn-sm"><i class='bx bx-trash'></i></button>
         </div>
     </div>
+
 </div>
 
 <div id="page-notes" class="app-page">
@@ -153,6 +154,32 @@
                 </div>
         </div>
     </form>
+    <form method="get" action="{% url 'home' %}#notes" class="card shadow-sm border-0 mb-4 p-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label for="note-filter-year" class="form-label small fw-semibold">Year</label>
+                <select class="form-select form-select-sm" id="note-filter-year" name="note_year">
+                    <option value="">All years</option>
+                    {% for year in "12345" %}<option value="{{ year }}"{% if note_filter_year == year %} selected{% endif %}>Year {{ year }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="note-filter-module" class="form-label small fw-semibold">Module</label>
+                <select class="form-select form-select-sm" id="note-filter-module" name="note_module">
+                    <option value="">All modules</option>
+                    {% for module in note_modules %}<option value="{{ module.pk }}"{% if note_filter_module == module.pk|stringformat:'s' %} selected{% endif %}>Year {{ module.year }} · {{ module.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="note-filter-date" class="form-label small fw-semibold">Created date</label>
+                <input class="form-control form-control-sm" id="note-filter-date" name="note_date" type="date" value="{{ note_filter_date }}">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button class="btn btn-primary btn-sm flex-grow-1" type="submit"><i class="bx bx-filter-alt"></i> Filter</button>
+                <a class="btn btn-light btn-sm" href="{% url 'home' %}#notes" aria-label="Clear note filters"><i class="bx bx-refresh"></i></a>
+            </div>
+        </div>
+    </form>
     <div class="row g-4" id="notes-list">
         {% for note in notes %}
             <div class="col-md-6 col-lg-4">
@@ -162,8 +189,8 @@
                             <div class="d-flex align-items-center gap-2"><i class="bx bx-note"></i><small class="fw-semibold">{% if note.module %}Year {{ note.year }} · {{ note.module.name }}{% else %}Private note{% endif %}</small></div>
                             <form method="post" action="{% url 'note-delete' note.pk %}" onsubmit="return confirm('Delete this note?');">{% csrf_token %}<button class="btn btn-sm btn-outline-danger border-0" type="submit" aria-label="Delete {{ note.title }}"><i class='bx bx-trash'></i></button></form>
                         </div>
-                        <h6 class="fw-bold">{{ note.title }}</h6>
                         <p class="small text-muted mb-2">{{ note.date|date:"M j, Y" }}</p>
+                        <h6 class="fw-bold">{{ note.title }}</h6>
                         <p class="small mb-0">{{ note.content|truncatechars:180 }}</p>
                     </div>
                 </div>
@@ -172,7 +199,7 @@
             <div class="col-12" id="empty-notes-message">
                 <div class="card border-0 bg-light text-center p-5">
                     <i class="bx bx-note fs-1 text-muted mb-2"></i>
-                    <p class="text-muted mb-0">You have not created any notes yet.</p>
+                    <p class="text-muted mb-0">No notes match these filters.</p>
                 </div>
             </div>
         {% endfor %}
@@ -186,38 +213,74 @@
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg">
             <div class="acad-stat-card text-center">
-                <div class="text-warning d-flex align-items-center justify-content-center gap-1 fw-bold" style="font-size: 20px;"><i class='bx bxs-crown'></i> {{ rank.name }}</div>
+                <div class="d-flex align-items-center justify-content-center gap-1 fw-bold" style="font-size: 20px; color: {{ rank.color }};">
+                    {% if rank.icon_class %}<i class="bx {{ rank.icon_class }}"></i>{% endif %}
+                    {{ rank.name|default:'No rank configured' }}
+                </div>
                 <span class="stat-label">Rank</span>
-                <div class="progress w-75 mx-auto bg-light"><div class="progress-bar bg-warning" style="width: {{ rank_percent }}%;"></div></div>
-                <span class="stat-change text-muted small">{{ student_progress.total_points }} / {{ rank.next }} XP</span>
+                <div class="progress w-75 mx-auto bg-light"><div class="progress-bar" style="width: {{ rank_percent }}%; background-color: {{ rank.color|default:'#d4a017' }};"></div></div>
+                <span class="stat-change text-muted small">{{ student_progress.total_points }} / {{ rank.max_points|default:0 }} Points</span>
             </div>
         </div>
         <div class="col-6 col-lg">
             <div class="acad-stat-card">
                 <div class="stat-val text-success">{{ student_progress.questions_answered }}</div>
                 <span class="stat-label">Questions Solved</span>
-                <span class="stat-change text-success small"><i class='bx bx-up-arrow-alt'></i> 120 this week</span>
+                <span class="stat-change text-success small"><i class='bx bx-up-arrow-alt'></i> {{ questions_solved_this_week }} this week</span>
             </div>
         </div>
         <div class="col-6 col-lg">
             <div class="acad-stat-card">
-                <div class="stat-val text-primary">12</div>
+                <div class="stat-val text-primary">{{ badges_earned_count }}</div>
                 <span class="stat-label">Badges Earned</span>
-                <span class="stat-change text-primary small"><i class='bx bx-up-arrow-alt'></i> 2 new</span>
+                <span class="stat-change text-primary small"><i class='bx bx-up-arrow-alt'></i> {{ badges_earned_today }} new today</span>
             </div>
         </div>
         <div class="col-6 col-lg">
             <div class="acad-stat-card">
-                <div class="stat-val text-warning">4</div>
+                <div class="stat-val text-warning">{{ day_streak }}</div>
                 <span class="stat-label">Day Streak</span>
                 <span class="stat-change text-warning small">Keep it up! <i class='bx bxs-hot'></i></span>
             </div>
         </div>
         <div class="col-6 col-lg">
             <div class="acad-stat-card">
-                <div class="stat-val text-primary">78%</div>
+                <div class="stat-val text-primary">{{ average_score }}%</div>
                 <span class="stat-label">Average Score</span>
-                <span class="stat-change text-success small"><i class='bx bx-up-arrow-alt'></i> 5% vs last week</span>
+                {% if average_score_change is not None %}
+                    <span class="stat-change {% if average_score_change >= 0 %}text-success{% else %}text-danger{% endif %} small"><i class='bx bx-{% if average_score_change >= 0 %}up{% else %}down{% endif %}-arrow-alt'></i> {{ average_score_change_display }}% vs last week</span>
+                {% else %}
+                    <span class="stat-change text-muted small">No score last week</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0"><i class="bx bxs-trophy text-warning me-1"></i> Leaderboard</h5>
+                <small class="text-muted">Top 10 students by Points</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="text-muted small">
+                        <tr><th scope="col">#</th><th scope="col">Student</th><th scope="col">Rank</th><th scope="col" class="text-end">Points</th><th scope="col" class="text-end">Average Score</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in leaderboard %}
+                            <tr{% if entry.student_id == request.user.id %} class="table-primary"{% endif %}>
+                                <td class="fw-bold">{{ entry.position }}</td>
+                                <td class="fw-semibold">{{ entry.name }}</td>
+                                <td style="color: {{ entry.rank.color|default:'#6b7280' }};">{% if entry.rank.icon_class %}<i class="bx {{ entry.rank.icon_class }}"></i>{% endif %} {{ entry.rank.name|default:'Unranked' }}</td>
+                                <td class="text-end fw-semibold">{{ entry.xp }}</td>
+                                <td class="text-end">{{ entry.average_score }}%</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No student progress yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -228,26 +291,12 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold m-0">XP Progress</h6>
-                    <span class="badge bg-light text-dark fw-normal">This week <i class='bx bx-chevron-down'></i></span>
+                    <h6 class="fw-bold m-0">Points Progress</h6>
+                    <span class="badge bg-light text-dark fw-normal">This week </span>
                 </div>
-                <small class="text-muted d-block mb-3" style="font-size: 11px;">Earn XP by solving questions and completing exams</small>
+                <small class="text-muted d-block mb-3" style="font-size: 11px;">Earn points by solving questions and completing exams</small>
                 <div class="w-100" style="height: 100px;">
-                    <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
-                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
-                            </linearGradient>
-                        </defs>
-                        <path d="M0,80 Q40,50 80,65 T160,40 T240,30 L300,60 V100 H0 Z" fill="url(#chartGrad)"/>
-                        <polyline points="0,80 40,50 80,65 120,75 160,40 200,45 240,30 300,60" fill="none" stroke="#3b82f6" stroke-width="2"/>
-                        <circle cx="300" cy="60" r="3" fill="#3b82f6"/>
-                        <text x="0" y="98" font-size="8" fill="#9ca3af">May 10</text>
-                        <text x="120" y="98" font-size="8" fill="#9ca3af">May 13</text>
-                        <text x="240" y="98" font-size="8" fill="#9ca3af">May 16</text>
-                        <text x="305" y="55" font-size="9" fill="#3b82f6" font-weight="bold">1,250 XP</text>
-                    </svg>
+                    <svg id="xp-progress-chart" width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none" role="img" aria-label="XP progress for this week"></svg>
                 </div>
             </div>
         </div>
@@ -260,32 +309,33 @@
                 </div>
                 <div class="d-flex flex-column align-items-center">
                     <div class="donut-wrap">
-                        <div class="donut-chart"></div>
+                        <div class="donut-chart" style="background: conic-gradient(#10b981 0% {{ performance_overview.correct_percentage }}%, #ef4444 {{ performance_overview.correct_percentage }}% {{ performance_overview.answered_percentage }}%, #e5e7eb {{ performance_overview.answered_percentage }}% 100%);"></div>
                         <div class="donut-inner">
-                            <span class="donut-text-num">78%</span>
-                            <span class="donut-text-label">Average</span>
+                            <span class="donut-text-num">{{ performance_overview.accuracy }}%</span>
+                            <span class="donut-text-label">Accuracy</span>
                         </div>
                     </div>
                     <div class="donut-legend w-100 mt-2 px-3">
                         <div class="donut-legend-item">
-                            <span><span class="dot bg-primary"></span> Correct</span>
-                            <span class="text-muted small">936 (78%)</span>
+                            <span><span class="dot bg-success"></span> Correct</span>
+                            <span class="text-muted small">{{ performance_overview.correct }}</span>
                         </div>
                         <div class="donut-legend-item">
                             <span><span class="dot bg-danger"></span> Incorrect</span>
-                            <span class="text-muted small">234 (19%)</span>
+                            <span class="text-muted small">{{ performance_overview.incorrect }}</span>
                         </div>
                         <div class="donut-legend-item">
-                            <span><span class="dot bg-success"></span> Unattempted</span>
-                            <span class="text-muted small">30 (3%)</span>
+                            <span><span class="dot" style="background:#e5e7eb;"></span> Unattempted</span>
+                            <span class="text-muted small">{{ performance_overview.unattempted }}</span>
                         </div>
                     </div>
+                    <small class="text-muted mt-2" style="font-size:10px;">First completed attempt only. Accuracy uses answered items. </small>
                 </div>
             </div>
         </div>
 
         <!-- Right: Subjects Performance -->
-        <div class="col-lg-4">
+        <!--<div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 p-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold m-0">Subjects Performance</h6>
@@ -314,12 +364,34 @@
                     </div>
                 </div>
             </div>
+        </div>-->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 p-4 d-flex flex-column justify-content-center align-items-center text-center">
+                <div class="d-flex justify-content-between w-100 align-items-start mb-3">
+                    <h6 class="fw-bold m-0">Weekly Goal</h6>
+                    {% if weekly_goal_data %}<small class="text-muted">{{ weekly_goal_data.days_remaining }} day{{ weekly_goal_data.days_remaining|pluralize }} left</small>{% endif %}
+                </div>
+                {% if weekly_goal_data %}
+                <div class="text-start w-100">
+                    <span class="text-muted small">{{ weekly_goal_data.goal.requirement }}</span>
+                </div>
+                <div class="my-2" style="font-size: 32px; font-weight: 700; color: #3b82f6; line-height: 1;">
+                    {{ weekly_goal_data.current }} <span class="text-muted" style="font-weight: 400; font-size: 20px;">/ {{ weekly_goal_data.goal.target }}</span>
+                </div>
+                <div class="progress w-100" style="height: 8px;"><div class="progress-bar {% if weekly_goal_data.failed %}bg-danger{% else %}bg-primary{% endif %}" style="width: {{ weekly_goal_data.percent }}%;"></div></div>
+                <div class="mt-3 text-primary small fw-bold">You're doing great! Keep going 💪{{ weekly_goal_data.xp_reward }}</div>
+                <div class="mt-3 text small fw-bold">Reward: <span class="text-warning fw-bold">+{{ weekly_goal_data.goal.xp_reward }}</span> Points</div>
+                {% else %}
+                <div class="text-muted small py-4">No weekly goal is active right now.</div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
+
     <!-- Bottom Row: 3 Columns -->
-    <div class="row g-4 mb-4">
-        <!-- Left: Recent Activity -->
+    <!--<div class="row g-4 mb-4">
+       
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 p-3">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -369,10 +441,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>-->
 
         <!-- Center: Weekly Goal -->
-        <div class="col-lg-4">
+        <!--<div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 p-4 d-flex flex-column justify-content-center align-items-center text-center">
                 <div class="d-flex justify-content-between w-100 align-items-start mb-3">
                     <h6 class="fw-bold m-0">Weekly Goal</h6>
@@ -385,12 +457,14 @@
                     120 <span class="text-muted" style="font-weight: 400; font-size: 20px;">/ 200</span>
                 </div>
                 <div class="progress w-100" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 60%;"></div></div>
-                <div class="mt-3 text-warning small fw-bold">You're doing great! Keep going 💪</div>
+                <div class="mt-3 text-warning small fw-bold">
+                    Reward: +{{ weekly_goal_data.goal.xp_reward }} XP
+                </div>
             </div>
-        </div>
+        </div>-->
 
         <!-- Right: Achievements Progress -->
-        <div class="col-lg-4">
+        <!--<div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 p-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold m-0">Achievements Progress</h6>
@@ -424,7 +498,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>-->
 
     <!-- Recent Badges Row -->
     <div class="mb-4">
@@ -432,79 +506,24 @@
             <h6 class="fw-bold m-0">All Badges</h6>
             <!--<a href="#" class="text-primary small fw-bold text-decoration-none">View All</a>-->
         </div>
-        <div class="bottom-badge-grid">
-            <div class="badge-card">
-                <div class="badge-box" style="background: #ede9fe; color: #7c3aed;"><i class='bx bxs-star'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quiz Master</h6>
-                <small class="text-muted" style="font-size: 9px;">+5 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 2h ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #fef3c7; color: #d97706;"><i class='bx bxs-trophy'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Perfect Score</h6>
-                <small class="text-muted" style="font-size: 9px;">+10 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 1d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #ffedd5; color: #ea580c;"><i class='bx bxs-flame'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Streak Keeper</h6>
-                <small class="text-muted" style="font-size: 9px;">+5 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 2d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dbeafe; color: #2563eb;"><i class='bx bxs-diamond'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Exam Ace</h6>
-                <small class="text-muted" style="font-size: 9px;">+15 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 3d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
-            <div class="badge-card">
-                <div class="badge-box" style="background: #dcfce7; color: #16a34a;"><i class='bx bxs-bolt'></i></div>
-                <h6 class="fw-bold" style="font-size: 11px;">Quick Learner</h6>
-                <small class="text-muted" style="font-size: 9px;">+2 XP</small>
-                <div class="text-muted" style="font-size: 10px;">Earned 5d ago</div>
-            </div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 row-cols-xl-8 g-3">
+            {% for badge in badge_progress %}
+                <div class="col d-flex">
+                    <div class="badge-card w-100 h-100">
+                    <div class="position-relative d-inline-block">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white" style="background: {{ badge.color }}; z-index: 1;">{{ badge.earned_count }}</span>
+                        <div class="badge-box" style="background: color-mix(in srgb, {{ badge.color }} 15%, white); color: {{ badge.color }};">
+                            <img src="{{ badge.image_url }}" alt="" style="width: 28px; height: 28px; object-fit: contain;">
+                        </div>
+                    </div>
+                    <h6 class="fw-bold" style="font-size: 11px;">{{ badge.name }}</h6>
+                    <small class="text-muted" style="font-size: 9px;">+{{ badge.xp_reward }} Points each</small>
+                    <div class="text-muted" style="font-size: 10px;">Last earned {{ badge.last_awarded_at|timesince }} ago</div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12"><p class="text-muted small mb-0">Complete exams and maintain a daily streak to earn badges.</p></div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -559,6 +578,7 @@
 {{ modules_by_year|json_script:"modules-by-year-data" }}
 {{ quizzes_by_year|json_script:"quizzes-by-year-data" }}
 {{ osce_exams_by_year|json_script:"osce-exams-by-year-data" }}
+{{ xp_chart_data|json_script:"xp-chart-data" }}
 <script>
     const yearData = {
         1: { modules: [{ icon: 'bx-heart', name: '1. Anatomy', bg: '#eff6ff', color: '#3b82f6', progress: 75, sections: 4, btnColor: 'primary' },{ icon: 'bx-leaf', name: '2. Physiology', bg: '#ecfdf5', color: '#10b981', progress: 40, sections: 4, btnColor: 'success' },{ icon: 'bx-dna', name: '3. Biochemistry', bg: '#f5f3ff', color: '#8b5cf6', progress: 20, sections: 4, btnColor: 'secondary' },{ icon: 'bxs-flask', name: '4. Histology', bg: '#fff7ed', color: '#f97316', progress: 10, sections: 4, btnColor: 'warning' },{ icon: 'bx-plus-medical', name: '5. Embryology', bg: '#f3e8ff', color: '#9333ea', progress: 5, sections: 3, btnColor: 'dark' }], table: [{ icon: 'bx-heart', color: '#3b82f6', name: '1. Anatomy', progress: 75, status: 'In Progress', statusClass: 'status-progress', access: 'Today' },{ icon: 'bx-leaf', color: '#10b981', name: '2. Physiology', progress: 40, status: 'In Progress', statusClass: 'status-progress', access: '2 days ago' },{ icon: 'bx-dna', color: '#8b5cf6', name: '3. Biochemistry', progress: 20, status: 'In Progress', statusClass: 'status-progress', access: '5 days ago' },{ icon: 'bxs-flask', color: '#f97316', name: '4. Histology', progress: 10, status: 'Not Started', statusClass: 'status-not-started', access: '-' },{ icon: 'bx-plus-medical', color: '#9333ea', name: '5. Embryology', progress: 5, status: 'Not Started', statusClass: 'status-not-started', access: '-' }], courses: [{ icon: 'bx-heart', color: '#3b82f6', title: 'Anatomy 101', sections: '4 Sections', progress: 75, completed: '12/16 Lessons' },{ icon: 'bx-leaf', color: '#10b981', title: 'Physiology', sections: '4 Sections', progress: 40, completed: '4/10 Lessons' },{ icon: 'bxs-flask', color: '#f97316', title: 'Histology', sections: '4 Sections', progress: 10, completed: '1/10 Lessons' },{ icon: 'bx-plus-medical', color: '#9333ea', title: 'Embryology', sections: '3 Sections', progress: 5, completed: '0/6 Lessons' },{ icon: 'bx-brain', color: '#6366f1', title: 'Neuroanatomy', sections: '2 Sections', progress: 0, completed: '0/4 Lessons' }], osce: [{ title: 'Cardiovascular Exam', type: 'med', stars: 4.5, time: 15, level: 'Medium', desc: 'Heart sounds, murmurs, and palpation techniques.' },{ title: 'Respiratory Exam', type: 'med', stars: 4.2, time: 12, level: 'Easy', desc: 'Lung auscultation, percussion, and chest inspection.' },{ title: 'Abdominal Exam', type: 'finale', stars: 3.8, time: 20, level: 'Hard', desc: 'Palpation of liver, spleen, and abdominal quadrants.' },{ title: 'Cranial Nerve Exam', type: 'finale', stars: 4.0, time: 15, level: 'Medium', desc: 'Testing CN I-XII in clinical setting.' },{ title: 'Musculoskeletal Exam', type: 'practice', stars: 3.5, time: 12, level: 'Easy', desc: 'Basic joint range of motion assessment.' }], quizzes: [{ title: 'Anatomy - Module 1', type: 'med', qs: 20, due: 'Tomorrow', score: '85%', badge: 'bg-success' },{ title: 'Physiology - Module 2', type: 'med', qs: 15, due: 'In 3 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Biochemistry - Basics', type: 'finale', qs: 30, due: 'In 1 week', score: '45%', badge: 'bg-danger' },{ title: 'Embryology - Gastrulation', type: 'finale', qs: 12, due: 'In 2 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Histology - Epithelium', type: 'practice', qs: 25, due: 'In 5 days', score: '70%', badge: 'bg-warning' }] }, 2: { modules: [{ icon: 'bx-droplet', name: '1. Pathology', bg: '#fef2f2', color: '#ef4444', progress: 55, sections: 5, btnColor: 'danger' },{ icon: 'bx-capsule', name: '2. Pharmacology', bg: '#f0fdf4', color: '#22c55e', progress: 30, sections: 4, btnColor: 'success' },{ icon: 'bx-bacterium', name: '3. Microbiology', bg: '#fefce8', color: '#eab308', progress: 15, sections: 6, btnColor: 'warning' },{ icon: 'bx-shield-quarter', name: '4. Immunology', bg: '#eef2ff', color: '#6366f1', progress: 5, sections: 3, btnColor: 'primary' },{ icon: 'bx-bone', name: '5. Genetics', bg: '#fce7f3', color: '#ec4899', progress: 0, sections: 3, btnColor: 'danger' }], table: [{ icon: 'bx-droplet', color: '#ef4444', name: '1. Pathology', progress: 55, status: 'In Progress', statusClass: 'status-progress', access: 'Yesterday' },{ icon: 'bx-capsule', color: '#22c55e', name: '2. Pharmacology', progress: 30, status: 'In Progress', statusClass: 'status-progress', access: '3 days ago' },{ icon: 'bx-bacterium', color: '#eab308', name: '3. Microbiology', progress: 15, status: 'In Progress', statusClass: 'status-progress', access: '1 week ago' },{ icon: 'bx-shield-quarter', color: '#6366f1', name: '4. Immunology', progress: 5, status: 'Not Started', statusClass: 'status-not-started', access: '-' },{ icon: 'bx-bone', color: '#ec4899', name: '5. Genetics', progress: 0, status: 'Not Started', statusClass: 'status-not-started', access: '-' }], courses: [{ icon: 'bx-droplet', color: '#ef4444', title: 'Pathology', sections: '5 Sections', progress: 55, completed: '8/15 Lessons' },{ icon: 'bx-capsule', color: '#22c55e', title: 'Pharmacology', sections: '4 Sections', progress: 30, completed: '3/10 Lessons' },{ icon: 'bx-bacterium', color: '#eab308', title: 'Microbiology', sections: '6 Sections', progress: 15, completed: '1/12 Lessons' },{ icon: 'bx-shield-quarter', color: '#6366f1', title: 'Immunology', sections: '3 Sections', progress: 5, completed: '1/6 Lessons' },{ icon: 'bx-bone', color: '#ec4899', title: 'Genetics', sections: '3 Sections', progress: 0, completed: '0/6 Lessons' }], osce: [{ title: 'Thyroid Exam', type: 'med', stars: 4.8, time: 12, level: 'Easy', desc: 'Neck examination, palpation, and nodule detection.' },{ title: 'Musculoskeletal Exam', type: 'med', stars: 4.0, time: 25, level: 'Hard', desc: 'Joint movements, arthritis evaluation.' },{ title: 'Skin Lesion Assessment', type: 'finale', stars: 4.1, time: 10, level: 'Medium', desc: 'Dermatological exam and rash identification.' },{ title: 'Abdominal Ultrasound', type: 'finale', stars: 4.3, time: 20, level: 'Medium', desc: 'Basic US scanning of the abdomen.' },{ title: 'Fundoscopy Exam', type: 'practice', stars: 3.9, time: 15, level: 'Hard', desc: 'Retinal examination and optic disc evaluation.' }], quizzes: [{ title: 'Pathology - Inflammation', type: 'med', qs: 25, due: 'Tomorrow', score: '92%', badge: 'bg-success' },{ title: 'Pharmacology - Antibiotics', type: 'med', qs: 20, due: 'In 2 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Immunology - Vaccines', type: 'finale', qs: 15, due: 'In 5 days', score: '60%', badge: 'bg-warning' },{ title: 'Genetics - Inheritance', type: 'finale', qs: 10, due: 'In 1 day', score: 'Pending', badge: 'bg-secondary' },{ title: 'Microbiology - Bacteria', type: 'practice', qs: 30, due: 'In 1 week', score: '30%', badge: 'bg-danger' }] }, 3: { modules: [{ icon: 'bx-heart', name: '1. Internal Med', bg: '#eff6ff', color: '#3b82f6', progress: 80, sections: 6, btnColor: 'primary' },{ icon: 'bx-cut', name: '2. Surgery', bg: '#fce7f3', color: '#ec4899', progress: 25, sections: 5, btnColor: 'danger' },{ icon: 'bx-child', name: '3. Pediatrics', bg: '#f0fdf4', color: '#22c55e', progress: 50, sections: 4, btnColor: 'success' },{ icon: 'bx-female', name: '4. Ob/Gyn', bg: '#fefce8', color: '#eab308', progress: 35, sections: 4, btnColor: 'warning' },{ icon: 'bx-plus', name: '5. Dermatology', bg: '#fff3cd', color: '#d97706', progress: 10, sections: 3, btnColor: 'warning' }], table: [{ icon: 'bx-heart', color: '#3b82f6', name: '1. Internal Med', progress: 80, status: 'In Progress', statusClass: 'status-progress', access: 'Today' },{ icon: 'bx-cut', color: '#ec4899', name: '2. Surgery', progress: 25, status: 'In Progress', statusClass: 'status-progress', access: '4 days ago' },{ icon: 'bx-child', color: '#22c55e', name: '3. Pediatrics', progress: 50, status: 'In Progress', statusClass: 'status-progress', access: 'Yesterday' },{ icon: 'bx-female', color: '#eab308', name: '4. Ob/Gyn', progress: 35, status: 'In Progress', statusClass: 'status-progress', access: '1 day ago' },{ icon: 'bx-plus', color: '#d97706', name: '5. Dermatology', progress: 10, status: 'Not Started', statusClass: 'status-not-started', access: '-' }], courses: [{ icon: 'bx-heart', color: '#3b82f6', title: 'Internal Med', sections: '6 Sections', progress: 80, completed: '18/22 Lessons' },{ icon: 'bx-cut', color: '#ec4899', title: 'Surgery', sections: '5 Sections', progress: 25, completed: '4/16 Lessons' },{ icon: 'bx-child', color: '#22c55e', title: 'Pediatrics', sections: '4 Sections', progress: 50, completed: '6/12 Lessons' },{ icon: 'bx-female', color: '#eab308', title: 'Ob/Gyn', sections: '4 Sections', progress: 35, completed: '4/12 Lessons' },{ icon: 'bx-plus', color: '#d97706', title: 'Dermatology', sections: '3 Sections', progress: 10, completed: '0/6 Lessons' }], osce: [{ title: 'Chest Pain Assessment', type: 'med', stars: 4.7, time: 15, level: 'Medium', desc: 'Cardiac vs respiratory chest pain differentiation.' },{ title: 'Surgical Suturing Basics', type: 'med', stars: 4.3, time: 30, level: 'Hard', desc: 'Knot tying and sterile technique.' },{ title: 'Newborn Reflexes', type: 'finale', stars: 4.6, time: 10, level: 'Easy', desc: 'Primitive reflexes assessment in babies.' },{ title: 'Pelvic Exam', type: 'finale', stars: 4.2, time: 15, level: 'Hard', desc: 'Ob/Gyn pelvic assessment and pap smear.' },{ title: 'Dermatology Spot Check', type: 'practice', stars: 4.5, time: 10, level: 'Easy', desc: 'Skin cancer identification and ABCDE rule.' }], quizzes: [{ title: 'Internal Med - Hypertension', type: 'med', qs: 20, due: 'Tomorrow', score: '75%', badge: 'bg-success' },{ title: 'Surgery - Post-op Care', type: 'med', qs: 10, due: 'In 4 days', score: '80%', badge: 'bg-success' },{ title: 'Pediatrics - Growth Charts', type: 'finale', qs: 15, due: 'In 2 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Ob/Gyn - Gestation', type: 'finale', qs: 12, due: 'In 3 days', score: '65%', badge: 'bg-warning' },{ title: 'Dermatology - Rashes', type: 'practice', qs: 20, due: 'In 1 week', score: 'Pending', badge: 'bg-secondary' }] }, 4: { modules: [{ icon: 'bx-brain', name: '1. Neurology', bg: '#eef2ff', color: '#6366f1', progress: 60, sections: 4, btnColor: 'primary' },{ icon: 'bx-message-dots', name: '2. Psychiatry', bg: '#fdf4ff', color: '#d946ef', progress: 20, sections: 4, btnColor: 'danger' },{ icon: 'bx-show', name: '3. Ophthalmology', bg: '#fefce8', color: '#eab308', progress: 10, sections: 3, btnColor: 'warning' },{ icon: 'bx-horizontal-right', name: '4. Orthopedics', bg: '#fff7ed', color: '#f97316', progress: 5, sections: 3, btnColor: 'secondary' },{ icon: 'bx-hive', name: '5. ENT', bg: '#ccfbf1', color: '#0d9488', progress: 20, sections: 3, btnColor: 'success' }], table: [{ icon: 'bx-brain', color: '#6366f1', name: '1. Neurology', progress: 60, status: 'In Progress', statusClass: 'status-progress', access: '2 days ago' },{ icon: 'bx-message-dots', color: '#d946ef', name: '2. Psychiatry', progress: 20, status: 'In Progress', statusClass: 'status-progress', access: 'Today' },{ icon: 'bx-show', color: '#eab308', name: '3. Ophthalmology', progress: 10, status: 'Not Started', statusClass: 'status-not-started', access: '-' },{ icon: 'bx-horizontal-right', color: '#f97316', name: '4. Orthopedics', progress: 5, status: 'Not Started', statusClass: 'status-not-started', access: '-' },{ icon: 'bx-hive', color: '#0d9488', name: '5. ENT', progress: 20, status: 'In Progress', statusClass: 'status-progress', access: 'Yesterday' }], courses: [{ icon: 'bx-brain', color: '#6366f1', title: 'Neurology', sections: '4 Sections', progress: 60, completed: '6/10 Lessons' },{ icon: 'bx-message-dots', color: '#d946ef', title: 'Psychiatry', sections: '4 Sections', progress: 20, completed: '2/10 Lessons' },{ icon: 'bx-show', color: '#eab308', title: 'Ophthalmology', sections: '3 Sections', progress: 10, completed: '1/8 Lessons' },{ icon: 'bx-horizontal-right', color: '#f97316', title: 'Orthopedics', sections: '3 Sections', progress: 5, completed: '0/6 Lessons' },{ icon: 'bx-hive', color: '#0d9488', title: 'ENT', sections: '3 Sections', progress: 20, completed: '1/6 Lessons' }], osce: [{ title: 'Neurological Exam', type: 'med', stars: 4.9, time: 25, level: 'Hard', desc: 'Cranial nerves and peripheral motor exam.' },{ title: 'Mental State Exam', type: 'med', stars: 4.4, time: 15, level: 'Medium', desc: 'Psychiatry cognitive and mood assessment.' },{ title: 'Eye Pressure Check', type: 'finale', stars: 4.0, time: 10, level: 'Easy', desc: 'Slit lamp and tonometry basics.' },{ title: 'Joint Aspiration', type: 'finale', stars: 4.2, time: 20, level: 'Hard', desc: 'Orthopedic sterile joint procedure.' },{ title: 'Ear Wax Removal', type: 'practice', stars: 4.6, time: 8, level: 'Easy', desc: 'ENT examination and cerumen impaction.' }], quizzes: [{ title: 'Neurology - Brain Anatomy', type: 'med', qs: 25, due: 'Tomorrow', score: '88%', badge: 'bg-success' },{ title: 'Psychiatry - Mood Disorders', type: 'med', qs: 15, due: 'In 3 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Orthopedics - Fractures', type: 'finale', qs: 10, due: 'In 5 days', score: '40%', badge: 'bg-danger' },{ title: 'ENT - Hearing Loss', type: 'finale', qs: 12, due: 'In 2 days', score: '70%', badge: 'bg-warning' },{ title: 'Ophthalmology - Vision', type: 'practice', qs: 20, due: 'In 1 day', score: 'Pending', badge: 'bg-secondary' }] }, 5: { modules: [{ icon: 'bx-hotel', name: '1. Clinical Rotations', bg: '#f0fdf4', color: '#22c55e', progress: 90, sections: 8, btnColor: 'success' },{ icon: 'bx-bolt', name: '2. Advanced Ther.', bg: '#eef2ff', color: '#6366f1', progress: 30, sections: 4, btnColor: 'primary' },{ icon: 'bx-globe', name: '3. Public Health', bg: '#fefce8', color: '#eab308', progress: 15, sections: 3, btnColor: 'warning' },{ icon: 'bx-book', name: '4. Elective', bg: '#fdf4ff', color: '#d946ef', progress: 45, sections: 2, btnColor: 'danger' },{ icon: 'bx-briefcase', name: '5. Residency Prep', bg: '#e0e7ff', color: '#4f46e5', progress: 25, sections: 2, btnColor: 'primary' }], table: [{ icon: 'bx-hotel', color: '#22c55e', name: '1. Clinical Rotations', progress: 90, status: 'In Progress', statusClass: 'status-progress', access: 'Today' },{ icon: 'bx-bolt', color: '#6366f1', name: '2. Advanced Ther.', progress: 30, status: 'In Progress', statusClass: 'status-progress', access: 'Yesterday' },{ icon: 'bx-globe', color: '#eab308', name: '3. Public Health', progress: 15, status: 'Not Started', statusClass: 'status-not-started', access: '-' },{ icon: 'bx-book', color: '#d946ef', name: '4. Elective', progress: 45, status: 'In Progress', statusClass: 'status-progress', access: '3 days ago' },{ icon: 'bx-briefcase', color: '#4f46e5', name: '5. Residency Prep', progress: 25, status: 'In Progress', statusClass: 'status-progress', access: 'Today' }], courses: [{ icon: 'bx-hotel', color: '#22c55e', title: 'Clinical Rotations', sections: '8 Sections', progress: 90, completed: '20/24 Lessons' },{ icon: 'bx-bolt', color: '#6366f1', title: 'Advanced Therapeutics', sections: '4 Sections', progress: 30, completed: '3/9 Lessons' },{ icon: 'bx-globe', color: '#eab308', title: 'Public Health', sections: '3 Sections', progress: 15, completed: '1/6 Lessons' },{ icon: 'bx-book', color: '#d946ef', title: 'Elective', sections: '2 Sections', progress: 45, completed: '1/4 Lessons' },{ icon: 'bx-briefcase', color: '#4f46e5', title: 'Residency Prep', sections: '2 Sections', progress: 25, completed: '1/4 Lessons' }], osce: [{ title: 'Mock Clinical Station', type: 'med', stars: 5.0, time: 15, level: 'Medium', desc: 'General comprehensive exam in a hospital setting.' },{ title: 'Crisis Management', type: 'med', stars: 4.6, time: 10, level: 'Hard', desc: 'Handling patient emergencies and protocols.' },{ title: 'Patient Communication', type: 'finale', stars: 4.8, time: 8, level: 'Easy', desc: 'Breaking bad news and history taking.' },{ title: 'Procedural Skills', type: 'finale', stars: 4.9, time: 20, level: 'Hard', desc: 'Common clinical procedures (NGT, Catheter).' },{ title: 'Prescription Writing', type: 'practice', stars: 5.0, time: 10, level: 'Easy', desc: 'Proper pharmacological prescribing.' }], quizzes: [{ title: 'Rotations - Case Studies', type: 'med', qs: 35, due: 'Tomorrow', score: '95%', badge: 'bg-success' },{ title: 'Public Health - Epidemics', type: 'med', qs: 20, due: 'In 2 days', score: '70%', badge: 'bg-warning' },{ title: 'Therapeutics - Drug Interactions', type: 'finale', qs: 25, due: 'In 6 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Residency - Interview Prep', type: 'finale', qs: 10, due: 'In 3 days', score: 'Pending', badge: 'bg-secondary' },{ title: 'Elective - Clinical Skills', type: 'practice', qs: 30, due: 'In 1 week', score: '85%', badge: 'bg-success' }] } };
@@ -616,9 +636,39 @@
     function filterOSCE() { const year = currentYear; const modFilter = document.getElementById('osce-filter-module').value; const stationFilter = document.getElementById('osce-filter-station').value; let data = yearData[year].osce; if (modFilter !== 'all') data = data.filter(item => item.module === modFilter); if (stationFilter !== 'all') data = data.filter(item => item.station === stationFilter); document.getElementById('osce-total').innerText = data.length; let html = ''; if (data.length === 0) { html = '<div class="col-12 text-center text-muted py-5">No OSCE exams match your filters.</div>'; } else { data.forEach(osc => { const retryLabel = osc.retries === 1 ? 'retry' : 'retries'; const action = osc.canStart ? `<a href="${osc.url}" class="btn btn-primary btn-sm w-100">Start OSCE</a>` : `<button class="btn btn-secondary btn-sm w-100" disabled>${osc.qs ? 'Completed' : 'Unavailable'}</button>`; html += `<div class="col-md-6 col-lg-4"><div class="card shadow-sm border-0 h-100"><div class="card-body d-flex flex-column"><div class="d-flex justify-content-between align-items-start mb-3"><div><h6 class="fw-bold mb-1">${osc.title}</h6><small class="text-muted">${osc.module}</small></div><span class="badge bg-info-subtle text-info-emphasis">${osc.stationLabel}</span></div><div class="d-flex gap-3 text-muted small mb-4"><span><i class='bx bx-question-mark'></i> ${osc.qs} Questions</span><span><i class='bx bx-time'></i> ${osc.time}m</span></div><p class="small text-muted mt-auto mb-3">${osc.retries} ${retryLabel} available</p>${action}</div></div></div>`; }); } document.getElementById('dynamic-osce').innerHTML = html; }
     function resetOSCEFilters() { document.getElementById('osce-filter-module').value = 'all'; document.getElementById('osce-filter-station').value = 'all'; filterOSCE(); }
     function renderQuizzes(year) { const modSelect = document.getElementById('quiz-filter-module'); const currentVal = modSelect.value; const modules = [...new Set(yearData[year].quizzes.map(quiz => quiz.module))]; modSelect.innerHTML = '<option value="all">All Modules</option>'; modules.forEach(module => { modSelect.innerHTML += `<option value="${module}">${module}</option>`; }); if (modules.includes(currentVal)) modSelect.value = currentVal; filterQuizzes(); }
-    function filterQuizzes() { const year = currentYear; const modFilter = document.getElementById('quiz-filter-module').value; const typeFilter = document.getElementById('quiz-filter-type').value; let data = yearData[year].quizzes; if (modFilter !== 'all') data = data.filter(item => item.module === modFilter); if (typeFilter !== 'all') data = data.filter(item => item.type === typeFilter); document.getElementById('quiz-total').innerText = data.length; let html = ''; if (data.length === 0) { html = '<div class="list-group-item text-center text-muted py-4 border-0">No quizzes match your filters.</div>'; } else { data.forEach(quiz => { const retryLabel = quiz.retries === 1 ? 'retry' : 'retries'; html += `<a href="${quiz.url}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"><div><h6 class="mb-1 fw-bold">${quiz.title}</h6><small class="text-muted">${quiz.qs} Questions • ${quiz.retries} ${retryLabel} available</small></div><div class="d-flex align-items-center gap-2"><span class="badge ${quiz.badge} rounded-pill">${quiz.score}</span></div></a>`; }); } document.getElementById('dynamic-quizzes').innerHTML = html; }
+    function filterQuizzes() { const year = currentYear; const modFilter = document.getElementById('quiz-filter-module').value; const typeFilter = document.getElementById('quiz-filter-type').value; let data = yearData[year].quizzes; if (modFilter !== 'all') data = data.filter(item => item.module === modFilter); if (typeFilter !== 'all') data = data.filter(item => item.type === typeFilter); document.getElementById('quiz-total').innerText = data.length; let html = ''; if (data.length === 0) { html = '<div class="list-group-item text-center text-muted py-4 border-0">No quizzes match your filters.</div>'; } else { data.forEach(quiz => { const retryLabel = quiz.retries === 1 ? 'retry' : 'retries'; const canStart = quiz.canStart !== false; const status = quiz.status || (canStart ? quiz.score : 'Completed'); const statusClass = quiz.statusClass || (canStart ? quiz.badge : 'bg-secondary'); const itemClass = canStart ? 'list-group-item-action' : 'disabled bg-light text-muted'; const content = `<div><h6 class="mb-1 fw-bold">${quiz.title}</h6><small class="text-muted">${quiz.qs} Questions • ${canStart ? `${quiz.retries} ${retryLabel} available` : 'All attempts completed'}</small></div><div class="d-flex align-items-center gap-2"><span class="badge ${statusClass} rounded-pill">${status}</span></div>`; html += canStart ? `<a href="${quiz.url}" class="list-group-item ${itemClass} d-flex justify-content-between align-items-center">${content}</a>` : `<div class="list-group-item ${itemClass} d-flex justify-content-between align-items-center" aria-disabled="true">${content}</div>`; }); } document.getElementById('dynamic-quizzes').innerHTML = html; }
     function resetQuizFilters() { document.getElementById('quiz-filter-module').value = 'all'; document.getElementById('quiz-filter-type').value = 'all'; filterQuizzes(); }
-    document.addEventListener('DOMContentLoaded', function() { selectYear(defaultAcademicYear); const menuToggle = document.getElementById('menuToggle'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay'); function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); } if (menuToggle) { menuToggle.addEventListener('click', toggleSidebar); } if (overlay) { overlay.addEventListener('click', toggleSidebar); } const navLinks = document.querySelectorAll('.sidebar-menu .nav-link'); const pages = document.querySelectorAll('.app-page'); navLinks.forEach(link => { link.addEventListener('click', function(e) { e.preventDefault(); navLinks.forEach(nav => nav.classList.remove('active')); this.classList.add('active'); pages.forEach(page => page.classList.remove('active-page')); const pageId = this.getAttribute('data-page'); const targetPage = document.getElementById('page-' + pageId); if (targetPage) { targetPage.classList.add('active-page'); } if (window.innerWidth <= 992) { toggleSidebar(); } }); });
+    // Keep locked assessments visible, but never expose a navigable action for them.
+    function filterOSCE() { const data = yearData[currentYear].osce.filter(item => (document.getElementById('osce-filter-module').value === 'all' || item.module === document.getElementById('osce-filter-module').value) && (document.getElementById('osce-filter-station').value === 'all' || item.station === document.getElementById('osce-filter-station').value)); document.getElementById('osce-total').innerText = data.length; document.getElementById('dynamic-osce').innerHTML = data.length ? data.map(osc => { const locked = osc.isLocked; const action = locked ? `<button class="btn btn-secondary btn-sm w-100" disabled><i class='bx bx-lock-alt'></i> Premium required</button>` : (osc.canStart ? `<a href="${osc.url}" class="btn btn-primary btn-sm w-100">Start OSCE</a>` : `<button class="btn btn-secondary btn-sm w-100" disabled>${osc.qs ? 'Completed' : 'Unavailable'}</button>`); return `<div class="col-md-6 col-lg-4"><div class="card shadow-sm border-0 h-100"><div class="card-body d-flex flex-column"><div class="d-flex justify-content-between align-items-start mb-3"><div><h6 class="fw-bold mb-1">${osc.title}</h6><small class="text-muted">${osc.module}</small></div><span class="badge bg-info-subtle text-info-emphasis">${osc.stationLabel}</span></div><div class="d-flex gap-3 text-muted small mb-4"><span><i class='bx bx-question-mark'></i> ${osc.qs} Questions</span><span><i class='bx bx-time'></i> ${osc.time}m</span></div><p class="small ${locked ? 'text-warning-emphasis' : 'text-muted'} mt-auto mb-3">${locked ? 'Premium subscription required' : `${osc.retries} retries available`}</p>${action}</div></div></div>`; }).join('') : '<div class="col-12 text-center text-muted py-5">No OSCE exams match your filters.</div>'; }
+    function filterQuizzes() { const data = yearData[currentYear].quizzes.filter(item => (document.getElementById('quiz-filter-module').value === 'all' || item.module === document.getElementById('quiz-filter-module').value) && (document.getElementById('quiz-filter-type').value === 'all' || item.type === document.getElementById('quiz-filter-type').value)); document.getElementById('quiz-total').innerText = data.length; document.getElementById('dynamic-quizzes').innerHTML = data.length ? data.map(quiz => { const locked = quiz.isLocked; const canStart = quiz.canStart !== false; const content = `<div><h6 class="mb-1 fw-bold">${quiz.title}</h6><small class="text-muted">${quiz.qs} Questions &bull; ${locked ? 'Premium subscription required' : (canStart ? `${quiz.retries} retries available` : 'All attempts completed')}</small></div><div class="d-flex align-items-center gap-2"><span class="badge ${locked ? 'bg-secondary' : (quiz.statusClass || quiz.badge)} rounded-pill">${locked ? 'Premium' : (quiz.status || quiz.score)}</span></div>`; return canStart ? `<a href="${quiz.url}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">${content}</a>` : `<div class="list-group-item disabled bg-light text-muted d-flex justify-content-between align-items-center" aria-disabled="true">${content}</div>`; }).join('') : '<div class="list-group-item text-center text-muted py-4 border-0">No quizzes match your filters.</div>'; }
+    function renderXpProgressChart() {
+        const chart = document.getElementById('xp-progress-chart');
+        const chartDataElement = document.getElementById('xp-chart-data');
+        if (!chart || !chartDataElement) return;
+
+        const data = JSON.parse(chartDataElement.textContent).filter(point => !point.is_future);
+        if (!data.length) return;
+
+        const width = 300, height = 100, left = 4, right = 4, top = 10, bottom = 20;
+        const values = data.map(point => point.xp);
+        const minValue = Math.min(...values), maxValue = Math.max(...values);
+        const range = maxValue - minValue || 1;
+        const x = index => left + ((width - left - right) * index / Math.max(data.length - 1, 1));
+        const y = value => top + ((maxValue - value) / range) * (height - top - bottom);
+        const points = data.map((point, index) => `${x(index).toFixed(1)},${y(point.xp).toFixed(1)}`);
+        const linePath = `M ${points.join(' L ')}`;
+        const areaPath = `${linePath} L ${x(data.length - 1).toFixed(1)},${height - bottom} L ${x(0).toFixed(1)},${height - bottom} Z`;
+        const last = data[data.length - 1];
+        const labels = [0, Math.floor((data.length - 1) / 2), data.length - 1]
+            .filter((index, position, indexes) => indexes.indexOf(index) === position)
+            .map(index => `<text x="${x(index).toFixed(1)}" y="98" text-anchor="middle" font-size="8" fill="#9ca3af">${data[index].label}</text>`)
+            .join('');
+        const dots = data.map((point, index) => `<circle cx="${x(index).toFixed(1)}" cy="${y(point.xp).toFixed(1)}" r="3" fill="#3b82f6"><title>${point.label}: ${point.xp.toLocaleString()} XP</title></circle>`).join('');
+
+        chart.innerHTML = `<defs><linearGradient id="xp-chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs><path d="${areaPath}" fill="url(#xp-chart-gradient)"/><path d="${linePath}" fill="none" stroke="#3b82f6" stroke-width="2" vector-effect="non-scaling-stroke"/>${dots}${labels}<text x="${Math.min(x(data.length - 1) - 4, 296).toFixed(1)}" y="${Math.max(y(last.xp) - 7, 10).toFixed(1)}" text-anchor="end" font-size="9" fill="#3b82f6" font-weight="bold">${last.xp.toLocaleString()} XP</text>`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() { renderXpProgressChart(); selectYear(defaultAcademicYear); const menuToggle = document.getElementById('menuToggle'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay'); function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); } if (menuToggle) { menuToggle.addEventListener('click', toggleSidebar); } if (overlay) { overlay.addEventListener('click', toggleSidebar); } const navLinks = document.querySelectorAll('.sidebar-menu .nav-link'); const pages = document.querySelectorAll('.app-page'); navLinks.forEach(link => { link.addEventListener('click', function(e) { e.preventDefault(); navLinks.forEach(nav => nav.classList.remove('active')); this.classList.add('active'); pages.forEach(page => page.classList.remove('active-page')); const pageId = this.getAttribute('data-page'); const targetPage = document.getElementById('page-' + pageId); if (targetPage) { targetPage.classList.add('active-page'); } if (window.innerWidth <= 992) { toggleSidebar(); } }); });
         const newNoteButton = document.getElementById('new-note-button');
         const newNoteCard = document.getElementById('new-note-card');
         const cancelNoteButton = document.getElementById('cancel-note-button');

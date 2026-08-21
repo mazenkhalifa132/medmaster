@@ -3,14 +3,15 @@
 <html lang="en"{% if not request.user.is_authenticated %} class="auth-page"{% endif %}>
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Med Master</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dxmbqh0mc/image/upload/v1787287258/logo_qqnbvv.png" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     {# Keep dashboard additions, including Academic Progress, from being hidden by a stale cached stylesheet. #}
-    <link href="{% static 'css/style.css' %}?v=20260810-badges-grid-8" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=20260821-security-watermark" rel="stylesheet" />
 </head>
 <body{% if not request.user.is_authenticated %} class="auth-page"{% endif %}>
     {% if messages %}
@@ -28,30 +29,42 @@
 
     {% if request.user.is_authenticated %}
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="right-panel-overlay" id="rightPanelOverlay"></div>
         <div class="app-wrapper">
             {% include 'parts/navbar.html' %}
             <div class="main-content-area">
                 <header class="topbar">
                     <div class="d-flex align-items-center gap-3">
                         <i class='bx bx-menu menu-toggle' id="menuToggle"></i>
-                        <div class="search-box">
+                        <button class="right-panel-toggle" id="rightPanelToggle" type="button" aria-label="Open right panel" aria-controls="rightPanel" aria-expanded="false">
+                            <i class='bx bx-sidebar'></i>
+                        </button>
+                        <!--<div class="search-box">
                             <i class='bx bx-search text-muted'></i>
                             <input type="text" placeholder="Search courses, modules...">
                             <span>Ctrl /</span>
-                        </div>
+                        </div>-->
                     </div>
                     <div class="user-area">
                         <div class="dropdown position-relative">
-                            <i class='bx bx-bell text-muted' style="font-size: 20px; cursor: pointer;" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="font-size: 10px;"><span class="visually-hidden">New alerts</span></span>
-                            </i>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 280px; padding: 10px 0;">
+                            <button class="notification-bell" id="notificationBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                                <i class='bx bx-bell'></i>
+                                {% if unread_notification_count %}<span class="notification-count">{{ unread_notification_count|floatformat:"0" }}</span>{% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow notification-menu" id="notificationMenu">
                                 <li><h6 class="dropdown-header fw-bold">Notifications</h6></li>
-                                <li><a class="dropdown-item py-2 border-bottom" href="#"><div class="d-flex flex-column"><span class="fw-bold">New Quiz Available</span><small class="text-muted">Anatomy Module 1 is ready</small></div></a></li>
-                                <li><a class="dropdown-item py-2 border-bottom" href="#"><div class="d-flex flex-column"><span class="fw-bold">OSCE Feedback</span><small class="text-muted">Your performance reviewed</small></div></a></li>
-                                <li><a class="dropdown-item py-2" href="#"><div class="d-flex flex-column"><span class="fw-bold">New Badge Earned</span><small class="text-muted">You earned a new star!</small></div></a></li>
-                                <li><hr class="dropdown-divider mx-0"></li>
-                                <li><a class="dropdown-item text-center text-primary fw-bold py-2" href="#">View All</a></li>
+                                {% for notification in unread_notifications %}
+                                    <li>
+                                        <a class="dropdown-item py-2 border-bottom" href="{{ notification.url|default:'#' }}">
+                                            <div class="d-flex gap-2 align-items-start">
+                                                {% if notification.image_url %}<img src="{{ notification.image_url }}" alt="" class="notification-badge-image">{% else %}<i class='bx {% if notification.kind == 'badge' %}bx-medal{% elif notification.kind == 'announcement' %}bx-megaphone{% else %}bx-book-open{% endif %} text-primary fs-5'></i>{% endif %}
+                                                <div class="d-flex flex-column"><span class="fw-bold text-wrap">{{ notification.title }}</span><small class="text-muted text-wrap">{{ notification.message|truncatechars:110 }}</small></div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% empty %}
+                                    <li><span class="dropdown-item-text text-muted small py-3">You have no new notifications.</span></li>
+                                {% endfor %}
                             </ul>
                         </div>
 
@@ -79,6 +92,7 @@
             </div>
             {% block right_panel %}{% include 'parts/right-panel.html' %}{% endblock %}
         </div>
+        {% block security_watermark %}{% include 'parts/security-watermark.html' %}{% endblock %}
     {% else %}
         {% block auth_content %}{% endblock %}
     {% endif %}
@@ -89,6 +103,34 @@
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
+            const rightPanelToggle = document.getElementById('rightPanelToggle');
+            const rightPanel = document.getElementById('rightPanel') || document.querySelector('[data-mobile-panel]');
+            const rightPanelOverlay = document.getElementById('rightPanelOverlay');
+
+            if (!rightPanel) rightPanelToggle?.setAttribute('hidden', '');
+            if (rightPanel?.id) rightPanelToggle?.setAttribute('aria-controls', rightPanel.id);
+
+            function toggleRightPanel() {
+                if (!rightPanel || !rightPanelOverlay) return;
+                const isOpen = rightPanel.classList.toggle('open');
+                rightPanelOverlay.classList.toggle('show', isOpen);
+                rightPanelToggle?.setAttribute('aria-expanded', String(isOpen));
+            }
+
+            rightPanelToggle?.addEventListener('click', toggleRightPanel);
+            rightPanelOverlay?.addEventListener('click', toggleRightPanel);
+
+            const notificationBell = document.getElementById('notificationBell');
+            notificationBell?.addEventListener('show.bs.dropdown', function () {
+                if (!this.querySelector('.notification-count')) return;
+                fetch('{% url "notifications-mark-all-seen" %}', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
+                    credentials: 'same-origin',
+                }).then(function (response) {
+                    if (response.ok) notificationBell.querySelector('.notification-count')?.remove();
+                });
+            });
 
             // The dashboard owns its in-page sidebar handler. Honor links to a
             // dashboard section when arriving from another page.

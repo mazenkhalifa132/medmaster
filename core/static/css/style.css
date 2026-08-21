@@ -8,11 +8,26 @@
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-light);
     color: var(--text-dark);
     height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    max-width: 100%;
     overflow: hidden;
 }
 
@@ -21,6 +36,7 @@ html.auth-page,
 body.auth-page {
     height: auto;
     min-height: 100vh;
+    min-height: 100svh;
     min-height: 100dvh;
     overflow-y: auto !important;
     overscroll-behavior-y: auto;
@@ -28,37 +44,13 @@ body.auth-page {
 }
 
 .auth-page-content {
+    min-height: 100vh;
+    min-height: 100svh;
     min-height: 100dvh;
 }
 
-@media (max-width: 576px) {
-    /* Mobile browsers can ignore body scrolling when the root page was previously
-       constrained. Give the authentication page its own viewport-sized scroller. */
-    html.auth-page,
-    body.auth-page {
-        height: 100%;
-        min-height: 0;
-        overflow: hidden !important;
-    }
-
-    .auth-page-content {
-        height: 100vh;
-        height: 100dvh;
-        min-height: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-top: 1.5rem !important;
-        padding-bottom: 1.5rem !important;
-    }
-
-    .auth-card {
-        margin: 0 auto;
-        padding: 24px;
-    }
-}
-
 /* --- Layout Grid --- */
-.app-wrapper { display: flex; height: 100vh; width: 100%; }
+.app-wrapper { display: flex; height: 100vh; height: 100dvh; width: 100%; max-width: 100%; overflow-x: clip; }
 
 /* --- Sidebar --- */
 .sidebar {
@@ -68,6 +60,7 @@ body.auth-page {
 }
 .sidebar-brand { padding: 24px; display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; }
 .sidebar-brand i { font-size: 28px; color: #60a5fa; }
+.sidebar-brand-logo { width: 36px; height: 36px; min-width: 36px; max-width: 36px; object-fit: contain; flex-shrink: 0; }
 .sidebar-brand small { font-size: 11px; font-weight: 400; color: #9ca3af; display: block; margin-top: -4px; }
 .sidebar-menu { padding: 0 16px; flex-grow: 1; overflow-y: auto; }
 .sidebar-menu .nav-link {
@@ -80,7 +73,7 @@ body.auth-page {
 .premium-box .btn-upgrade { background: #fff; color: var(--primary-dark); font-weight: 600; font-size: 13px; width: 100%; padding: 8px; border-radius: 6px; }
 
 /* --- Main Content --- */
-.main-content-area { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-light); }
+.main-content-area { flex-grow: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-light); }
 .topbar {
     padding: 16px 32px; background: #fff; border-bottom: 1px solid #e5e7eb;
     display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
@@ -90,9 +83,14 @@ body.auth-page {
 .search-box span { font-size: 11px; color: #9ca3af; border-left: 1px solid #d1d5db; padding-left: 10px; }
 .user-area { display: flex; align-items: center; gap: 20px; }
 .user-area img { width: 36px; height: 36px; border-radius: 50%; }
+.notification-bell { position: relative; padding: 0; border: 0; background: transparent; color: var(--text-gray); font-size: 20px; line-height: 1; cursor: pointer; }
+.notification-bell:hover { color: var(--text-dark); }
+.notification-count { position: absolute; top: -8px; right: -10px; min-width: 17px; height: 17px; padding: 0 4px; border: 2px solid #fff; border-radius: 999px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; line-height: 13px; }
+.notification-menu { min-width: min(360px, calc(100vw - 2rem)); max-height: min(460px, calc(100vh - 5rem)); overflow-y: auto; padding: 10px 0; }
+.notification-badge-image { width: 28px; height: 28px; object-fit: contain; flex: 0 0 auto; }
 
 /* --- Page Content Container --- */
-.page-container { flex-grow: 1; overflow-y: auto; padding: 24px 32px; }
+.page-container { flex-grow: 1; min-height: 0; overflow-y: auto; padding: 24px 32px; -webkit-overflow-scrolling: touch; }
 
 /* --- Pages (Hidden by default) --- */
 .app-page { display: none; animation: fadeIn 0.3s ease; }
@@ -126,6 +124,8 @@ body.auth-page {
 
 /* --- Right Panel --- */
 .right-panel { width: 320px; background: #fff; border-left: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; flex-shrink: 0; }
+.right-panel-toggle { display: none; border: 0; padding: 0; background: transparent; color: var(--text-gray); font-size: 24px; line-height: 1; cursor: pointer; }
+.right-panel-toggle:hover { color: var(--text-dark); }
 .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
 .quick-item { background: var(--bg-light); padding: 16px; border-radius: var(--border-radius); text-align: center; font-size: 12px; font-weight: 500; transition: 0.2s; cursor: pointer; }
 .quick-item:hover { background: #e5e7eb; }
@@ -173,37 +173,108 @@ body.auth-page {
 .badge-box { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 6px; }
 .badge-card { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
 
-/* Eight badges per row on desktop. Extra badges automatically start the next row. */
-.bottom-badge-grid {
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 16px;
-    align-items: stretch;
-}
-
-.bottom-badge-grid .badge-card { min-width: 0; }
-
-
 /* --- Responsive --- */
-@media (max-width: 1200px) { .right-panel { display: none; } }
+@media (max-width: 1200px) {
+    .right-panel {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        right: -340px;
+        height: 100vh;
+        height: 100dvh;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+        transition: right 0.3s ease;
+    }
+    .right-panel.open { right: 0; }
+    .right-panel-overlay { display: none; position: fixed; z-index: 999; inset: 0; background: rgba(0, 0, 0, 0.5); }
+    .right-panel-overlay.show { display: block; }
+    .right-panel-toggle { display: block; }
+}
 @media (max-width: 992px) { 
-    .sidebar { position: fixed; left: -260px; top: 0; height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+    .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; height: 100dvh; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
     .sidebar.open { left: 0; }
     .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
     .sidebar-overlay.show { display: block; }
     .topbar .menu-toggle { display: block !important; }
 }
 @media (max-width: 768px) {
+    /* Use the document as the scroller on phones. Nested viewport-height
+       scrollers can clip the first or last section when mobile browser bars
+       expand or collapse. */
+    html,
+    body {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        overflow-x: clip;
+        overflow-y: auto;
+        overscroll-behavior-y: auto;
+    }
+    .app-wrapper {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        overflow-x: clip;
+    }
+    .main-content-area {
+        height: auto;
+        overflow: visible;
+    }
     .topbar { flex-direction: column; gap: 12px; align-items: stretch; padding: 16px; }
     .search-box { width: 100%; }
-    .page-container { padding: 16px; }
-    .modules-list-header, .modules-list-row { grid-template-columns: 20px 1fr 1fr; font-size: 12px; }
-    .modules-list-header div:nth-child(3), .modules-list-row div:nth-child(3),
-    .modules-list-header div:nth-child(4), .modules-list-row div:nth-child(4),
-    .modules-list-header div:nth-child(5), .modules-list-row div:nth-child(5),
-    .modules-list-header div:nth-child(6), .modules-list-row div:nth-child(6) { display: none; }
+    .page-container { flex: 0 0 auto; overflow: visible; padding: 16px; padding-bottom: max(32px, env(safe-area-inset-bottom)); }
+    .topbar, .page-container { width: 100%; max-width: 100%; }
+    .page-container img, .page-container video, .page-container canvas { max-width: 100%; height: auto; }
+    .page-container input, .page-container select, .page-container textarea, .page-container button { max-width: 100%; }
+    .right-panel { width: min(320px, 100vw); }
+    .welcome-banner { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px; }
+    .auth-page-content { min-height: 100vh; min-height: 100svh; min-height: 100dvh; padding-top: 1.5rem !important; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important; }
+    .auth-card { margin: 0 auto; padding: 24px; }
+    .modules-list-container { padding: 16px; }
+    #dynamic-table { overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .modules-list-header, .modules-list-row { min-width: 680px; font-size: 12px; }
 }
 .menu-toggle { display: none; font-size: 24px; cursor: pointer; }
+
+/* Server-rendered visual deterrent for authenticated protected pages. The
+   fixed, pointer-inert layer never participates in document scrolling. */
+.security-watermark-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    pointer-events: none;
+    user-select: none;
+    mix-blend-mode: difference;
+}
+.security-watermark-cell { position: relative; min-width: 0; }
+.security-watermark {
+    --watermark-x: 0%;
+    --watermark-y: 0%;
+    --watermark-rotation: -15deg;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: #fff;
+    font-size: clamp(12px, 1.5vw, 18px);
+    font-weight: 600;
+    letter-spacing: .08em;
+    line-height: 1;
+    opacity: .12;
+    white-space: nowrap;
+    transform: translate3d(var(--watermark-x), var(--watermark-y), 0) rotate(var(--watermark-rotation));
+}
+.security-watermark-cell:nth-child(4n + 2) .security-watermark { --watermark-rotation: -25deg; }
+.security-watermark-cell:nth-child(4n + 3) .security-watermark { --watermark-rotation: 10deg; }
+.security-watermark-cell:nth-child(4n) .security-watermark { --watermark-rotation: 20deg; }
+@media (max-width: 768px) {
+    .security-watermark-layer { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); }
+    .security-watermark { font-size: clamp(12px, 3.5vw, 16px); }
+}
 
 /* Utilities */
 .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; display: inline-block; }
@@ -232,6 +303,19 @@ body.auth-page {
     background: transparent;
 }
 .module-tab-pane { padding: 24px 0 0 0; }
+
+/* Published text content keeps the existing modal layout while making medical
+   articles, tables, images, and reusable callouts easy to study. */
+#textContentModal .modal-dialog { max-width: min(1140px, calc(100vw - 2rem)); }
+#textContentModal .modal-content { min-height: min(82vh, 860px); }
+#textContentModalBody { max-width: 940px; margin: 0 auto; line-height: 1.8; overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
+#textContentModalBody h1, #textContentModalBody h2, #textContentModalBody h3 { color: var(--text-dark); font-weight: 700; margin: 1.4rem 0 .7rem; }
+#textContentModalBody h1 { font-size: 1.8rem; } #textContentModalBody h2 { font-size: 1.45rem; } #textContentModalBody h3 { font-size: 1.2rem; }
+#textContentModalBody img { display: block; width: auto; max-width: 100%; height: auto; margin: 1rem auto; border-radius: 8px; }
+#textContentModalBody table { width: 100%; margin: 1rem 0; border-collapse: collapse; background: #fff; color: var(--text-dark); } #textContentModalBody th, #textContentModalBody td { padding: .65rem; border: 1px solid #dbe2ea; background: #fff; color: var(--text-dark); } #textContentModalBody th { background: #eff6ff; color: #1e3a8a; font-weight: 700; }
+#textContentModalBody blockquote { margin: 1rem 0; padding-left: 1rem; color: var(--text-gray); border-left: 4px solid #93c5fd; }
+#textContentModalBody .medical-callout { margin: 1rem 0; padding: 1rem; border-left: 4px solid #2563eb; border-radius: 8px; background: #eff6ff; }
+#textContentModalBody .medical-callout p { margin: .5rem 0 0; } #textContentModalBody .medical-clinical-pearl { border-color: #059669; background: #ecfdf5; } #textContentModalBody .medical-warning { border-color: #d97706; background: #fffbeb; } #textContentModalBody .medical-clinical-case { border-color: #7c3aed; background: #f5f3ff; } #textContentModalBody .medical-diagnosis { border-color: #dc2626; background: #fef2f2; } #textContentModalBody .medical-treatment { border-color: #0891b2; background: #ecfeff; } #textContentModalBody .medical-pathophysiology { border-color: #4f46e5; background: #eef2ff; }
 
 /* Auth Page */
 .auth-card {
