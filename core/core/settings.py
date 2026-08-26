@@ -107,6 +107,7 @@ TEMPLATES = [
                 'django.template.context_processors.csrf',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'notifications.context_processors.notifications',
                 'upcoming.context_processors.upcoming_events',
                 'progress.context_processors.recent_badges',
                 'verification.services.activation_status',
