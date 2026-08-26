@@ -18,9 +18,11 @@ def _create_for_users(users, *, kind, title, message, url='', image_url='', expi
     ])
 
 
-def notify_students(*, title, message, url=''):
+def notify_students(*, title, message, academic_year, url=''):
     User = get_user_model()
-    students = User.objects.filter(role='student', is_active=True, is_staff=False)
+    students = User.objects.filter(
+        role='student', is_active=True, is_staff=False, academic_year=academic_year,
+    )
     return _create_for_users(students, kind=Notification.CONTENT, title=title, message=message, url=url)
 
 
@@ -38,6 +40,8 @@ def notify_badge_awarded(*, student, badge):
 def send_broadcast(broadcast):
     User = get_user_model()
     users = User.objects.filter(is_active=True)
+    if broadcast.target_academic_year != broadcast.ALL_YEARS:
+        users = users.filter(academic_year=broadcast.target_academic_year)
     return _create_for_users(
         users,
         kind=Notification.ANNOUNCEMENT,

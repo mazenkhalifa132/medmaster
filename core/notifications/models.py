@@ -30,6 +30,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(default=default_expiry)
     seen_at = models.DateTimeField(blank=True, null=True)
+    dismissed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ('-created_at', '-pk')
@@ -44,16 +45,37 @@ class Notification(models.Model):
             self.seen_at = timezone.now()
             self.save(update_fields=('seen_at',))
 
+    def dismiss(self):
+        if self.dismissed_at is None:
+            self.dismissed_at = timezone.now()
+            self.save(update_fields=('dismissed_at',))
+
     def __str__(self):
         return f'{self.recipient}: {self.title}'
 
 
 class NotificationBroadcast(models.Model):
-    """Staff-created announcement delivered to every active user."""
+    """Staff-created announcement delivered to all users or one academic year."""
+
+    ALL_YEARS = 0
+    ACADEMIC_YEAR_CHOICES = (
+        (ALL_YEARS, 'All years'),
+        (1, 'Year 1'),
+        (2, 'Year 2'),
+        (3, 'Year 3'),
+        (4, 'Year 4'),
+        (5, 'Year 5'),
+    )
 
     title = models.CharField(max_length=255)
     message = models.TextField()
     url = models.CharField(max_length=500, blank=True, help_text='Optional destination path or URL.')
+    target_academic_year = models.PositiveSmallIntegerField(
+        choices=ACADEMIC_YEAR_CHOICES,
+        default=ALL_YEARS,
+        verbose_name='Audience',
+        help_text='Choose a year to notify only its students, or All years for everyone.',
+    )
     expires_at = models.DateTimeField(default=default_expiry)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
@@ -68,3 +90,7 @@ class NotificationBroadcast(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def audience_label(self):
+        return self.get_target_academic_year_display()

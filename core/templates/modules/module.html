@@ -29,13 +29,13 @@
         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;font-weight:600;">X</div>
         <div><h6 class="fw-bold m-0">Dr. X</h6><small class="text-muted">Professor of {{ module.name }}</small></div>
     </div>
-    <small class="text-muted"><i class='bx bx-time'></i> Last updated feature is coming soon</small>
+    <!--<small class="text-muted"><i class='bx bx-time'></i> Last updated feature is coming soon</small>-->
 </div>
 
 <div class="card shadow-sm border-0 mb-4 p-4" style="border-radius: var(--border-radius);">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div class="d-flex align-items-center gap-4">
-            <div class="module-icon-box mb-0" style="background:{{ module.bg_color }};color:{{ module.color }};width:64px;height:64px;font-size:32px;"><i class="bx {{ module.icon_class }}"></i></div>
+            <div class="module-icon-box mb-0" style="background:{{ module.bg_color }};width:64px;height:64px;"><img src="{{ module.colored_image_url }}" alt="{{ module.name }} icon" style="width:40px;height:40px;object-fit:contain;"></div>
             <div><h4 class="fw-bold mb-1">{{ module.name }}</h4><p class="text-muted m-0">{{ module.description|default:"Medical Science" }} &middot; Year {{ module.year }}</p></div>
         </div>
         <div class="text-end">

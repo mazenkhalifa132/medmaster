@@ -11,7 +11,7 @@
     <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     {# Keep dashboard additions, including Academic Progress, from being hidden by a stale cached stylesheet. #}
-    <link href="{% static 'css/style.css' %}?v=20260821-security-watermark" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=20260822-locked-navigation" rel="stylesheet" />
 </head>
 <body{% if not request.user.is_authenticated %} class="auth-page"{% endif %}>
     {% if messages %}
@@ -49,21 +49,24 @@
                         <div class="dropdown position-relative">
                             <button class="notification-bell" id="notificationBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
                                 <i class='bx bx-bell'></i>
-                                {% if unread_notification_count %}<span class="notification-count">{{ unread_notification_count|floatformat:"0" }}</span>{% endif %}
+                                {% if active_notification_count %}<span class="notification-count">{{ active_notification_count|floatformat:"0" }}</span>{% endif %}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow notification-menu" id="notificationMenu">
                                 <li><h6 class="dropdown-header fw-bold">Notifications</h6></li>
-                                {% for notification in unread_notifications %}
-                                    <li>
-                                        <a class="dropdown-item py-2 border-bottom" href="{{ notification.url|default:'#' }}">
-                                            <div class="d-flex gap-2 align-items-start">
+                                {% for notification in active_notifications %}
+                                    <li class="notification-item" data-notification-id="{{ notification.pk }}">
+                                        <div class="d-flex align-items-start border-bottom">
+                                            <a class="dropdown-item py-2 flex-grow-1" href="{{ notification.url|default:'#' }}">
+                                                <div class="d-flex gap-2 align-items-start">
                                                 {% if notification.image_url %}<img src="{{ notification.image_url }}" alt="" class="notification-badge-image">{% else %}<i class='bx {% if notification.kind == 'badge' %}bx-medal{% elif notification.kind == 'announcement' %}bx-megaphone{% else %}bx-book-open{% endif %} text-primary fs-5'></i>{% endif %}
                                                 <div class="d-flex flex-column"><span class="fw-bold text-wrap">{{ notification.title }}</span><small class="text-muted text-wrap">{{ notification.message|truncatechars:110 }}</small></div>
+                                                </div>
+                                            </a>
+                                            <button class="notification-dismiss btn btn-sm btn-link text-muted px-2" type="button" aria-label="Dismiss {{ notification.title }}" data-dismiss-url="{% url 'notifications-dismiss' notification.pk %}"><i class="bx bx-x fs-5"></i></button>
                                             </div>
-                                        </a>
                                     </li>
                                 {% empty %}
-                                    <li><span class="dropdown-item-text text-muted small py-3">You have no new notifications.</span></li>
+                                    <li class="notification-empty"><span class="dropdown-item-text text-muted small py-3">You have no active notifications.</span></li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -121,14 +124,27 @@
             rightPanelOverlay?.addEventListener('click', toggleRightPanel);
 
             const notificationBell = document.getElementById('notificationBell');
-            notificationBell?.addEventListener('show.bs.dropdown', function () {
-                if (!this.querySelector('.notification-count')) return;
-                fetch('{% url "notifications-mark-all-seen" %}', {
+            const notificationMenu = document.getElementById('notificationMenu');
+            notificationMenu?.addEventListener('click', function (event) {
+                const dismissButton = event.target.closest('.notification-dismiss');
+                if (!dismissButton) return;
+                event.preventDefault();
+                const notificationItem = dismissButton.closest('.notification-item');
+                fetch(dismissButton.dataset.dismissUrl, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
                     credentials: 'same-origin',
                 }).then(function (response) {
-                    if (response.ok) notificationBell.querySelector('.notification-count')?.remove();
+                    if (!response.ok || !notificationItem) return;
+                    notificationItem.remove();
+                    const remaining = notificationMenu.querySelectorAll('.notification-item').length;
+                    const count = notificationBell?.querySelector('.notification-count');
+                    if (remaining) {
+                        if (count) count.textContent = remaining;
+                    } else {
+                        count?.remove();
+                        notificationMenu.insertAdjacentHTML('beforeend', '<li class="notification-empty"><span class="dropdown-item-text text-muted small py-3">You have no active notifications.</span></li>');
+                    }
                 });
             });
 

@@ -1,7 +1,16 @@
 from django import forms
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
+from django.db.models import ExpressionWrapper, F, IntegerField, OuterRef, Subquery, Sum, Value
+from django.db.models.functions import Coalesce
+from django.template.response import TemplateResponse
+from django.urls import path
 
-from .models import Badge, Rank, WeeklyGoal
+from exams.models import ExamAttempt
+from osce.models import OSCEAttempt
+
+from .models import Badge, Rank, StudentProgress, WeeklyGoal, rank_for_points
 
 
 class RankAdminForm(forms.ModelForm):
@@ -9,6 +18,8 @@ class RankAdminForm(forms.ModelForm):
         model = Rank
         fields = '__all__'
         widgets = {
+            # A native color input provides a palette while preserving the
+            # hexadecimal value required by the model.
             'color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Rank color'}),
         }
 
@@ -16,9 +27,98 @@ class RankAdminForm(forms.ModelForm):
 @admin.register(Rank)
 class RankAdmin(admin.ModelAdmin):
     form = RankAdminForm
-    list_display = ('name', 'min_points', 'max_points', 'color', 'icon_class')
-    list_editable = ('min_points', 'max_points', 'color', 'icon_class')
+    list_display = ('name', 'min_points', 'max_points', 'color', 'image_url')
+    list_editable = ('min_points', 'max_points', 'color', 'image_url')
     ordering = ('min_points',)
+
+    def get_changelist_form(self, request, **kwargs):
+        """Use the color-picker widget for inline edits on the rank list."""
+        kwargs['form'] = RankAdminForm
+        return super().get_changelist_form(request, **kwargs)
+
+
+@admin.register(StudentProgress)
+class StudentProgressAdmin(admin.ModelAdmin):
+    """Admin-only student leaderboard and progress records."""
+
+    list_display = ('student', 'total_points', 'correct_answers', 'incorrect_answers', 'updated_at')
+    search_fields = ('student__username', 'student__first_name', 'student__last_name', 'student__email')
+    readonly_fields = ('student', 'total_points', 'correct_answers', 'incorrect_answers', 'updated_at')
+    change_list_template = 'admin/progress/studentprogress/change_list.html'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser or request.user.role == 'admin'
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'leaderboard/',
+                self.admin_site.admin_view(self.leaderboard_view),
+                name='progress_studentprogress_leaderboard',
+            ),
+        ]
+        return custom_urls + urls
+
+    def leaderboard_view(self, request):
+        if not self.has_view_permission(request):
+            raise PermissionDenied
+        exam_totals = ExamAttempt.objects.filter(student_id=OuterRef('pk')).values('student').annotate(
+            score=Sum('score'), total=Sum('total_questions'),
+        )
+        osce_totals = OSCEAttempt.objects.filter(student_id=OuterRef('pk')).values('student').annotate(
+            score=Sum(ExpressionWrapper(F('mcq_score') + F('practical_score'), output_field=IntegerField())),
+            total=Sum(ExpressionWrapper(F('total_questions') + F('practical_total'), output_field=IntegerField())),
+        )
+        User = get_user_model()
+        students = User.objects.filter(
+            role='student', is_staff=False, is_superuser=False,
+        ).annotate(
+            total_points=Coalesce('progress__total_points', Value(0)),
+            correct_answers=Coalesce('progress__correct_answers', Value(0)),
+            incorrect_answers=Coalesce('progress__incorrect_answers', Value(0)),
+            exam_score=Coalesce(Subquery(exam_totals.values('score')[:1], output_field=IntegerField()), Value(0)),
+            exam_total=Coalesce(Subquery(exam_totals.values('total')[:1], output_field=IntegerField()), Value(0)),
+            osce_score=Coalesce(Subquery(osce_totals.values('score')[:1], output_field=IntegerField()), Value(0)),
+            osce_total=Coalesce(Subquery(osce_totals.values('total')[:1], output_field=IntegerField()), Value(0)),
+        ).order_by('username')
+
+        leaderboard = []
+        for student in students:
+            score = student.exam_score + student.osce_score
+            total = student.exam_total + student.osce_total
+            leaderboard.append({
+                'student': student,
+                'score': score,
+                'percentage': round((score / total) * 100, 1) if total else 0,
+                'total_points': student.total_points,
+                'correct_answers': student.correct_answers,
+                'incorrect_answers': student.incorrect_answers,
+                'rank': rank_for_points(student.total_points),
+            })
+        leaderboard.sort(key=lambda entry: (-entry['score'], -entry['percentage'], entry['student'].username.lower()))
+        for position, entry in enumerate(leaderboard, start=1):
+            entry['position'] = position
+
+        context = {
+            **self.admin_site.each_context(request),
+            'title': 'Full student leaderboard',
+            'opts': self.model._meta,
+            'leaderboard': leaderboard,
+        }
+        return TemplateResponse(request, 'admin/progress/studentprogress/leaderboard.html', context)
 
 
 class BadgeAdminForm(forms.ModelForm):

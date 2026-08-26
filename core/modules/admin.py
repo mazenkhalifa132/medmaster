@@ -11,10 +11,12 @@ class ModuleAdminForm(forms.ModelForm):
         widgets = {
             'color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Module color'}),
             'bg_color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Module background color'}),
+            'btn_color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Module button color'}),
         }
         labels = {
             'color': 'Icon color',
             'bg_color': 'Background color',
+            'btn_color': 'Button color',
         }
 
 
@@ -23,7 +25,7 @@ class ModuleAdmin(admin.ModelAdmin):
     form = ModuleAdminForm
     list_display = (
         'name', 'year', 'order', 'has_lessons', 'has_videos', 'has_files', 'has_text',
-        'has_exams', 'has_osce', 'is_active',
+        'has_exams', 'has_osce', 'image_url', 'is_active',
     )
     list_filter = ('year', 'is_active')
     ordering = ('year', 'order', 'name')
@@ -34,6 +36,6 @@ class ModuleAdmin(admin.ModelAdmin):
             'fields': ('has_lessons', 'has_videos', 'has_files', 'has_text', 'has_exams', 'has_osce'),
         }),
         ('Appearance and details', {
-            'fields': ('icon_class', 'color', 'bg_color', 'btn_color', 'sections_count'),
+            'fields': ('image_url', 'color', 'bg_color', 'btn_color', 'sections_count'),
         }),
     )

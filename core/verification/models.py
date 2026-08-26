@@ -27,8 +27,25 @@ class StudentVerification(models.Model):
         verbose_name_plural = 'Student verifications'
 
     def save(self, *args, **kwargs):
+        previous = None
+        if self.pk:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                'activation_year', 'is_active'
+            ).first()
         self.phone = normalize_phone(self.phone)
         super().save(*args, **kwargs)
+        if self.is_active and self.activation_year is not None:
+            # Keep the student's assigned year aligned with the year an
+            # administrator has just activated for their phone number.
+            from .services import assign_activated_academic_years, notify_activated_students
+
+            assign_activated_academic_years([self])
+            if (
+                previous is None
+                or not previous['is_active']
+                or previous['activation_year'] != self.activation_year
+            ):
+                notify_activated_students([self])
 
     def __str__(self):
         return f'{self.phone} ({"active" if self.is_active else "inactive"})'

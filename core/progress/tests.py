@@ -2,12 +2,59 @@ from datetime import datetime, time, timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from exams.models import Exam, ExamAttempt
 from modules.models import Module
-from .models import PointTransaction, StudentProgress, StudentWeeklyGoal, WeeklyGoal
+from .models import PointTransaction, Rank, StudentProgress, StudentWeeklyGoal, WeeklyGoal
 from .services import evaluate_weekly_goals, record_answer_points, weekly_goal_progress
+
+
+class RankIconUrlTests(TestCase):
+    def test_rank_icon_uses_the_selected_rank_color(self):
+        rank = Rank(
+            name='Bronze',
+            min_points=0,
+            max_points=100,
+            color='#d97706',
+            image_url='https://api.iconify.design/bi/bell-fill.svg?color=%23000000',
+        )
+
+        self.assertEqual(
+            rank.colored_image_url,
+            'https://api.iconify.design/bi/bell-fill.svg?color=%23d97706',
+        )
+
+
+class AdminLeaderboardTests(TestCase):
+    def test_admin_leaderboard_lists_only_students_in_score_order(self):
+        User = get_user_model()
+        admin_user = User.objects.create_superuser(
+            username='admin', email='admin@example.com', password='StrongPass1', role='admin',
+        )
+        first_student = User.objects.create_user(
+            username='first', email='first@example.com', phone='01000000001', password='StrongPass1',
+        )
+        second_student = User.objects.create_user(
+            username='second', email='second@example.com', phone='01000000002', password='StrongPass1',
+        )
+        module = Module.objects.create(year=1, name='Anatomy', image_url='https://example.com/anatomy.svg')
+        exam = Exam.objects.create(year=1, module=module, name='Quiz', time_limit=20)
+        ExamAttempt.objects.create(exam=exam, student=first_student, score=8, total_questions=10)
+        ExamAttempt.objects.create(exam=exam, student=second_student, score=6, total_questions=10)
+        ExamAttempt.objects.create(exam=exam, student=admin_user, score=10, total_questions=10)
+
+        self.client.force_login(admin_user)
+        response = self.client.get(reverse('admin:progress_studentprogress_leaderboard'))
+
+        self.assertEqual(response.status_code, 200)
+        leaderboard = response.context['leaderboard']
+        self.assertEqual([entry['student'] for entry in leaderboard], [first_student, second_student])
+        self.assertEqual(leaderboard[0]['percentage'], 80)
+        self.assertEqual(leaderboard[0]['total_points'], 0)
+        self.assertEqual(leaderboard[0]['correct_answers'], 0)
+        self.assertEqual(leaderboard[0]['incorrect_answers'], 0)
 
 
 class PointScoringTests(TestCase):

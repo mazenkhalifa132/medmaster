@@ -53,7 +53,7 @@ class OSCEViewTests(TestCase):
             email='student@example.com',
             password='StrongPass123',
         )
-        self.module = Module.objects.create(year=1, name='Cardiology', icon_class='bx-heart')
+        self.module = Module.objects.create(year=1, name='Cardiology', image_url='https://example.com/cardiology.svg')
         self.exam = OSCEExam.objects.create(
             year=1,
             module=self.module,
@@ -94,6 +94,34 @@ class OSCEViewTests(TestCase):
         response = self.client.get(reverse('osce-detail', kwargs={'pk': self.exam.pk}))
 
         self.assertTemplateUsed(response, 'osce/osce.html')
+
+    def test_admin_bulk_import_creates_osce_questions_and_answers(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='StrongPass123',
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.post(
+            reverse('admin:osce_osceexam_bulk_upload', args=(self.exam.pk,)),
+            {
+                'questions': (
+                    'Which artery is assessed for a BP reading?,'
+                    'Brachial artery+,Radial artery,Carotid artery,Femoral artery,'
+                    'Use the brachial artery.\n'
+                    'A second question,Correct answer+,Wrong answer,,,Explanation'
+                ),
+            },
+        )
+
+        self.assertRedirects(response, reverse('admin:osce_osceexam_change', args=(self.exam.pk,)))
+        imported_questions = self.exam.questions.filter(question__in=[
+            'Which artery is assessed for a BP reading?', 'A second question',
+        ])
+        self.assertEqual(imported_questions.count(), 2)
+        self.assertEqual(imported_questions[0].answers.filter(is_correct=True).count(), 1)
+        self.assertEqual(imported_questions[1].answers.filter(is_correct=True).count(), 1)
 
     def test_submit_view_records_mcq_answers(self):
         self.client.force_login(self.user)

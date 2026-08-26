@@ -166,7 +166,7 @@ def home(request):
             'id': module.pk,
             'name': module.name,
             'url': reverse('module-detail', args=[module.pk]),
-            'icon': module.icon_class or 'bx-book',
+            'imageUrl': module.colored_image_url,
             'bg': module.bg_color,
             'color': module.color,
             'btnColor': module.btn_color,
@@ -194,8 +194,10 @@ def home(request):
             default=None,
         )
         retries_available = max(exam.retry_times - len(attempts), 0)
-        if not first_attempt or exam.exam_type == 'saq':
-            score, badge = 'Pending', 'bg-secondary'
+        if not first_attempt:
+            score, badge = 'Not Answered', 'bg-secondary'
+        elif exam.exam_type == 'saq':
+            score, badge = '-/-', 'bg-secondary'
         else:
             percentage = round((first_attempt.score / first_attempt.total_questions) * 100) if first_attempt.total_questions else 0
             score = f'{percentage}%'
@@ -209,6 +211,8 @@ def home(request):
             'retries': retries_available,
             'score': score,
             'badge': badge,
+            'hasFirstAttempt': bool(first_attempt),
+            'reviewUrl': reverse('exam-review', args=[exam.pk]) if first_attempt else '',
             'isLocked': is_locked,
             'canStart': not is_locked and bool(exam.questions.all()) and retries_available > 0,
             'status': 'Premium required' if is_locked else ('Completed' if retries_available == 0 else ('Unavailable' if not exam.questions.all() else 'Available')),
@@ -257,7 +261,11 @@ def home(request):
     notes = Note.objects.filter(student=request.user, **note_filters).select_related('module')
 
     leaderboard_progress = list(
-        StudentProgress.objects.select_related('student').order_by('-total_points', 'student_id')[:10]
+        StudentProgress.objects.filter(
+            student__role='student',
+            student__is_staff=False,
+            student__is_superuser=False,
+        ).select_related('student').order_by('-total_points', 'student_id')[:10]
     )
     leaderboard_student_ids = [progress.student_id for progress in leaderboard_progress]
     exam_leaderboard_totals = {

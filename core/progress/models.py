@@ -1,3 +1,5 @@
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -59,10 +61,9 @@ class Rank(models.Model):
     min_points = models.PositiveIntegerField(help_text='Inclusive lower limit for this rank.')
     max_points = models.PositiveIntegerField(help_text='Exclusive upper limit for this rank.')
     color = models.CharField(max_length=20, default='#d4a017', help_text='CSS color, for example #d4a017.')
-    icon_class = models.CharField(
-        max_length=100,
+    image_url = models.URLField(
         blank=True,
-        help_text='Optional Boxicons class, for example bxs-crown. Leave blank for no icon.',
+        help_text='Public URL of the rank icon image.',
     )
 
     class Meta:
@@ -86,6 +87,18 @@ class Rank(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.min_points}–{self.max_points} XP)'
+
+
+    @property
+    def colored_image_url(self):
+        """Return the image URL tinted with this rank's selected color."""
+        if not self.image_url:
+            return ''
+
+        url_parts = urlsplit(self.image_url)
+        query = [(key, value) for key, value in parse_qsl(url_parts.query) if key != 'color']
+        query.append(('color', self.color))
+        return urlunsplit((*url_parts[:3], urlencode(query), url_parts.fragment))
 
 
 class Badge(models.Model):

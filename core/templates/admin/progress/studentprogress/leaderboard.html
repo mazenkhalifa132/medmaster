@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <table id="result_list">
+            <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Student</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone number</th>
+                    <th scope="col">Percentage</th>
+                    <th scope="col">Total points</th>
+                    <th scope="col">Correct answers</th>
+                    <th scope="col">Wrong answers</th>
+                    <th scope="col">Rank name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                    <tr>
+                        <td>{{ entry.position }}</td>
+                        <th scope="row">{{ entry.student.get_full_name|default:entry.student.username }}</th>
+                        <td>{{ entry.student.email }}</td>
+                        <td>{{ entry.student.phone|default:"—" }}</td>
+                        <td>{{ entry.percentage }}%</td>
+                        <td>{{ entry.total_points }}</td>
+                        <td>{{ entry.correct_answers }}</td>
+                        <td>{{ entry.incorrect_answers }}</td>
+                        <td>{{ entry.rank.name|default:"Unranked" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="9">No student accounts found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p><a href="{% url 'admin:progress_studentprogress_changelist' %}">Back to student progress</a></p>
+</div>
+{% endblock %}

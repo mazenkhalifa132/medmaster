@@ -12,7 +12,7 @@ class ModuleFilesTests(TestCase):
         module = Module.objects.create(
             year=1,
             name='Anatomy',
-            icon_class='bx-heart',
+            image_url='https://api.iconify.design/solar:heart-bold.svg',
             has_files=True,
         )
         lectures = FileSubcategory.objects.create(module=module, name='Lectures', order=1)
@@ -41,6 +41,7 @@ class ModuleFilesTests(TestCase):
         self.assertEqual(response.context['file_groups'][0]['name'], 'Lectures')
         self.assertEqual(response.context['file_groups'][0]['files'][0].file_name, 'Upper limb lecture')
         self.assertEqual(response.context['file_groups'][1]['name'], 'Other files')
+        self.assertContains(response, 'https://api.iconify.design/solar:heart-bold.svg?color=%233b82f6')
 
 
 class ModuleAdminTests(TestCase):
@@ -54,3 +55,16 @@ class ModuleAdminTests(TestCase):
 
         self.assertContains(response, 'type="color" name="color"')
         self.assertContains(response, 'type="color" name="bg_color"')
+
+    def test_module_icon_can_be_configured_from_an_image_url(self):
+        module = Module.objects.create(
+            year=1,
+            name='Anatomy',
+            image_url='https://api.iconify.design/solar:heart-bold.svg',
+        )
+
+        self.assertEqual(module.image_url, 'https://api.iconify.design/solar:heart-bold.svg')
+        self.assertEqual(
+            module.colored_image_url,
+            'https://api.iconify.design/solar:heart-bold.svg?color=%233b82f6',
+        )

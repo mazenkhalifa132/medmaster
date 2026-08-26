@@ -109,3 +109,29 @@ class AuthFlowTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_student_profile_cannot_change_academic_year(self):
+        user = User.objects.create_user(
+            username='profileuser',
+            email='profile@example.com',
+            password='ProfilePass123!',
+            first_name='Original',
+            last_name='Student',
+            academic_year=1,
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'first_name': 'Updated',
+                'last_name': 'Student',
+                # A forged form submission must not allow year switching.
+                'academic_year': '5',
+            },
+        )
+
+        self.assertRedirects(response, reverse('profile'))
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, 'Updated')
+        self.assertEqual(user.academic_year, 1)

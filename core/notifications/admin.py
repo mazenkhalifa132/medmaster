@@ -17,10 +17,15 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(NotificationBroadcast)
 class NotificationBroadcastAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_by', 'created_at', 'expires_at')
+    list_display = ('title', 'audience', 'created_by', 'created_at', 'expires_at')
+    list_filter = ('target_academic_year', 'created_at')
     search_fields = ('title', 'message')
     readonly_fields = ('created_at', 'created_by')
-    fields = ('title', 'message', 'url', 'expires_at', 'created_by', 'created_at')
+    fields = ('title', 'message', 'url', 'target_academic_year', 'expires_at', 'created_by', 'created_at')
+
+    @admin.display(description='Audience', ordering='target_academic_year')
+    def audience(self, obj):
+        return obj.audience_label
 
     def save_model(self, request, obj, form, change):
         if not change:

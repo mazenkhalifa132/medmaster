@@ -14,6 +14,23 @@ def _attempts_used(exam, user):
     return ExamAttempt.objects.filter(exam=exam, student=user).count()
 
 
+def _question_results(attempt):
+    answer_records = attempt.answers.select_related('question', 'selected_answer').prefetch_related(
+        'question__answers'
+    ).order_by('question__order', 'question__pk')
+    question_results = []
+    for answer_record in answer_records:
+        correct_answer = next(
+            (answer for answer in answer_record.question.answers.all() if answer.is_correct), None
+        )
+        question_results.append({
+            'answer_record': answer_record,
+            'correct_answer': correct_answer,
+            'is_correct': bool(answer_record.selected_answer and answer_record.selected_answer.is_correct),
+        })
+    return question_results
+
+
 @login_required(login_url='auth')
 def exam_detail(request, pk):
     exam = get_object_or_404(
@@ -117,20 +134,37 @@ def submit_exam(request, pk):
                 total_questions=attempt.total_questions,
                 attempt_key=f'exam:{attempt.pk}',
             )
-    question_results = []
-    for answer_record in answer_records:
-        correct_answer = next(
-            (answer for answer in answer_record.question.answers.all() if answer.is_correct), None
-        )
-        question_results.append({
-            'answer_record': answer_record,
-            'correct_answer': correct_answer,
-            'is_correct': bool(answer_record.selected_answer and answer_record.selected_answer.is_correct),
-        })
     attempts_remaining = max(exam.retry_times - _attempts_used(exam, request.user), 0)
     return render(request, 'exams/result.html', {
         'exam': exam,
         'attempt': attempt,
-        'question_results': question_results,
+        'question_results': _question_results(attempt),
         'attempts_remaining': attempts_remaining,
+    })
+
+
+@login_required(login_url='auth')
+def exam_review(request, pk):
+    """Show the student's first completed attempt without creating a new attempt."""
+    exam = get_object_or_404(
+        Exam.objects.select_related('module'),
+        pk=pk,
+        is_active=True,
+        module__is_active=True,
+    )
+    if not can_access_content(request.user, exam):
+        raise PermissionDenied('This exam requires activation for your academic year.')
+    attempt = ExamAttempt.objects.filter(
+        exam=exam,
+        student=request.user,
+        total_questions__gt=0,
+    ).order_by('submitted_at', 'pk').first()
+    if not attempt:
+        messages.error(request, 'Complete this quiz before reviewing it.')
+        return redirect('home')
+    return render(request, 'exams/result.html', {
+        'exam': exam,
+        'attempt': attempt,
+        'question_results': _question_results(attempt),
+        'review_mode': True,
     })

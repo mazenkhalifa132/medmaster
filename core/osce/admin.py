@@ -1,8 +1,14 @@
-from django.contrib import admin
-from django.core.exceptions import ValidationError
+from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
+from django.db.models import Max
 from django.forms import BaseInlineFormSet, ModelForm, Select
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 import nested_admin
 
+from exams.bulk_import import BulkQuestionImportError, parse_questions
 from .models import OSCEAnswer, OSCEExam, OSCEQuestion
 
 
@@ -62,6 +68,7 @@ class OSCEQuestionInline(nested_admin.NestedStackedInline):
 class OSCEExamAdmin(nested_admin.NestedModelAdmin):
     form = OSCEExamAdminForm
     inlines = (OSCEQuestionInline,)
+    change_form_template = 'admin/osce/osceexam/change_form.html'
     fields = (
         'year', 'module', 'name', 'retry_times', 'mcq_timer', 'is_trial', 'osce_station',
         'systolic_pressure', 'diastolic_pressure',
@@ -75,6 +82,70 @@ class OSCEExamAdmin(nested_admin.NestedModelAdmin):
     list_filter = ('year', 'module', 'osce_station', 'is_trial', 'is_active')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'name')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/bulk-upload/',
+                self.admin_site.admin_view(self.bulk_upload_view),
+                name='osce_osceexam_bulk_upload',
+            ),
+        ]
+        return custom_urls + urls
+
+    def bulk_upload_view(self, request, object_id):
+        exam = self.get_object(request, object_id)
+        if exam is None:
+            return HttpResponseRedirect(reverse('admin:osce_osceexam_changelist'))
+        if not self.has_change_permission(request, exam):
+            raise PermissionDenied
+
+        raw_text = request.POST.get('questions', '')
+        if request.method == 'POST':
+            try:
+                question_rows = parse_questions(raw_text)
+                with transaction.atomic():
+                    exam = OSCEExam.objects.select_for_update().get(pk=exam.pk)
+                    last_order = exam.questions.aggregate(max_order=Max('order'))['max_order'] or 0
+                    questions = [
+                        OSCEQuestion(
+                            exam=exam,
+                            order=last_order + index,
+                            question=row['text'],
+                            explanation=row['explanation'],
+                        )
+                        for index, row in enumerate(question_rows, start=1)
+                    ]
+                    created_questions = OSCEQuestion.objects.bulk_create(questions)
+                    answers = [
+                        OSCEAnswer(
+                            question=question,
+                            order=answer_order,
+                            text=answer['text'],
+                            is_correct=answer['is_correct'],
+                        )
+                        for question, row in zip(created_questions, question_rows)
+                        for answer_order, answer in enumerate(row['answers'], start=1)
+                    ]
+                    OSCEAnswer.objects.bulk_create(answers)
+            except BulkQuestionImportError as error:
+                self.message_user(request, str(error), messages.ERROR)
+            else:
+                self.message_user(
+                    request,
+                    f'Imported {len(question_rows)} question(s) and their answers.',
+                    messages.SUCCESS,
+                )
+                return HttpResponseRedirect(reverse('admin:osce_osceexam_change', args=(exam.pk,)))
+
+        context = {
+            **self.admin_site.each_context(request),
+            'title': f'Import questions: {exam.name}',
+            'exam': exam,
+            'raw_text': raw_text,
+        }
+        return TemplateResponse(request, 'admin/osce/osceexam/bulk_upload.html', context)
 
 
 @admin.register(OSCEQuestion)

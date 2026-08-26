@@ -13,7 +13,7 @@ class VideoSystemTests(TestCase):
         self.module = Module.objects.create(
             year=1,
             name='Anatomy',
-            icon_class='bx-heart',
+            image_url='https://example.com/anatomy.svg',
             has_videos=True,
         )
         self.subcategory = VideoSubcategory.objects.create(

@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'progress',
     'notifications.apps.NotificationsConfig',
     'verification.apps.VerificationConfig',
+    'websitesettings.apps.WebsitesettingsConfig',
 ]
 
 MIDDLEWARE = [
@@ -186,6 +187,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# User-uploaded files are separate from static assets.  Keep this directory
+# outside ``staticfiles`` so collectstatic never removes uploaded content.
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Django defaults to only 2.5 MB for data kept in memory.  These environment
+# variables make the application suitable for document/image uploads while
+# allowing a hosting provider to impose a stricter limit when required.
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(
+    os.getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', str(10 * 1024 * 1024))
+)
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(
+    os.getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', str(50 * 1024 * 1024))
+)
 
 # Serve the files collected during the Docker/Railway build.
 STORAGES = {

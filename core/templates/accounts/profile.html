@@ -34,7 +34,7 @@
                 <div class="col-md-6"><label class="form-label text-muted small" for="last-name">Last Name</label><input type="text" class="form-control profile-editable" id="last-name" name="last_name" value="{{ request.user.last_name }}" maxlength="150" readonly required></div>
                 <div class="col-md-6"><label class="form-label text-muted small" for="email">Email Address</label><input type="email" class="form-control" id="email" value="{{ request.user.email }}" readonly></div>
                 <div class="col-md-6"><label class="form-label text-muted small" for="phone">Phone Number</label><input type="tel" class="form-control" id="phone" value="{{ request.user.phone|default:'' }}" readonly></div>
-                <div class="col-md-6"><label class="form-label text-muted small" for="academic-year">Academic Year</label><select class="form-select profile-editable" id="academic-year" name="academic_year" disabled required><option value="">Select year</option>{% for year in '12345' %}<option value="{{ year }}"{% if request.user.academic_year|stringformat:'s' == year %} selected{% endif %}>Year {{ year }}</option>{% endfor %}</select></div>
+                <div class="col-md-6"><label class="form-label text-muted small" for="academic-year">Academic Year</label><input class="form-control" id="academic-year" value="{% if request.user.academic_year %}Year {{ request.user.academic_year }}{% else %}Not assigned{% endif %}" readonly><div class="form-text">Your academic year is assigned by an administrator.</div></div>
             </div>
 
             <hr>
@@ -54,7 +54,7 @@
         const saveButton = document.getElementById('save-button');
         const fields = form.querySelectorAll('.profile-editable');
         const setEditing = editing => {
-            fields.forEach(field => { if (field.tagName === 'SELECT') field.disabled = !editing; else field.readOnly = !editing; });
+            fields.forEach(field => { field.readOnly = !editing; });
             editButton.classList.toggle('d-none', editing);
             cancelButton.classList.toggle('d-none', !editing);
             saveButton.classList.toggle('d-none', !editing);

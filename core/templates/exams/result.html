@@ -17,13 +17,13 @@
 <div class="card border-0 shadow-sm mx-auto text-center mb-4" style="max-width:720px;border-radius:var(--border-radius);">
     <div class="card-body p-5">
         <i class='bx bxs-check-circle text-success' style="font-size:70px;"></i>
-        <h2 class="fw-bold mt-3">Exam submitted</h2>
+        <h2 class="fw-bold mt-3">{% if review_mode %}First attempt review{% else %}Exam submitted{% endif %}</h2>
         <p class="text-muted">{{ exam.name }}</p>
         <div class="display-4 fw-bold text-primary my-4">{% if exam.exam_type == 'saq' %}-/-{% else %}{{ attempt.result }}{% endif %}</div>
         {% if exam.exam_type == 'saq' %}<p class="text-muted">Your written answers have been submitted for review.</p>{% else %}<p class="text-muted">You answered {{ attempt.score }} out of {{ attempt.total_questions }} questions correctly.</p>{% endif %}
         <div class="d-flex justify-content-center gap-2 mt-3">
             <a class="btn btn-outline-secondary px-4" href="{% url 'module-detail' exam.module_id %}">Back to module</a>
-            {% if attempts_remaining %}<a class="btn btn-primary px-4" href="{% url 'exam-detail' exam.pk %}"><i class='bx bx-refresh'></i> Test Again ({{ attempts_remaining }} left)</a>{% endif %}
+            {% if not review_mode and attempts_remaining %}<a class="btn btn-primary px-4" href="{% url 'exam-detail' exam.pk %}"><i class='bx bx-refresh'></i> Test Again ({{ attempts_remaining }} left)</a>{% endif %}
         </div>
     </div>
 </div>

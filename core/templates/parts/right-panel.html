@@ -23,9 +23,10 @@
         {% endfor %}
     </div>
     <hr>
-    <div class="mb-4">
-        <h6 class="fw-bold mb-3">Performance Overview</h6>
-        <div class="d-flex align-items-center gap-3">
+    <div class="mb-4{% if not has_active_academic_year %} premium-locked-section{% endif %}">
+        <div class="premium-lock-content">
+            <h6 class="fw-bold mb-3">Performance Overview</h6>
+            <div class="d-flex align-items-center gap-3">
             <div style="width:100px; height:100px; border-radius:50%; background:conic-gradient(from -90deg, #2563eb 0% {{ performance_overview.correct_percentage }}%, #8b5cf6 {{ performance_overview.correct_percentage }}% {{ performance_overview.answered_percentage }}%, #e5e7eb {{ performance_overview.answered_percentage }}% 100%); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <div style="width:68px; height:68px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column;">
                     <h5 class="m-0 fw-bold">{{ performance_overview.accuracy }}%</h5>
@@ -37,28 +38,32 @@
                 <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span> Incorrect</span> <span>{{ performance_overview.incorrect }}</span></div>
                 <div class="d-flex justify-content-between"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e7eb;"></span> Unattempted</span> <span>{{ performance_overview.unattempted }}</span></div>
             </div>
+            </div>
+            <small class="text-muted d-block mt-2" style="font-size:10px;">First completed attempt only.</small>
         </div>
-        <small class="text-muted d-block mt-2" style="font-size:10px;">First completed attempt only.</small>
+        {% if not has_active_academic_year %}
+            <span class="premium-lock-label"><i class="bx bx-lock-alt"></i> Premium</span>
+        {% endif %}
     </div>
     <hr>
     <div class="quick-access">
-        <!--<h6 class="fw-bold mb-3">Dr. X</h6>
-        <div style="text-align: center;">
-            <img src="{% static 'imgs/dr.x/curious.jpg' %}" alt="Dr. X" style="width: 50%; height: auto;">
-            <h6 class="fw-bold m-0">Keep Going</h6>
-            <small class="text-muted">"Discipline today, success tomorrow"</small>
-        </div>-->
-        <div style="text-align: center;">
-            <img src="https://res.cloudinary.com/dxmbqh0mc/image/upload/v1787288850/bc85f6b0-bdf5-4683-994b-c08010035377_zphzi1.png" alt="Soon" style="width: 100%; height: auto; border-radius: 10px;">
-            
+        <div class="position-relative text-center" aria-label="Dr. X content coming soon">
+            <div style="filter: blur(5px); user-select: none;" aria-hidden="true">
+                <h6 class="fw-bold mb-3">Dr. X</h6>
+                <img src="{% static 'imgs/dr.x/curious.jpg' %}" alt="" style="width: 50%; height: auto;">
+                <h6 class="fw-bold m-0">Keep Going</h6>
+                <small class="text-muted">"Discipline today, success tomorrow"</small>
+            </div>
+            <span class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-secondary px-3 py-2">Coming soon</span>
         </div>
     </div>
     <hr>
-    <div>
-        <h6 class="fw-bold mb-3 d-flex justify-content-between align-items-center">Recent Badges
-            <a href="#progress" class="text-primary fw-normal text-decoration-none" style="font-size: 12px;" onclick="document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']').click(); return false;">View More</a>
-        </h6>
-        <div class="d-flex flex-wrap gap-2">
+    <div{% if not has_active_academic_year %} class="premium-locked-section"{% endif %}>
+        <div class="premium-lock-content">
+            <h6 class="fw-bold mb-3 d-flex justify-content-between align-items-center">Recent Badges
+                <a href="#progress" class="text-primary fw-normal text-decoration-none" style="font-size: 12px;" onclick="document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']').click(); return false;">View More</a>
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
             {% for badge in recent_badges %}
                 <div class="position-relative" title="{{ badge.name }}" style="width:40px;height:40px;flex-shrink:0;">
                     {% if badge.earned_count > 1 %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="z-index:1;font-size:9px;min-width:18px;">{{ badge.earned_count }}</span>{% endif %}
@@ -69,6 +74,10 @@
             {% empty %}
                 <small class="text-muted">No badges earned yet.</small>
             {% endfor %}
+            </div>
         </div>
+        {% if not has_active_academic_year %}
+            <span class="premium-lock-label"><i class="bx bx-lock-alt"></i> Premium</span>
+        {% endif %}
     </div>
 </aside>

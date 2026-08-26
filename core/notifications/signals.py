@@ -22,6 +22,7 @@ def notify_new_module(sender, instance, created, **kwargs):
         notify_students(
             title=f'New module: {instance.name}',
             message=f'Year {instance.year} now has a new module to study.',
+            academic_year=instance.year,
             url=_module_url(instance.pk),
         )
 
@@ -32,6 +33,7 @@ def notify_new_video(sender, instance, created, **kwargs):
         notify_students(
             title=f'New video: {instance.name}',
             message=f'A new video was added to {instance.module.name}.',
+            academic_year=instance.year,
             url=_module_url(instance.module_id),
         )
 
@@ -42,6 +44,7 @@ def notify_new_file(sender, instance, created, **kwargs):
         notify_students(
             title=f'New file: {instance.file_name}',
             message=f'A new {instance.get_file_type_display()} file was added to {instance.module.name}.',
+            academic_year=instance.year,
             url=_module_url(instance.module_id),
         )
 
@@ -63,6 +66,7 @@ def notify_new_text(sender, instance, created, **kwargs):
         notify_students(
             title=f'New text content: {instance.title}',
             message=f'New reading material was added to {instance.module.name}.',
+            academic_year=instance.module.year,
             url=_module_url(instance.module_id),
         )
 
@@ -73,6 +77,7 @@ def notify_new_exam(sender, instance, created, **kwargs):
         notify_students(
             title=f'New exam: {instance.name}',
             message=f'A new {instance.get_exam_type_display()} exam is available in {instance.module.name}.',
+            academic_year=instance.year,
             url=_module_url(instance.module_id),
         )
 
@@ -83,6 +88,7 @@ def notify_new_osce_exam(sender, instance, created, **kwargs):
         notify_students(
             title=f'New OSCE: {instance.name}',
             message=f'A new OSCE assessment is available in {instance.module.name}.',
+            academic_year=instance.year,
             url=_module_url(instance.module_id),
         )
 

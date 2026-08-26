@@ -23,7 +23,7 @@ class TextContentTests(TestCase):
             username='author', email='author@example.com', password='StrongPass1'
         )
         self.module = Module.objects.create(
-            year=1, name='Anatomy', icon_class='bx-book', has_text=True
+            year=1, name='Anatomy', image_url='https://example.com/anatomy.svg', has_text=True
         )
 
     def test_only_published_content_is_available_to_students(self):
@@ -79,3 +79,5 @@ class TextContentTests(TestCase):
 
         self.assertContains(response, 'rich-text-editor__toolbar')
         self.assertContains(response, 'rich_text_editor.js')
+        self.assertContains(response, 'data-command="tableAction"')
+        self.assertContains(response, 'data-command="deleteBlock"')
