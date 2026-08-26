@@ -66,7 +66,6 @@ def activation_status(request):
     return {
         'has_active_academic_year': bool(
             user.is_authenticated
-            and user.academic_year
             and has_year_access(user, user.academic_year)
         ),
     }

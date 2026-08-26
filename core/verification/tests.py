@@ -42,3 +42,24 @@ class StudentVerificationTests(TestCase):
         self.assertContains(response, 'nav-link-locked')
         self.assertContains(response, 'Notes <small class="nav-premium-label">Premium</small>')
         self.assertContains(response, 'Progress <small class="nav-premium-label">Premium</small>')
+
+    def test_activated_student_sees_unlocked_premium_navigation(self):
+        student = User.objects.create_user(
+            username='activated-student',
+            email='activated@example.com',
+            password='StrongPass123!',
+            phone='+20 100 000 0001',
+            academic_year=1,
+        )
+        StudentVerification.objects.create(
+            phone='201000000001',
+            activation_year=1,
+            is_active=True,
+        )
+        self.client.force_login(student)
+
+        response = self.client.get('/')
+
+        self.assertNotContains(response, 'nav-link-locked')
+        self.assertContains(response, 'href="/#notes"')
+        self.assertContains(response, 'href="/#progress"')
