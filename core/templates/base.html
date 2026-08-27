@@ -11,7 +11,7 @@
     <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     {# Keep dashboard additions, including Academic Progress, from being hidden by a stale cached stylesheet. #}
-    <link href="{% static 'css/style.css' %}?v=20260822-locked-navigation" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=20260827-auth-logo-center" rel="stylesheet" />
 </head>
 <body{% if not request.user.is_authenticated %} class="auth-page"{% endif %}>
     {% if messages %}

@@ -337,13 +337,15 @@ body.auth-page {
 .auth-logo {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     margin-bottom: 24px;
 }
 
-.auth-logo i {
-    font-size: 36px;
-    color: var(--primary-blue);
+.auth-logo img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
 }
 
 .auth-logo h1 {

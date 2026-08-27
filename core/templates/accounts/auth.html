@@ -2,13 +2,14 @@
 {% block auth_content %}
 <div class="auth-page-content container py-5">
     <div class="auth-card mx-auto">
-        <div class="auth-logo">
-            <i class='bx bxs-graduation'></i>
+        <div class="auth-logo d-flex justify-content-center w-100">
+            <img src="https://res.cloudinary.com/dxmbqh0mc/image/upload/v1787287258/logo_qqnbvv.png" alt="Med Master logo">
             <div>
                 <h1>Med Master</h1>
                 <span>Master Your Future</span>
             </div>
         </div>
+        
 
         {% if messages %}
             {% for message in messages %}
