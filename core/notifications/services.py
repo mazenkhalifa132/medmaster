@@ -32,7 +32,7 @@ def notify_badge_awarded(*, student, badge):
         kind=Notification.BADGE,
         title=f'Badge earned: {badge.name}',
         message=f'You earned the {badge.name} badge.',
-        image_url=badge.image_url,
+        image_url=badge.colored_image_url,
         url='/#progress',
     )
 

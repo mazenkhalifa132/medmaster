@@ -3,23 +3,31 @@ from django.db.models import Count, F, Max, OuterRef, Q, Subquery
 from exams.models import ExamAnswer, ExamAttempt, ExamQuestion
 from osce.models import OSCEAnswerRecord, OSCEAttempt, OSCEExam, OSCEQuestion
 
-from .models import StudentBadge
+from .models import Badge, StudentBadge
 
 
 def _recent_badges_for(student):
     """Return the five most recently earned badge types, with award counts."""
-    return (
+    awards = (
         StudentBadge.objects.filter(student=student)
         .values('badge_id')
-        .annotate(
-            name=F('badge__name'),
-            color=F('badge__color'),
-            image_url=F('badge__image_url'),
-            earned_count=Count('pk'),
-            latest_awarded_at=Max('awarded_at'),
-        )
+        .annotate(earned_count=Count('pk'), latest_awarded_at=Max('awarded_at'))
         .order_by('-latest_awarded_at', 'badge_id')[:5]
     )
+    badges = {
+        badge.pk: badge
+        for badge in Badge.objects.filter(pk__in=[award['badge_id'] for award in awards])
+    }
+    # Preserve the template's small dictionary interface while using the colorized URL.
+    return [
+        {
+            **award,
+            'name': badges[award['badge_id']].name,
+            'color': badges[award['badge_id']].color,
+            'image_url': badges[award['badge_id']].colored_image_url,
+        }
+        for award in awards
+    ]
 
 def recent_badges(request):
     """Provide shared right-panel data for the signed-in student."""

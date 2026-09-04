@@ -56,7 +56,7 @@ class NotificationSystemTests(TestCase):
 
         notification = Notification.objects.get(recipient=self.student)
         self.assertEqual(notification.kind, Notification.BADGE)
-        self.assertEqual(notification.image_url, badge.image_url)
+        self.assertEqual(notification.image_url, badge.colored_image_url)
         self.assertFalse(Notification.objects.filter(recipient=self.other_student).exists())
 
     def test_dismissed_and_expired_notifications_are_not_returned_to_the_bell(self):

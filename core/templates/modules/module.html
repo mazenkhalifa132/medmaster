@@ -19,6 +19,15 @@
     }
     .video-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
     .video-card:hover { transform: translateY(-2px); box-shadow: 0 .25rem .75rem rgba(0, 0, 0, 0.08); }
+    .module-description-preview {
+        display: -webkit-box;
+        width: 60%;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+    }
+    .module-description-preview.is-expanded { display: block; width: 100%; }
+    .module-completion-area { align-self: flex-start; margin-top: 2rem; }
 </style>
 <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-secondary px-0 mb-3 d-inline-flex align-items-center gap-1">
     <i class='bx bx-arrow-back fs-5'></i> Back to Dashboard
@@ -33,14 +42,35 @@
 </div>-->
 
 <div class="card shadow-sm border-0 mb-4 p-4" style="border-radius: var(--border-radius);">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-4">
+    <div class="d-flex flex-nowrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-4 flex-grow-1" style="min-width: 0;">
             <div class="module-icon-box mb-0" style="background:{{ module.bg_color }};width:64px;height:64px;"><img src="{{ module.colored_image_url }}" alt="{{ module.name }} icon" style="width:40px;height:40px;object-fit:contain;"></div>
-            <div><h4 class="fw-bold mb-1">{{ module.name }}</h4><p class="text-muted m-0">{{ module.description|default:"Medical Science" }} &middot; Year {{ module.year }}</p></div>
+            <div class="flex-grow-1" style="min-width: 0;">
+                <h4 class="fw-bold mb-1">{{ module.name }}</h4>
+                {% if module.description %}
+                    <div class="text-muted">
+                        <span id="module-description-{{ module.pk }}" class="module-description-preview" style="white-space: pre-wrap;">{{ module.description }}</span>
+                    </div>
+                {% else %}
+                    <div class="text-muted" style="white-space: pre-wrap;">{{ module.description|default:"Medical Science" }}</div>
+                {% endif %}
+                <small class="text-muted d-block mt-1">Year {{ module.year }}</small>
+            </div>
         </div>
-        <div class="text-end">
-            <div class="d-flex align-items-center justify-content-end gap-2 mb-1"><h2 class="fw-bold text-primary m-0" style="font-size:24px;">{{ exam_progress }}%</h2><span class="status-badge {% if exam_progress == 100 %}status-completed{% else %}status-progress{% endif %}">{% if exam_progress == 100 %}Completed{% else %}In Progress{% endif %}</span></div>
-            <div class="progress" style="width:140px;height:6px;margin-left:auto;"><div class="progress-bar" style="width:{{ exam_progress }}%;background:{{ module.color }};"></div></div>
+        <div class="d-flex align-items-center gap-2 ms-auto flex-shrink-0 module-completion-area">
+            {% if module.description %}
+                <button
+                    type="button"
+                    class="btn btn-link text-muted p-0 align-self-start"
+                    data-description-toggle="{{ module.pk }}"
+                    aria-expanded="false"
+                    aria-label="Show full module description"
+                ><i class='bx bx-chevron-down fs-5'></i></button>
+            {% endif %}
+            <div class="text-end">
+                <div class="d-flex align-items-center justify-content-end gap-2 mb-1"><h2 class="fw-bold text-primary m-0" style="font-size:24px;">{{ exam_progress }}%</h2><span class="status-badge {% if exam_progress == 100 %}status-completed{% else %}status-progress{% endif %}">{% if exam_progress == 100 %}Completed{% else %}In Progress{% endif %}</span></div>
+                <div class="progress" style="width:140px;height:6px;margin-left:auto;"><div class="progress-bar" style="width:{{ exam_progress }}%;background:{{ module.color }};"></div></div>
+            </div>
         </div>
     </div>
 </div>
@@ -145,6 +175,18 @@
     </div>
 </div>
 <script>
+    document.querySelectorAll('[data-description-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const id = this.dataset.descriptionToggle;
+            const description = document.getElementById(`module-description-${id}`);
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            description.classList.toggle('is-expanded', !expanded);
+            this.setAttribute('aria-expanded', String(!expanded));
+            this.setAttribute('aria-label', expanded ? 'Show full module description' : 'Hide full module description');
+            this.querySelector('i').className = expanded ? 'bx bx-chevron-down fs-5' : 'bx bx-chevron-up fs-5';
+        });
+    });
+
     document.getElementById('videoModal').addEventListener('show.bs.modal', function (event) {
         const video = event.relatedTarget;
         this.querySelector('#videoModalTitle').textContent = video.dataset.videoTitle;

@@ -7,8 +7,11 @@ from django.utils import timezone
 
 from exams.models import Exam, ExamAttempt
 from modules.models import Module
-from .models import PointTransaction, Rank, StudentProgress, StudentWeeklyGoal, WeeklyGoal
-from .services import evaluate_weekly_goals, record_answer_points, weekly_goal_progress
+from .models import Badge, PointTransaction, Rank, StudentBadge, StudentProgress, StudentWeeklyGoal, WeeklyGoal
+from .services import (
+    award_exam_badges, award_module_progress_badges, evaluate_weekly_goals,
+    record_answer_points, weekly_goal_progress,
+)
 
 
 class RankIconUrlTests(TestCase):
@@ -25,6 +28,67 @@ class RankIconUrlTests(TestCase):
             rank.colored_image_url,
             'https://api.iconify.design/bi/bell-fill.svg?color=%23d97706',
         )
+
+    def test_badge_icon_uses_the_selected_badge_color(self):
+        badge = Badge(
+            name='High scorer', color='#0ea5e9', image_url='https://api.iconify.design/solar:medal-star-bold.svg',
+            rule_type=Badge.EXAM_SCORE, threshold=80,
+        )
+
+        self.assertEqual(
+            badge.colored_image_url,
+            'https://api.iconify.design/solar:medal-star-bold.svg?color=%230ea5e9',
+        )
+
+
+class ExamBadgeTests(TestCase):
+    def setUp(self):
+        self.student = get_user_model().objects.create_user(username='badge-student', password='SafePassword1!')
+        module = Module.objects.create(year=1, name='Anatomy', image_url='https://example.com/anatomy.svg')
+        self.target_exam = Exam.objects.create(year=1, module=module, name='Target quiz', time_limit=20)
+        self.other_exam = Exam.objects.create(year=1, module=module, name='Other quiz', time_limit=20)
+        self.global_badge = Badge.objects.create(
+            name='Global high score', image_url='https://example.com/global.svg',
+            rule_type=Badge.EXAM_SCORE, threshold=80,
+        )
+        self.target_badge = Badge.objects.create(
+            name='Target high score', image_url='https://example.com/target.svg', exam=self.target_exam,
+            rule_type=Badge.EXAM_SCORE, threshold=80,
+        )
+
+    def test_exam_badge_is_awarded_only_for_its_selected_exam(self):
+        award_exam_badges(
+            student=self.student, score=9, total_questions=10, attempt_key='exam:other', exam=self.other_exam,
+        )
+        awarded_badge_ids = set(StudentBadge.objects.values_list('badge_id', flat=True))
+        self.assertIn(self.global_badge.pk, awarded_badge_ids)
+        self.assertNotIn(self.target_badge.pk, awarded_badge_ids)
+
+        award_exam_badges(
+            student=self.student, score=9, total_questions=10, attempt_key='exam:target', exam=self.target_exam,
+        )
+        awarded_badge_ids = set(StudentBadge.objects.values_list('badge_id', flat=True))
+        self.assertIn(self.global_badge.pk, awarded_badge_ids)
+        self.assertIn(self.target_badge.pk, awarded_badge_ids)
+
+    def test_module_progress_badge_uses_combined_first_attempt_scores(self):
+        module_badge = Badge.objects.create(
+            name='Anatomy progress', image_url='https://example.com/module.svg',
+            rule_type=Badge.MODULE_PROGRESS, module=self.target_exam.module, threshold=80,
+        )
+        retry_badge = Badge.objects.create(
+            name='Anatomy perfection', image_url='https://example.com/module-perfect.svg',
+            rule_type=Badge.MODULE_PROGRESS, module=self.target_exam.module, threshold=90,
+        )
+        ExamAttempt.objects.create(exam=self.target_exam, student=self.student, score=8, total_questions=10)
+        ExamAttempt.objects.create(exam=self.other_exam, student=self.student, score=9, total_questions=10)
+        # Retries do not improve the module-progress result.
+        ExamAttempt.objects.create(exam=self.target_exam, student=self.student, score=10, total_questions=10)
+
+        award_module_progress_badges(student=self.student, module=self.target_exam.module)
+
+        self.assertTrue(StudentBadge.objects.filter(badge=module_badge, student=self.student).exists())
+        self.assertFalse(StudentBadge.objects.filter(badge=retry_badge, student=self.student).exists())
 
 
 class AdminLeaderboardTests(TestCase):

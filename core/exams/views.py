@@ -6,7 +6,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Exam, ExamAnswer, ExamAttempt, MCQAnswer
-from progress.services import award_exam_badges, record_answer_points
+from progress.services import award_exam_badges, award_module_progress_badges, record_answer_points
 from verification.services import can_access_content
 
 
@@ -133,7 +133,9 @@ def submit_exam(request, pk):
                 score=attempt.score,
                 total_questions=attempt.total_questions,
                 attempt_key=f'exam:{attempt.pk}',
+                exam=exam,
             )
+            award_module_progress_badges(student=request.user, module=exam.module)
     attempts_remaining = max(exam.retry_times - _attempts_used(exam, request.user), 0)
     return render(request, 'exams/result.html', {
         'exam': exam,

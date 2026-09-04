@@ -63,7 +63,7 @@ def _award_badge(*, student, badge, source_key):
     return award, created
 
 
-def award_exam_badges(*, student, score, total_questions, attempt_key):
+def award_exam_badges(*, student, score, total_questions, attempt_key, exam=None):
     """Award all score-based badges earned by a completed exam or OSCE."""
     if not total_questions:
         return []
@@ -73,8 +73,45 @@ def award_exam_badges(*, student, score, total_questions, attempt_key):
         rule_type=Badge.EXAM_SCORE,
         threshold__lte=percentage,
     )
+    if exam is None:
+        badges = badges.filter(exam__isnull=True)
+    else:
+        badges = badges.filter(models.Q(exam__isnull=True) | models.Q(exam=exam))
     return [
         _award_badge(student=student, badge=badge, source_key=f'badge:{attempt_key}:{badge.pk}')[0]
+        for badge in badges
+    ]
+
+
+def award_module_progress_badges(*, student, module):
+    """Award a module badge after first-attempt scores meet its percentage."""
+    first_attempts = {}
+    attempts = ExamAttempt.objects.filter(
+        student=student,
+        exam__module=module,
+        total_questions__gt=0,
+    ).exclude(exam__exam_type='saq').order_by('exam_id', 'submitted_at', 'pk')
+    for attempt in attempts:
+        first_attempts.setdefault(attempt.exam_id, attempt)
+
+    score = sum(attempt.score for attempt in first_attempts.values())
+    total = sum(attempt.total_questions for attempt in first_attempts.values())
+    if not total:
+        return []
+
+    percentage = (score / total) * 100
+    badges = Badge.objects.filter(
+        is_active=True,
+        rule_type=Badge.MODULE_PROGRESS,
+        module=module,
+        threshold__lte=percentage,
+    )
+    return [
+        _award_badge(
+            student=student,
+            badge=badge,
+            source_key=f'badge:module:{module.pk}:student:{student.pk}:{badge.pk}',
+        )[0]
         for badge in badges
     ]
 

@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
 {% block auth_content %}
+
+<style>
+    #signup-fname::placeholder {
+    font-size: 12px;
+    }
+    #signup-sname::placeholder {
+    font-size: 12px;
+    }
+</style>
 <div class="auth-page-content container py-5">
     <div class="auth-card mx-auto">
         <div class="auth-logo d-flex justify-content-center w-100">
@@ -45,11 +54,11 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="signup-fname" class="form-label text-muted small">First Name</label>
-                        <input type="text" class="form-control" id="signup-fname" name="first_name" required>
+                        <input type="text" class="form-control" id="signup-fname" name="first_name" placeholder="This name will be visible to others" required>
                     </div>
                     <div class="col-md-6">
                         <label for="signup-sname" class="form-label text-muted small">Last Name</label>
-                        <input type="text" class="form-control" id="signup-sname" name="last_name" required>
+                        <input type="text" class="form-control" id="signup-sname" name="last_name" placeholder="This name will be visible to others" required>
                     </div>
                 </div>
                 <div class="mt-3">

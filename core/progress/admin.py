@@ -7,10 +7,27 @@ from django.db.models.functions import Coalesce
 from django.template.response import TemplateResponse
 from django.urls import path
 
-from exams.models import ExamAttempt
+from exams.models import Exam, ExamAttempt
+from modules.models import Module
 from osce.models import OSCEAttempt
 
 from .models import Badge, Rank, StudentProgress, WeeklyGoal, rank_for_points
+
+
+class ModuleByYearSelect(forms.Select):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value and hasattr(value, 'instance'):
+            option['attrs']['data-year'] = value.instance.year
+        return option
+
+
+class ExamByModuleSelect(forms.Select):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value and hasattr(value, 'instance'):
+            option['attrs']['data-module'] = value.instance.module_id
+        return option
 
 
 class RankAdminForm(forms.ModelForm):
@@ -122,6 +139,38 @@ class StudentProgressAdmin(admin.ModelAdmin):
 
 
 class BadgeAdminForm(forms.ModelForm):
+    exam_year = forms.TypedChoiceField(
+        choices=(( '', '---------'), *Exam.YEAR_CHOICES),
+        coerce=int,
+        required=False,
+        label='Year',
+    )
+    exam_module = forms.ModelChoiceField(
+        queryset=Module.objects.all(),
+        required=False,
+        label='Module',
+        widget=ModuleByYearSelect,
+    )
+    module_year = forms.TypedChoiceField(
+        choices=(( '', '---------'), *Exam.YEAR_CHOICES),
+        coerce=int,
+        required=False,
+        label='Year',
+    )
+    target_module = forms.ModelChoiceField(
+        queryset=Module.objects.all(),
+        required=False,
+        label='Module',
+        widget=ModuleByYearSelect,
+    )
+    module_percentage = forms.IntegerField(
+        min_value=0,
+        max_value=100,
+        required=False,
+        label='Required percentage',
+        help_text='Combined first-attempt score required across this module’s exams.',
+    )
+
     class Meta:
         model = Badge
         fields = '__all__'
@@ -135,11 +184,78 @@ class BadgeAdminForm(forms.ModelForm):
             'color': forms.TextInput(attrs={'type': 'color', 'aria-label': 'Badge color'}),
         }
 
+    class Media:
+        js = ('progress/admin/badge_exam_filter.js', 'progress/admin/badge_rule_type.js')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        selected_exam = self.instance.exam if self.instance and self.instance.pk else None
+        selected_module = self.instance.module if self.instance and self.instance.pk else None
+        exam_year = self.data.get('exam_year') or (selected_exam.year if selected_exam else None)
+        exam_module = self.data.get('exam_module') or (selected_exam.module_id if selected_exam else None)
+        module_year = self.data.get('module_year') or (selected_module.year if selected_module else None)
+        target_module = self.data.get('target_module') or (selected_module.pk if selected_module else None)
+        self.fields['exam'].queryset = Exam.objects.select_related('module').all()
+        self.fields['exam'].widget = ExamByModuleSelect(choices=self.fields['exam'].choices)
+        self.fields['threshold'].required = False
+        self.initial.update({
+            'exam_year': exam_year,
+            'exam_module': exam_module,
+            'module_year': module_year,
+            'target_module': target_module,
+            'module_percentage': self.instance.threshold if selected_module else None,
+        })
+
+    def clean(self):
+        cleaned_data = super().clean()
+        exam_year = cleaned_data.get('exam_year')
+        exam_module = cleaned_data.get('exam_module')
+        exam = cleaned_data.get('exam')
+        rule_type = cleaned_data.get('rule_type')
+        if exam and (not exam_year or not exam_module):
+            raise forms.ValidationError('Choose the year and module for the selected exam.')
+        if exam and (exam.year != exam_year or exam.module_id != exam_module.pk):
+            raise forms.ValidationError('The selected exam must belong to the chosen year and module.')
+        if rule_type == Badge.MODULE_PROGRESS:
+            module_year = cleaned_data.get('module_year')
+            target_module = cleaned_data.get('target_module')
+            percentage = cleaned_data.get('module_percentage')
+            if not module_year or not target_module or percentage is None:
+                raise forms.ValidationError('Choose a year and module, then enter the required percentage.')
+            if target_module.year != module_year:
+                raise forms.ValidationError('The selected module must belong to the chosen year.')
+            cleaned_data['module'] = target_module
+            cleaned_data['threshold'] = percentage
+            cleaned_data['exam'] = None
+            self.instance.module = target_module
+            self.instance.exam = None
+        return cleaned_data
+
 
 @admin.register(Badge)
 class BadgeAdmin(admin.ModelAdmin):
     form = BadgeAdminForm
-    list_display = ('name', 'rule_type', 'threshold_requirement', 'xp_reward', 'is_active')
+    fieldsets = (
+        ('Badge details', {
+            'fields': ('name', 'color', 'image_url', 'xp_reward', 'rule_type', 'is_active'),
+        }),
+        ('Exam targeting', {
+            'fields': ('exam_year', 'exam_module', 'exam'),
+            'description': 'Choose a year, then a module, then the exam this badge should apply to.',
+            'classes': ('exam-targeting',),
+        }),
+        ('Module details', {
+            'fields': ('module_year', 'target_module', 'module_percentage'),
+            'description': 'Choose a year and module, then the percentage required to earn this badge.',
+            'classes': ('module-targeting',),
+        }),
+        ('Score or login requirement', {
+            'fields': ('threshold',),
+            'description': 'Enter the required exam percentage or consecutive login days.',
+            'classes': ('threshold-targeting',),
+        }),
+    )
+    list_display = ('name', 'rule_type', 'threshold_requirement', 'xp_reward', 'is_active', 'exam', 'module')
     list_filter = ('rule_type', 'is_active')
     list_editable = ('xp_reward', 'is_active')
     search_fields = ('name',)

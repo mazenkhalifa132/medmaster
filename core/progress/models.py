@@ -105,15 +105,33 @@ class Badge(models.Model):
     """A configurable achievement that can award XP once to each student."""
 
     EXAM_SCORE = 'exam_score'
+    MODULE_PROGRESS = 'module_progress'
     LOGIN_STREAK = 'login_streak'
     RULE_CHOICES = (
         (EXAM_SCORE, 'Exam score'),
+        (MODULE_PROGRESS, 'Module progress'),
         (LOGIN_STREAK, 'Daily login streak'),
     )
 
     name = models.CharField(max_length=100, unique=True)
     color = models.CharField(max_length=20, default='#7c3aed', help_text='CSS color, for example #7c3aed.')
     image_url = models.URLField(help_text='Public URL of the badge image.')
+    exam = models.ForeignKey(
+        'exams.Exam',
+        on_delete=models.CASCADE,
+        related_name='badges',
+        blank=True,
+        null=True,
+        help_text='Optional. Limit this badge to one exam; leave blank to award it for every exam.',
+    )
+    module = models.ForeignKey(
+        'modules.Module',
+        on_delete=models.CASCADE,
+        related_name='progress_badges',
+        blank=True,
+        null=True,
+        help_text='Module required for a module-progress badge.',
+    )
     xp_reward = models.PositiveIntegerField(default=0)
     rule_type = models.CharField(max_length=20, choices=RULE_CHOICES)
     threshold = models.PositiveIntegerField(
@@ -133,11 +151,26 @@ class Badge(models.Model):
             raise ValidationError({
                 'threshold': 'For an exam-score badge, enter the required exam percentage (0–100).'
             })
+        if self.rule_type == self.MODULE_PROGRESS:
+            if self.threshold > 100:
+                raise ValidationError({'threshold': 'Enter a module percentage from 0 to 100.'})
+            if not self.module_id:
+                raise ValidationError({'module': 'Select a module for a module-progress badge.'})
+
+    @property
+    def colored_image_url(self):
+        """Return the icon URL using this badge's selected color."""
+        url_parts = urlsplit(self.image_url)
+        query = [(key, value) for key, value in parse_qsl(url_parts.query) if key != 'color']
+        query.append(('color', self.color))
+        return urlunsplit((*url_parts[:3], urlencode(query), url_parts.fragment))
 
     @property
     def threshold_requirement(self):
         if self.rule_type == self.EXAM_SCORE:
             return f'{self.threshold}% exam score'
+        if self.rule_type == self.MODULE_PROGRESS:
+            return f'{self.threshold}% module progress'
         return f'{self.threshold} day login streak'
 
 
