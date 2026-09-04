@@ -67,10 +67,15 @@ class StudentProgressAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        # Django checks deletion permissions on every related model before it
+        # allows an administrator to delete a user.  Student progress cascades
+        # when its student is deleted, so denying this permission made the
+        # admin reject student deletion even though the database relationship
+        # is configured with CASCADE.
+        return self.has_module_permission(request)
 
     def has_module_permission(self, request):
-        return request.user.is_superuser or request.user.role == 'admin'
+        return request.user.is_superuser or getattr(request.user, 'role', None) == 'admin'
 
     def has_view_permission(self, request, obj=None):
         return self.has_module_permission(request)

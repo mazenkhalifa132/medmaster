@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import User
+from progress.models import StudentProgress
 
 
 class AuthFlowTests(TestCase):
@@ -135,3 +136,27 @@ class AuthFlowTests(TestCase):
         user.refresh_from_db()
         self.assertEqual(user.first_name, 'Updated')
         self.assertEqual(user.academic_year, 1)
+
+    def test_admin_can_delete_student_with_progress(self):
+        admin_user = User.objects.create_superuser(
+            username='deleteadmin',
+            email='deleteadmin@example.com',
+            password='AdminPass123!',
+        )
+        student = User.objects.create_user(
+            username='studenttodelete',
+            email='studenttodelete@example.com',
+            password='StudentPass123!',
+            role='student',
+        )
+        progress = StudentProgress.objects.create(student=student, total_points=50)
+        self.client.force_login(admin_user)
+
+        response = self.client.post(
+            reverse('admin:accounts_user_delete', args=(student.pk,)),
+            {'post': 'yes'},
+        )
+
+        self.assertRedirects(response, reverse('admin:accounts_user_changelist'))
+        self.assertFalse(User.objects.filter(pk=student.pk).exists())
+        self.assertFalse(StudentProgress.objects.filter(pk=progress.pk).exists())
