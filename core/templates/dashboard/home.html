@@ -22,7 +22,12 @@
         </div>
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
             {% for year in years %}
-            <div class="col d-flex"><div class="year-card w-100{% if year.number == request.user.academic_year|default:1 %} active{% endif %}" data-year="{{ year.number }}" onclick="selectYear({{ year.number }})"><i class='bx bxs-graduation'></i><h6>Year {{ year.number }}</h6><small>{{ year.module_count }} Module{{ year.module_count|pluralize }}</small></div></div>
+            <div class="col d-flex">
+                <div class="year-card w-100{% if year.number == request.user.academic_year|default:1 %} active{% else %} locked{% endif %}" data-year="{{ year.number }}"{% if year.number == request.user.academic_year|default:1 %} onclick="selectYear({{ year.number }})"{% else %} aria-disabled="true"{% endif %}>
+                    <div class="year-card-content"><i class='bx bxs-graduation'></i><h6>Year {{ year.number }}</h6><small>{{ year.module_count }} Module{{ year.module_count|pluralize }}</small></div>
+                    {% if year.number != request.user.academic_year|default:1 %}<i class="bx bx-lock-alt year-card-lock" aria-hidden="true"></i>{% endif %}
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -509,21 +514,46 @@
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 row-cols-xl-8 g-3">
             {% for badge in badge_progress %}
                 <div class="col d-flex">
-                    <div class="badge-card w-100 h-100">
-                    <div class="position-relative d-inline-block">
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white" style="background: {{ badge.color }}; z-index: 1;">{{ badge.earned_count }}</span>
-                        <div class="badge-box" style="background: color-mix(in srgb, {{ badge.color }} 15%, white); color: {{ badge.color }};">
-                            <img src="{{ badge.colored_image_url }}" alt="" style="width: 28px; height: 28px; object-fit: contain;">
+                    <button type="button" class="badge-card badge-card-button w-100 h-100" data-bs-toggle="modal" data-bs-target="#badgeDetailModal"
+                        data-badge-name="{{ badge.name }}" data-badge-description="{{ badge.description|default:'No description has been added for this badge yet.' }}"
+                        data-badge-icon="{{ badge.colored_image_url }}" data-badge-color="{{ badge.color }}"
+                        data-badge-last-earned="{{ badge.last_awarded_at|date:'M j, Y, g:i A' }}" data-badge-points="{{ badge.points_earned }}" data-badge-awards="{{ badge.earned_count }}">
+                        <div class="position-relative d-inline-block">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white" style="background: {{ badge.color }}; z-index: 1;">{{ badge.earned_count }}</span>
+                            <div class="badge-box" style="background: color-mix(in srgb, {{ badge.color }} 15%, white); color: {{ badge.color }};">
+                                <img src="{{ badge.colored_image_url }}" alt="" style="width: 28px; height: 28px; object-fit: contain;">
+                            </div>
                         </div>
-                    </div>
-                    <h6 class="fw-bold" style="font-size: 11px;">{{ badge.name }}</h6>
-                    <small class="text-muted" style="font-size: 9px;">+{{ badge.xp_reward }} Points each</small>
-                    <div class="text-muted" style="font-size: 10px;">Last earned {{ badge.last_awarded_at|timesince }} ago</div>
-                    </div>
+                        <h6 class="fw-bold" style="font-size: 11px;">{{ badge.name }}</h6>
+                        <small class="text-muted" style="font-size: 9px;">+{{ badge.xp_reward }} Points each</small>
+                        <div class="text-muted" style="font-size: 10px;">Last earned {{ badge.last_awarded_at|timesince }} ago</div>
+                    </button>
                 </div>
             {% empty %}
                 <div class="col-12"><p class="text-muted small mb-0">Complete exams and maintain a daily streak to earn badges.</p></div>
             {% endfor %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="badgeDetailModal" tabindex="-1" aria-labelledby="badgeDetailTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="badgeDetailTitle">Badge details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="badge-detail-icon" id="badgeDetailIconWrap"><img id="badgeDetailIcon" src="" alt=""></div>
+                        <div><h5 class="fw-bold mb-1" id="badgeDetailName"></h5><span class="text-muted small" id="badgeDetailAwardCount"></span></div>
+                    </div>
+                    <p class="text-muted mb-4" id="badgeDetailDescription"></p>
+                    <div class="row g-3 text-center">
+                        <div class="col-6"><div class="badge-detail-stat"><small class="text-muted d-block">Last earned</small><strong id="badgeDetailLastEarned"></strong></div></div>
+                        <div class="col-6"><div class="badge-detail-stat"><small class="text-muted d-block">Points earned</small><strong id="badgeDetailPoints"></strong></div></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -533,7 +563,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold">Community</h4>
-        <a href="https://t.me/medmaster012" target="_blank" class="btn btn-outline-primary btn-sm">
+        <a href="{{ telegram_group_url }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
             <i class='bx bxl-telegram'></i> Open in Telegram
         </a>
     </div>
@@ -609,7 +639,7 @@
     const MODULES_PER_PAGE = 4;
     function selectYear(year) { currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
     function updateOverallProgress(year) { const modules = yearData[year].modules; const progress = modules.length ? Math.round(modules.reduce((total, module) => total + module.progress, 0) / modules.length) : 0; document.getElementById('overall-progress-value').innerText = `${progress}%`; document.getElementById('overall-progress-ring').style.background = `conic-gradient(#2563eb 0% ${progress}%, rgba(255,255,255,0.2) ${progress}% 100%)`; }
-    function selectYear(year) { currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); updateOverallProgress(year); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
+    function selectYear(year) { if (Number(year) !== defaultAcademicYear) return; currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); updateOverallProgress(year); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
     function renderModules(year) {
         const data = yearData[year].modules;
         const totalPages = Math.ceil(data.length / MODULES_PER_PAGE);
@@ -689,7 +719,7 @@
         chart.innerHTML = `<defs><linearGradient id="xp-chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs><path d="${areaPath}" fill="url(#xp-chart-gradient)"/><path d="${linePath}" fill="none" stroke="#3b82f6" stroke-width="2" vector-effect="non-scaling-stroke"/>${dots}${labels}<text x="${Math.min(x(data.length - 1) - 4, 296).toFixed(1)}" y="${Math.max(y(last.xp) - 7, 10).toFixed(1)}" text-anchor="end" font-size="9" fill="#3b82f6" font-weight="bold">${last.xp.toLocaleString()} Points</text>`;
     }
 
-    document.addEventListener('DOMContentLoaded', function() { renderXpProgressChart(); selectYear(defaultAcademicYear); const menuToggle = document.getElementById('menuToggle'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay'); function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); } if (menuToggle) { menuToggle.addEventListener('click', toggleSidebar); } if (overlay) { overlay.addEventListener('click', toggleSidebar); } const navLinks = document.querySelectorAll('.sidebar-menu a.nav-link[data-page]'); const pages = document.querySelectorAll('.app-page'); navLinks.forEach(link => { link.addEventListener('click', function(e) { e.preventDefault(); navLinks.forEach(nav => nav.classList.remove('active')); this.classList.add('active'); pages.forEach(page => page.classList.remove('active-page')); const pageId = this.getAttribute('data-page'); const targetPage = document.getElementById('page-' + pageId); if (targetPage) { targetPage.classList.add('active-page'); } if (window.innerWidth <= 992) { toggleSidebar(); } }); });
+    document.addEventListener('DOMContentLoaded', function() { renderXpProgressChart(); selectYear(defaultAcademicYear); const badgeModal = document.getElementById('badgeDetailModal'); badgeModal?.addEventListener('show.bs.modal', function (event) { const badge = event.relatedTarget; const data = badge.dataset; document.getElementById('badgeDetailTitle').textContent = data.badgeName; document.getElementById('badgeDetailName').textContent = data.badgeName; document.getElementById('badgeDetailDescription').textContent = data.badgeDescription; document.getElementById('badgeDetailLastEarned').textContent = data.badgeLastEarned; document.getElementById('badgeDetailPoints').textContent = `${data.badgePoints} Points`; document.getElementById('badgeDetailAwardCount').textContent = `${data.badgeAwards} award${data.badgeAwards === '1' ? '' : 's'}`; const iconWrap = document.getElementById('badgeDetailIconWrap'); iconWrap.style.background = `color-mix(in srgb, ${data.badgeColor} 15%, white)`; document.getElementById('badgeDetailIcon').src = data.badgeIcon; document.getElementById('badgeDetailIcon').alt = `${data.badgeName} badge`; }); const menuToggle = document.getElementById('menuToggle'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay'); function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); } if (menuToggle) { menuToggle.addEventListener('click', toggleSidebar); } if (overlay) { overlay.addEventListener('click', toggleSidebar); } const navLinks = document.querySelectorAll('.sidebar-menu a.nav-link[data-page]'); const pages = document.querySelectorAll('.app-page'); navLinks.forEach(link => { link.addEventListener('click', function(e) { e.preventDefault(); navLinks.forEach(nav => nav.classList.remove('active')); this.classList.add('active'); pages.forEach(page => page.classList.remove('active-page')); const pageId = this.getAttribute('data-page'); const targetPage = document.getElementById('page-' + pageId); if (targetPage) { targetPage.classList.add('active-page'); } if (window.innerWidth <= 992) { toggleSidebar(); } }); });
         const newNoteButton = document.getElementById('new-note-button');
         const newNoteCard = document.getElementById('new-note-card');
         const cancelNoteButton = document.getElementById('cancel-note-button');

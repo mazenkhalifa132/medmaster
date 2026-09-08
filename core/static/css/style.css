@@ -106,12 +106,16 @@ body.auth-page {
 .progress-ring-small .inner { width: 46px; height: 46px; background: #0f1638; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 
 /* --- Year Cards --- */
-.year-card { background: #fff; padding: 16px; border-radius: var(--border-radius); text-align: center; border: 2px solid transparent; box-shadow: var(--shadow); transition: 0.3s; cursor: pointer; }
+.year-card { position: relative; background: #fff; padding: 16px; border-radius: var(--border-radius); text-align: center; border: 2px solid transparent; box-shadow: var(--shadow); transition: 0.3s; cursor: pointer; }
 .year-card.active { border-color: var(--primary-blue); background: #f8faff; }
 .year-card.active i, .year-card.active h6 { color: var(--primary-blue) !important; }
 .year-card i { font-size: 24px; color: #6b7280; margin-bottom: 8px; }
 .year-card h6 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text-dark); }
 .year-card small { font-size: 11px; color: var(--text-gray); }
+.year-card.locked { cursor: not-allowed; overflow: hidden; background: rgba(255, 255, 255, .75); isolation: isolate; }
+.year-card.locked .year-card-content { filter: blur(0px); opacity: 0.45; user-select: none; }
+.year-card.locked::after { content: ''; position: absolute; inset: 0; z-index: 1; background: rgba(255, 255, 255, .22); backdrop-filter: blur(1px); }
+.year-card-lock { position: absolute; top: 50%; left: 50%; z-index: 2; margin: 0 !important; transform: translate(-50%, -50%); padding: 9px; border-radius: 50%; background: rgba(255, 255, 255, .92); color: #4b5563 !important; font-size: 25px !important; line-height: 1; box-shadow: 0 2px 8px rgba(0, 0, 0, .14); }
 
 /* --- Modules --- */
 .module-card { background: #fff; padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow); margin-bottom: 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
@@ -178,6 +182,11 @@ body.auth-page {
 /* Badges Grid */
 .badge-box { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 6px; }
 .badge-card { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+.badge-card-button { border: 0; color: inherit; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+.badge-card-button:hover, .badge-card-button:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(15, 23, 42, .14); outline: 2px solid #2563eb; outline-offset: 2px; }
+.badge-detail-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.badge-detail-icon img { width: 40px; height: 40px; object-fit: contain; }
+.badge-detail-stat { background: #f8fafc; border-radius: 10px; padding: 12px 8px; min-height: 68px; }
 
 /* --- Responsive --- */
 @media (max-width: 1200px) {
@@ -378,4 +387,69 @@ body.auth-page {
     color: var(--primary-blue);
     font-weight: 600;
     cursor: pointer;
+}
+
+/* --- Highest Score / Latest Score --- */
+
+.score-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.score-card {
+    width: 100%;
+    min-height: 145px;
+
+    background: #f8f9fc;
+    border: 1px solid #dfe3ea;
+    border-radius: 12px;
+
+    padding: 14px 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    text-align: center;
+}
+
+.score-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.score-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.score-value {
+    font-size: 25px;
+    line-height: 1;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 7px;
+}
+
+.score-date {
+    display: block;
+    font-size: 9px;
+    color: #9ca3af;
 }

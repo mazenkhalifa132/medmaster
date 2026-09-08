@@ -29,11 +29,69 @@ def _recent_badges_for(student):
         for award in awards
     ]
 
+
+def _score_summary_for(student, academic_year):
+    """Return a student's latest and highest completed, graded attempt."""
+    attempts = []
+
+    quiz_attempts = ExamAttempt.objects.filter(
+        student=student,
+        total_questions__gt=0,
+        exam__year=academic_year,
+        exam__is_active=True,
+        exam__module__is_active=True,
+    ).exclude(exam__exam_type='saq')
+    attempts.extend(
+        {
+            'score': round((attempt.score / attempt.total_questions) * 100),
+            'submitted_at': attempt.submitted_at,
+            'pk': attempt.pk,
+        }
+        for attempt in quiz_attempts
+    )
+
+    osce_attempts = OSCEAttempt.objects.filter(
+        student=student,
+        total_questions__gt=0,
+        exam__year=academic_year,
+        exam__is_active=True,
+        exam__module__is_active=True,
+    )
+    for attempt in osce_attempts:
+        total_possible = attempt.total_questions + attempt.practical_total
+        if total_possible:
+            attempts.append({
+                'score': round((attempt.mcq_score + attempt.practical_score) / total_possible * 100),
+                'submitted_at': attempt.submitted_at,
+                'pk': attempt.pk,
+            })
+
+    if not attempts:
+        return {
+            'highest_score': None,
+            'highest_score_date': None,
+            'latest_score': None,
+            'latest_score_date': None,
+        }
+
+    latest = max(attempts, key=lambda attempt: (attempt['submitted_at'], attempt['pk']))
+    highest = max(attempts, key=lambda attempt: (attempt['score'], attempt['submitted_at'], attempt['pk']))
+    return {
+        'highest_score': highest['score'],
+        'highest_score_date': highest['submitted_at'],
+        'latest_score': latest['score'],
+        'latest_score_date': latest['submitted_at'],
+    }
+
 def recent_badges(request):
     """Provide shared right-panel data for the signed-in student."""
     if not request.user.is_authenticated:
         return {
             'recent_badges': [],
+            'highest_score': None,
+            'highest_score_date': None,
+            'latest_score': None,
+            'latest_score_date': None,
             'performance_overview': {
                 'correct': 0, 'incorrect': 0, 'unattempted': 0, 'accuracy': 0,
                 'correct_percentage': 0, 'answered_percentage': 0,
@@ -44,6 +102,7 @@ def recent_badges(request):
     if not academic_year:
         return {
             'recent_badges': _recent_badges_for(request.user),
+            **_score_summary_for(request.user, academic_year),
             'performance_overview': {
                 'correct': 0, 'incorrect': 0, 'unattempted': 0, 'accuracy': 0,
                 'correct_percentage': 0, 'answered_percentage': 0,
@@ -126,5 +185,6 @@ def recent_badges(request):
 
     return {
         'recent_badges': _recent_badges_for(request.user),
+        **_score_summary_for(request.user, academic_year),
         'performance_overview': performance_overview,
     }

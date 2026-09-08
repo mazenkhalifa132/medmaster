@@ -114,6 +114,10 @@ class Badge(models.Model):
     )
 
     name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(
+        blank=True,
+        help_text='Explain what the student accomplished to earn this badge.',
+    )
     color = models.CharField(max_length=20, default='#7c3aed', help_text='CSS color, for example #7c3aed.')
     image_url = models.URLField(help_text='Public URL of the badge image.')
     exam = models.ForeignKey(

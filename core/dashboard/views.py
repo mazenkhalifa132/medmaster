@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from exams.models import Exam, ExamAttempt
+from dashboard.models import TelegramGroup
 from modules.models import Module
 from notes.models import Note
 from osce.models import OSCEAttempt, OSCEExam
@@ -300,6 +301,15 @@ def home(request):
             'average_score': round((leaderboard_score / leaderboard_questions) * 100) if leaderboard_questions else 0,
         })
 
+    badge_progress = list(
+        Badge.objects.filter(awards__student=request.user).annotate(
+            earned_count=Count('awards'),
+            last_awarded_at=Max('awards__awarded_at'),
+        ).order_by('-last_awarded_at')[:12]
+    )
+    for badge in badge_progress:
+        badge.points_earned = badge.xp_reward * badge.earned_count
+
     return render(request, 'dashboard/home.html', {
         'active_page': 'dashboard',
         'student_progress': student_progress,
@@ -315,10 +325,7 @@ def home(request):
         'average_score_change': average_score_change,
         'average_score_change_display': average_score_change_display,
         'badges': StudentBadge.objects.filter(student=request.user).select_related('badge')[:12],
-        'badge_progress': Badge.objects.filter(awards__student=request.user).annotate(
-            earned_count=Count('awards'),
-            last_awarded_at=Max('awards__awarded_at'),
-        ).order_by('-last_awarded_at')[:12],
+        'badge_progress': badge_progress,
         'years': years,
         'modules_by_year': modules_by_year,
         'quizzes_by_year': quizzes_by_year,
@@ -329,11 +336,25 @@ def home(request):
         'note_filter_module': note_filter_module,
         'note_filter_date': note_filter_date,
         'leaderboard': leaderboard,
+        'telegram_group_url': _telegram_group_for(request.user.academic_year).public_url,
     })
 
+
+def _telegram_group_for(academic_year):
+    """Return the configured group, retaining the original feed as a safe fallback."""
+    return TelegramGroup.objects.filter(year=academic_year).first() or TelegramGroup(
+        year=academic_year or 1, handle='medmaster012'
+    )
+
+
+@login_required(login_url='auth')
 def telegram_feed(request):
-    url = "https://t.me/s/medmaster012"
-    res = requests.get(url)
+    group = _telegram_group_for(request.user.academic_year)
+    try:
+        res = requests.get(group.preview_url, timeout=10)
+        res.raise_for_status()
+    except requests.RequestException:
+        return JsonResponse([], safe=False)
 
     soup = BeautifulSoup(res.text, "html.parser")
 

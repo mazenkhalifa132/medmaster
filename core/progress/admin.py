@@ -242,7 +242,7 @@ class BadgeAdmin(admin.ModelAdmin):
     form = BadgeAdminForm
     fieldsets = (
         ('Badge details', {
-            'fields': ('name', 'color', 'image_url', 'xp_reward', 'rule_type', 'is_active'),
+            'fields': ('name', 'description', 'color', 'image_url', 'xp_reward', 'rule_type', 'is_active'),
         }),
         ('Exam targeting', {
             'fields': ('exam_year', 'exam_module', 'exam'),

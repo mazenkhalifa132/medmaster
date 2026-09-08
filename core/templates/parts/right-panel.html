@@ -46,7 +46,7 @@
         {% endif %}
     </div>
     <hr>
-    <div class="quick-access">
+    <!--<div class="quick-access">
         <div class="position-relative text-center" aria-label="Dr. X content coming soon">
             <div style="filter: blur(5px); user-select: none;" aria-hidden="true">
                 <h6 class="fw-bold mb-3">Dr. X</h6>
@@ -57,7 +57,72 @@
             <span class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-secondary px-3 py-2">Coming soon</span>
         </div>
     </div>
+    <hr>-->
+    <!-- Highest Score / Latest Score -->
+    <div class="mb-4{% if not has_active_academic_year %} premium-locked-section{% endif %}">
+        <div class="premium-lock-content">
+
+            <h6 class="fw-bold mb-3">
+                Highest Score – Latest Score
+            </h6>
+
+            <div class="score-comparison">
+
+                <!-- Highest Score -->
+                <div class="score-card">
+
+                    <div class="score-icon">
+                        <i class='bx bx-trophy'></i>
+                    </div>
+
+                    <div class="score-label">
+                        Highest Score
+                    </div>
+
+                    <div class="score-value">
+                        {% if highest_score is not None %}{{ highest_score }}%{% else %}—{% endif %}
+                    </div>
+
+                    <small class="score-date">
+                        {% if highest_score_date %}{{ highest_score_date|date:"M j, Y" }}{% else %}No attempts yet{% endif %}
+                    </small>
+
+                </div>
+
+                <!-- Latest Score -->
+                <div class="score-card">
+
+                    <div class="score-icon">
+                        <i class='bx bx-trending-up'></i>
+                    </div>
+
+                    <div class="score-label">
+                        Latest Score
+                    </div>
+
+                    <div class="score-value">
+                        {% if latest_score is not None %}{{ latest_score }}%{% else %}—{% endif %}
+                    </div>
+
+                    <small class="score-date">
+                        {% if latest_score_date %}{{ latest_score_date|date:"M j, Y" }}{% else %}No attempts yet{% endif %}
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% if not has_active_academic_year %}
+            <span class="premium-lock-label">
+                <i class="bx bx-lock-alt"></i> Premium
+            </span>
+        {% endif %}
+    </div>
+
     <hr>
+
     <div{% if not has_active_academic_year %} class="premium-locked-section"{% endif %}>
         <div class="premium-lock-content">
             <h6 class="fw-bold mb-3 d-flex justify-content-between align-items-center">Recent Badges
