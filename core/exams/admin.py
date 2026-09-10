@@ -23,11 +23,25 @@ class ModuleByYearSelect(Select):
         return option
 
 
+class ModuleDependentSelect(Select):
+    """Expose an exam setting's owning module to the admin JavaScript filter."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value and hasattr(value, 'instance'):
+            option['attrs']['data-module'] = value.instance.module_id
+        return option
+
+
 class ExamAdminForm(ModelForm):
     class Meta:
         model = Exam
         fields = '__all__'
-        widgets = {'module': ModuleByYearSelect}
+        widgets = {
+            'module': ModuleByYearSelect,
+            'subject': ModuleDependentSelect,
+            'week': ModuleDependentSelect,
+        }
 
     class Media:
         js = ('exams/admin/exam_module_filter.js',)
@@ -67,11 +81,11 @@ class ExamAdmin(nested_admin.NestedModelAdmin):
     form = ExamAdminForm
     inlines = (ExamQuestionInline,)
     change_form_template = 'admin/exams/exam/change_form.html'
-    list_display = ('name', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'is_trial', 'result', 'is_active')
+    list_display = ('name', 'order', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'is_trial', 'result', 'is_active')
     list_filter = ('exam_type', 'year', 'module', 'is_trial', 'is_active')
     search_fields = ('name', 'module__name')
-    ordering = ('year', 'module__order', 'name')
-    fields = ('year', 'module', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_trial', 'is_active')
+    ordering = ('year', 'module__order', 'order', 'name')
+    fields = ('year', 'module', 'subject', 'week', 'order', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_trial', 'is_active')
 
     def get_urls(self):
         urls = super().get_urls()

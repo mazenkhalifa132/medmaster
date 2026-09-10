@@ -184,7 +184,7 @@ def home(request):
     exams = Exam.objects.filter(
         is_active=True,
         module__is_active=True,
-    ).select_related('module').prefetch_related('questions', 'attempts')
+    ).select_related('module', 'subject', 'week').prefetch_related('questions', 'attempts')
     for exam in exams:
         is_locked = not can_access_content(request.user, exam)
         attempts = [attempt for attempt in exam.attempts.all() if attempt.student_id == request.user.id]
@@ -207,6 +207,8 @@ def home(request):
             'url': reverse('exam-detail', args=[exam.pk]),
             'title': exam.name,
             'module': exam.module.name,
+            'subject': exam.subject.name if exam.subject_id else '',
+            'week': exam.week.name if exam.week_id else '',
             'type': exam.exam_type,
             'qs': len(exam.questions.all()),
             'retries': retries_available,

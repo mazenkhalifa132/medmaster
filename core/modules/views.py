@@ -28,7 +28,7 @@ def module_detail(request, pk):
             module=module, is_active=True, is_trial=False
         ).exists(),
     }
-    exams = Exam.objects.filter(module=module, is_active=True).prefetch_related('questions')
+    exams = Exam.objects.filter(module=module, is_active=True).order_by('order', 'name').prefetch_related('questions')
     osce_exams = OSCEExam.objects.filter(module=module, is_active=True).prefetch_related('questions')
     study_files = list(
         StudyFile.objects.filter(module=module).select_related('subcategory').order_by(

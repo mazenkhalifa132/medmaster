@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Module
+from .models import Module, ModuleExamSubject, ModuleExamWeek
 
 
 class ModuleAdminForm(forms.ModelForm):
@@ -20,9 +20,22 @@ class ModuleAdminForm(forms.ModelForm):
         }
 
 
+class ModuleExamSubjectInline(admin.TabularInline):
+    model = ModuleExamSubject
+    extra = 1
+    fields = ('name', 'order')
+
+
+class ModuleExamWeekInline(admin.TabularInline):
+    model = ModuleExamWeek
+    extra = 1
+    fields = ('name', 'order')
+
+
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
     form = ModuleAdminForm
+    inlines = (ModuleExamSubjectInline, ModuleExamWeekInline)
     list_display = (
         'name', 'year', 'order', 'has_lessons', 'has_videos', 'has_files', 'has_text',
         'has_exams', 'has_osce', 'image_url', 'is_active',
@@ -39,3 +52,6 @@ class ModuleAdmin(admin.ModelAdmin):
             'fields': ('image_url', 'color', 'bg_color', 'btn_color', 'sections_count'),
         }),
     )
+
+    class Media:
+        js = ('modules/admin/exam_section_settings.js',)

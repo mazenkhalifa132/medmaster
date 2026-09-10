@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.conf import settings
 
-from modules.models import Module
+from modules.models import Module, ModuleExamSubject, ModuleExamWeek
 
 
 class Exam(models.Model):
@@ -21,7 +21,16 @@ class Exam(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)],
     )
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='exams')
+    subject = models.ForeignKey(
+        ModuleExamSubject, on_delete=models.SET_NULL, related_name='exams', blank=True, null=True,
+        help_text='Subjects are configured in the selected module.',
+    )
+    week = models.ForeignKey(
+        ModuleExamWeek, on_delete=models.SET_NULL, related_name='exams', blank=True, null=True,
+        help_text='Weeks are configured in the selected module.',
+    )
     name = models.CharField(max_length=200)
+    order = models.PositiveSmallIntegerField(default=1)
     exam_type = models.CharField(
         max_length=10,
         choices=EXAM_TYPE_CHOICES,
@@ -38,7 +47,7 @@ class Exam(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ('year', 'module__order', 'name')
+        ordering = ('year', 'module__order', 'order', 'name')
         constraints = [
             models.UniqueConstraint(
                 fields=('module', 'name'), name='unique_exam_name_per_module'
@@ -49,6 +58,10 @@ class Exam(models.Model):
         super().clean()
         if self.module_id and self.year != self.module.year:
             raise ValidationError({'module': 'The module must belong to the selected exam year.'})
+        if self.subject_id and self.subject.module_id != self.module_id:
+            raise ValidationError({'subject': 'Choose a subject configured for the selected module.'})
+        if self.week_id and self.week.module_id != self.module_id:
+            raise ValidationError({'week': 'Choose a week configured for the selected module.'})
 
     @property
     def question_count(self):

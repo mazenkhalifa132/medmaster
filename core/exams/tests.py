@@ -1,6 +1,33 @@
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from .bulk_import import BulkQuestionImportError, parse_questions
+from .models import Exam
+from modules.models import Module
+
+
+class ExamOrderingTests(TestCase):
+    def test_exams_are_ordered_by_order_then_name(self):
+        module = Module.objects.create(
+            year=1,
+            name='Anatomy',
+            image_url='https://example.com/anatomy.png',
+        )
+        later_exam = Exam.objects.create(
+            year=1,
+            module=module,
+            name='First by name',
+            order=2,
+            time_limit=20,
+        )
+        first_exam = Exam.objects.create(
+            year=1,
+            module=module,
+            name='Second by name',
+            order=1,
+            time_limit=20,
+        )
+
+        self.assertEqual(list(module.exams.all()), [first_exam, later_exam])
 
 
 class BulkQuestionParserTests(SimpleTestCase):

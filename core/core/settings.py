@@ -99,7 +99,8 @@ DATABASES = {
     }
 }
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # أو أي رقم أكبر يناسبك
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 ميجابايت
 # ----------------------------------------
 # التحقق من كلمات المرور (متغيرش فيها)
 AUTH_PASSWORD_VALIDATORS = [

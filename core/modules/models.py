@@ -48,3 +48,41 @@ class Module(models.Model):
         query = [(key, value) for key, value in parse_qsl(url_parts.query) if key != 'color']
         query.append(('color', self.color))
         return urlunsplit((*url_parts[:3], urlencode(query), url_parts.fragment))
+
+
+class ModuleExamSubject(models.Model):
+    """A subject that can be selected by exams within one module."""
+
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='exam_subjects')
+    name = models.CharField(max_length=100)
+    order = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ('order', 'name')
+        constraints = [
+            models.UniqueConstraint(fields=('module', 'name'), name='unique_exam_subject_per_module'),
+        ]
+        verbose_name = 'exam subject'
+        verbose_name_plural = 'Exam subjects'
+
+    def __str__(self):
+        return self.name
+
+
+class ModuleExamWeek(models.Model):
+    """A configurable week/period that can be selected by exams within one module."""
+
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='exam_weeks')
+    name = models.CharField(max_length=100, help_text='For example: Week 1, Week 2, or Revision week.')
+    order = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ('order', 'name')
+        constraints = [
+            models.UniqueConstraint(fields=('module', 'name'), name='unique_exam_week_per_module'),
+        ]
+        verbose_name = 'exam week'
+        verbose_name_plural = 'Exam weeks'
+
+    def __str__(self):
+        return self.name
