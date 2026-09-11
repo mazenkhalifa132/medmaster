@@ -7,3 +7,12 @@ __pycache__/
 staticfiles/
 media/
 db.sqlite3
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+staticfiles/
+media/
+*.log
