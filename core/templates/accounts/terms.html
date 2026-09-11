@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block auth_content %}
+<style>
+    .terms-page { min-height: 100vh; padding: 48px 16px; }
+    .terms-card { max-width: 920px; margin: 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 12px 36px rgba(15, 23, 42, .12); overflow: hidden; }
+    .terms-hero { padding: 32px 40px; color: #fff; background: linear-gradient(135deg, #1d4ed8, #2563eb); }
+    .terms-hero img { width: 46px; height: 46px; object-fit: contain; border-radius: 9px; background: #fff; }
+    .terms-content { padding: 38px 40px 48px; }
+    .terms-document { margin: 0; color: #334155; font: 400 .94rem/1.7 Inter, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+    @media (max-width: 576px) { .terms-page { padding: 20px 10px; } .terms-hero, .terms-content { padding: 26px 22px; } }
+</style>
+
+<main class="terms-page">
+    <article class="terms-card">
+        <header class="terms-hero">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <img src="https://res.cloudinary.com/dxmbqh0mc/image/upload/v1787287258/logo_qqnbvv.png" alt="Med Master logo">
+                <div><h1 class="h3 mb-0 fw-bold">MedMaster</h1><span class="small">Master Your Future</span></div>
+            </div>
+            <h2 class="h3 mb-0 text-white">Terms &amp; Conditions</h2>
+        </header>
+        <div class="terms-content">
+            <pre class="terms-document">{{ terms_text }}</pre>
+        </div>
+    </article>
+</main>
+{% endblock %}

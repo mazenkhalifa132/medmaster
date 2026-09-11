@@ -1,0 +1,1301 @@
+# MEDMASTER — TERMS & CONDITIONS
+
+**Last Updated:** [DATE]
+
+**Effective Date:** [DATE]
+
+Welcome to **MedMaster** ("MedMaster", "we", "us", or "our").
+
+These Terms & Conditions ("Terms", "Terms and Conditions", or "Agreement") govern your access to and use of the MedMaster website, platform, applications, educational materials, online examinations, simulations, videos, documents, services, subscriptions, and any other products or services provided by MedMaster (collectively, the "Platform").
+
+By accessing, registering for, purchasing, subscribing to, or using the Platform in any way, you acknowledge that you have read, understood, and agreed to be legally bound by these Terms.
+
+If you do not agree to these Terms, you must not access or use the Platform.
+
+---
+
+# 1. DEFINITIONS
+
+For the purposes of these Terms:
+
+**"MedMaster"** means the MedMaster educational platform and its owners, operators, administrators, employees, contractors, representatives, affiliates, and authorized service providers.
+
+**"User", "you", or "your"** means any individual or entity accessing or using the Platform.
+
+**"Account"** means a registered user account created to access the Platform.
+
+**"Subscription"** means any paid or free access plan, course access, module access, examination access, membership, or other access package offered by MedMaster.
+
+**"Content"** means all materials made available through the Platform, including but not limited to text, explanations, questions, answers, images, diagrams, illustrations, videos, audio, PDFs, documents, presentations, simulations, software, code, graphics, logos, trademarks, user interfaces, databases, and educational materials.
+
+**"Educational Content"** means Content intended to assist users with academic learning, examination preparation, medical education, or related educational purposes.
+
+**"Third-Party Services"** means external services, websites, hosting providers, payment providers, video providers, cloud-storage providers, analytics providers, authentication services, or other third-party systems integrated with or linked to the Platform.
+
+---
+
+# 2. ELIGIBILITY
+
+You may use MedMaster only if you are legally capable of entering into a binding agreement under applicable law.
+
+If you are under the age required by applicable law to enter into contracts independently, you may use the Platform only with the involvement and consent of your parent or legal guardian where required.
+
+By creating an Account, you represent that:
+
+1. The information you provide is accurate and truthful.
+2. You are legally permitted to use the Platform.
+3. You will comply with these Terms.
+4. You will not create an Account for fraudulent or unlawful purposes.
+5. You will not impersonate another person.
+6. You will not use another person's identity or credentials without authorization.
+
+MedMaster reserves the right to refuse registration or terminate an Account where reasonably necessary to protect the Platform, its users, or its legal interests.
+
+---
+
+# 3. ACCEPTANCE OF THESE TERMS
+
+By clicking an acceptance checkbox, creating an Account, purchasing a Subscription, or continuing to use the Platform after being presented with these Terms, you acknowledge that you accept these Terms.
+
+If you use the Platform on behalf of another person, organization, institution, or entity, you represent that you have the authority to accept these Terms on its behalf.
+
+These Terms constitute the agreement between you and MedMaster regarding your use of the Platform.
+
+---
+
+# 4. CHANGES TO THESE TERMS
+
+MedMaster may modify, update, replace, or amend these Terms from time to time.
+
+Changes may be made for reasons including:
+
+* Changes to applicable laws or regulations.
+* Changes to the Platform.
+* Addition or removal of features.
+* Changes to business operations.
+* Security requirements.
+* Prevention of abuse or fraud.
+* Changes in payment or subscription systems.
+* Clarification of existing provisions.
+
+The updated Terms will become effective when posted on the Platform unless a different effective date is stated.
+
+Your continued use of the Platform after the effective date of revised Terms constitutes acceptance of the updated Terms.
+
+If you do not agree to the revised Terms, you must stop using the Platform.
+
+---
+
+# 5. MEDMASTER IS AN EDUCATIONAL PLATFORM
+
+MedMaster is an educational and examination-preparation platform.
+
+The Platform is designed to assist students in learning, practicing, revising, and preparing for academic examinations.
+
+MedMaster does not guarantee that using the Platform will:
+
+* Result in passing an examination.
+* Result in obtaining a particular grade.
+* Result in academic promotion.
+* Result in admission to any institution.
+* Result in obtaining a degree or qualification.
+* Result in employment.
+* Result in professional licensing.
+* Result in professional certification.
+* Improve academic performance by any particular amount.
+
+Academic results depend on numerous factors outside MedMaster's control, including individual preparation, examination difficulty, institutional requirements, teaching quality, examination policies, and individual performance.
+
+You are solely responsible for your academic decisions and preparation.
+
+---
+
+# 6. MEDICAL DISCLAIMER
+
+## 6.1 Educational Purpose Only
+
+Some MedMaster Content may concern medicine, healthcare, diagnosis, anatomy, physiology, pharmacology, pathology, surgery, clinical examination, laboratory medicine, or other healthcare-related subjects.
+
+Such Content is provided **for educational and academic purposes only**.
+
+The Platform is not intended to replace:
+
+* Professional medical advice.
+* Diagnosis by a qualified healthcare professional.
+* Treatment provided by a qualified healthcare professional.
+* Clinical supervision.
+* Hospital or institutional protocols.
+* Official medical guidelines.
+* Professional consultation.
+
+You must not rely solely on MedMaster Content when making decisions concerning the diagnosis, treatment, management, or care of a real patient.
+
+---
+
+## 6.2 Clinical Use
+
+Users who are students, healthcare professionals, or other individuals must independently verify information before using it in a clinical or professional environment.
+
+Clinical decisions must be based on appropriate professional judgment, current evidence, institutional policies, applicable regulations, and qualified supervision where appropriate.
+
+MedMaster shall not be responsible for any injury, loss, damage, adverse outcome, incorrect diagnosis, incorrect treatment, medication error, procedural error, or other consequence arising from reliance on Platform Content.
+
+---
+
+## 6.3 Educational Errors
+
+Although MedMaster makes reasonable efforts to provide accurate educational material, medical knowledge changes continuously.
+
+Information may become outdated, incomplete, inaccurate, or inconsistent with newer research, guidelines, textbooks, institutional policies, or professional standards.
+
+MedMaster does not warrant that every piece of Educational Content is:
+
+* Complete.
+* Current.
+* Error-free.
+* Appropriate for every curriculum.
+* Appropriate for every institution.
+* Appropriate for every examination.
+* Consistent with every medical guideline.
+
+Users should verify important information using authoritative sources.
+
+---
+
+# 7. ACCOUNTS
+
+Certain Platform features require registration.
+
+You are responsible for maintaining the confidentiality of your Account credentials.
+
+You must not:
+
+* Share your password.
+* Give your Account to another person.
+* Sell your Account.
+* Rent your Account.
+* Transfer your Account without authorization.
+* Allow unauthorized users to access paid Content.
+* Use another user's Account.
+* Attempt to obtain another user's credentials.
+
+You are responsible for all activity occurring through your Account unless you can demonstrate that such activity occurred without your authorization and despite reasonable security precautions.
+
+If you believe that your Account has been compromised, you must notify MedMaster as soon as reasonably possible.
+
+MedMaster may temporarily suspend an Account where there is evidence of unauthorized access, credential sharing, fraud, abuse, or other suspicious activity.
+
+---
+
+# 8. ACCURACY OF ACCOUNT INFORMATION
+
+You agree to provide accurate and current information during registration.
+
+You must not intentionally provide:
+
+* False names.
+* False academic information.
+* Fraudulent contact information.
+* Another person's information.
+* Misleading information intended to bypass Platform restrictions.
+
+MedMaster may request reasonable verification where necessary to investigate suspected fraud, unauthorized access, abuse, or payment disputes.
+
+---
+
+# 9. SUBSCRIPTIONS AND PAID ACCESS
+
+MedMaster may offer free and paid access plans.
+
+Paid access may provide access to specific Content, modules, examinations, simulations, videos, documents, or other features for a specified period.
+
+The exact features included in each Subscription will be communicated at the time of purchase or activation.
+
+MedMaster reserves the right to change future Subscription plans, pricing, features, or availability.
+
+Such changes will generally not retroactively remove access that has already been validly purchased for a defined period, except where necessary due to legal, security, technical, or other circumstances outside MedMaster's reasonable control.
+
+---
+
+# 10. SUBSCRIPTION PERIOD
+
+Unless expressly stated otherwise, access to paid Content is provided only for the Subscription period specified at the time of purchase.
+
+Access does not automatically imply permanent ownership of the Content.
+
+When a Subscription expires, access to Subscription-restricted Content may be removed automatically.
+
+MedMaster is not required to maintain access to expired Subscription Content.
+
+---
+
+# 11. ACCOUNT ACTIVATION AND ACCESS
+
+MedMaster may use activation systems, payment verification, manual activation, codes, subscriptions, or other mechanisms to control access to paid Content.
+
+Activation codes, access codes, promotional codes, or similar credentials may:
+
+* Be limited to one Account.
+* Have an expiration date.
+* Be restricted to certain Content.
+* Be non-transferable.
+* Be revoked where fraud or abuse is suspected.
+
+Attempting to bypass an activation mechanism is prohibited.
+
+---
+
+# 12. PAYMENTS
+
+Where applicable, payments may be processed through third-party payment providers.
+
+MedMaster may not directly process or store all payment information.
+
+By making a payment, you agree to provide accurate payment information and authorize the applicable payment provider to process the transaction.
+
+You are responsible for any fees imposed by your bank, card provider, telecommunications provider, payment provider, or other third party.
+
+A successful payment does not grant you ownership of MedMaster's Content.
+
+It grants you the access rights expressly associated with the purchased Subscription.
+
+---
+
+# 13. PRICES
+
+MedMaster may change its prices at any time for future purchases.
+
+Price changes will not automatically modify a Subscription period that has already been purchased unless permitted or required by applicable law.
+
+MedMaster may make promotional offers, discounts, coupons, or special pricing available from time to time.
+
+Promotional offers may be subject to additional conditions.
+
+Unless explicitly stated otherwise, promotional offers cannot be combined.
+
+---
+
+# 14. REFUND POLICY
+
+Unless otherwise required by applicable law, payments for digital educational Content, subscriptions, downloadable materials, or access that has already been activated may be non-refundable once access has been provided.
+
+However, MedMaster may, at its sole discretion, issue refunds in exceptional circumstances.
+
+Examples may include:
+
+* Duplicate payment.
+* Technical failure preventing access.
+* Unauthorized payment where adequately established.
+* Incorrect charge caused by a Platform error.
+
+A request for a refund does not automatically guarantee a refund.
+
+Where required by applicable consumer-protection laws, the applicable statutory rights will prevail over this section.
+
+---
+
+# 15. CHARGEBACKS AND PAYMENT DISPUTES
+
+You agree to contact MedMaster first regarding any billing issue before initiating a payment chargeback where reasonably possible.
+
+Fraudulent or abusive chargebacks may result in:
+
+* Suspension of the Account.
+* Termination of access.
+* Cancellation of active Subscriptions.
+* Investigation of the transaction.
+* Legal action where appropriate.
+
+Nothing in this section limits any rights you may have under mandatory applicable law.
+
+---
+
+# 16. NO SHARING OF PAID CONTENT
+
+Paid Content is licensed to the individual Account holder unless MedMaster expressly states otherwise.
+
+You may not:
+
+* Share paid Content publicly.
+* Upload paid Content to Telegram.
+* Upload paid Content to WhatsApp groups.
+* Upload paid Content to Facebook groups.
+* Upload paid Content to Discord.
+* Upload paid Content to Google Drive or similar services.
+* Sell copies of MedMaster Content.
+* Give Content to classmates.
+* Redistribute Content through university groups.
+* Record and redistribute Platform videos.
+* Screen-record restricted Content for redistribution.
+* Reproduce examination questions for unauthorized distribution.
+
+Unauthorized sharing may result in immediate suspension or termination.
+
+---
+
+# 17. ANTI-PIRACY AND ANTI-CIRCUMVENTION
+
+You agree not to attempt to bypass, disable, defeat, or circumvent any technical protection used by MedMaster.
+
+This includes attempts to:
+
+* Bypass subscription restrictions.
+* Circumvent authentication.
+* Manipulate API requests.
+* Modify client-side restrictions to obtain unauthorized access.
+* Extract protected Content.
+* Scrape examination databases.
+* Reverse engineer access controls.
+* Exploit vulnerabilities to access restricted Content.
+* Use automated systems to download Content in bulk.
+* Circumvent user limits.
+* Share authentication tokens or session credentials.
+
+MedMaster may investigate suspected violations and take appropriate action.
+
+---
+
+# 18. WATERMARKS AND IDENTIFICATION
+
+MedMaster may display identifying information, including usernames or Account identifiers, on certain Content, videos, documents, images, or other materials.
+
+Such identifiers may be used to discourage unauthorized redistribution and assist in investigating piracy.
+
+You must not remove, obscure, modify, crop, alter, or attempt to conceal such identifiers.
+
+---
+
+# 19. EXAMINATIONS AND ASSESSMENTS
+
+MedMaster may provide MCQs, OSCE simulations, OSPE simulations, clinical scenarios, quizzes, assessments, practice stations, or similar educational activities.
+
+These activities are designed for learning and practice.
+
+They are not necessarily official examinations and are not necessarily affiliated with any university, faculty, hospital, examination board, ministry, licensing authority, or professional organization.
+
+MedMaster does not guarantee that Platform questions will appear in any real examination.
+
+---
+
+# 20. EXAMINATION INTEGRITY
+
+Users must not intentionally manipulate examination systems.
+
+Prohibited conduct includes:
+
+* Using unauthorized external assistance where prohibited.
+* Sharing answers during restricted assessments.
+* Exploiting technical bugs to obtain answers.
+* Manipulating timers.
+* Manipulating scores.
+* Altering requests sent to the server.
+* Accessing hidden answers through unauthorized means.
+* Inspecting restricted databases.
+* Attempting to access another user's results.
+* Using automated scripts to manipulate attempts or scores.
+
+MedMaster may invalidate attempts or scores obtained through prohibited conduct.
+
+---
+
+# 21. RETRIES AND ATTEMPTS
+
+Where the Platform limits the number of attempts, the limitation applies to the Account associated with the attempt.
+
+Attempt limits may not be circumvented by:
+
+* Creating multiple Accounts.
+* Using another person's Account.
+* Manipulating technical systems.
+* Repeatedly registering using false information.
+
+MedMaster may invalidate attempts associated with circumvention.
+
+---
+
+# 22. USER-GENERATED CONTENT
+
+If MedMaster allows users to submit comments, messages, feedback, questions, reviews, suggestions, images, or other materials ("User Content"), you remain responsible for the User Content you submit.
+
+You must not submit Content that:
+
+* Violates applicable law.
+* Infringes intellectual-property rights.
+* Contains malware.
+* Contains unauthorized personal information.
+* Is defamatory.
+* Is threatening.
+* Is abusive.
+* Is fraudulent.
+* Is sexually explicit where prohibited.
+* Promotes unlawful activity.
+* Impersonates another person.
+* Attempts to manipulate or damage the Platform.
+
+MedMaster reserves the right to remove User Content that violates these Terms or that MedMaster reasonably believes may create legal, security, reputational, or operational risk.
+
+---
+
+# 23. USER FEEDBACK
+
+If you voluntarily submit suggestions, ideas, recommendations, corrections, feature requests, or other feedback to MedMaster, you acknowledge that MedMaster may use such feedback to improve the Platform without owing you compensation, unless otherwise agreed in writing.
+
+You should not submit confidential business ideas or proprietary information that you expect MedMaster to keep confidential unless a separate written agreement exists.
+
+---
+
+# 24. INTELLECTUAL PROPERTY
+
+All MedMaster Content, branding, software, design, graphics, logos, names, interfaces, databases, educational materials, examination systems, simulations, written explanations, videos, illustrations, and other original materials are owned by or licensed to MedMaster unless expressly stated otherwise.
+
+These materials are protected by applicable intellectual-property laws.
+
+Nothing in these Terms transfers ownership of MedMaster intellectual property to you.
+
+---
+
+# 25. LIMITED LICENSE TO USERS
+
+Subject to these Terms and any applicable Subscription, MedMaster grants you a limited, personal, non-exclusive, non-transferable, revocable license to access and use the Platform for personal educational purposes.
+
+You may not:
+
+* Resell the Platform.
+* Commercialize Platform Content.
+* Copy substantial portions of the Platform.
+* Create derivative products from Platform Content.
+* Reproduce paid materials for distribution.
+* Publicly display restricted Content.
+* Use Platform Content to create a competing commercial platform without written permission.
+* Systematically extract Platform Content.
+
+---
+
+# 26. COPYRIGHT COMPLAINTS
+
+MedMaster respects intellectual-property rights.
+
+If you believe Content available on the Platform infringes your copyright or other intellectual-property rights, you should contact MedMaster using the official contact information provided on the Platform.
+
+Your notice should provide sufficient information to identify:
+
+* The protected work.
+* The allegedly infringing material.
+* Your relationship to the rights holder.
+* The basis of your claim.
+* Contact information through which the matter can be investigated.
+
+MedMaster may remove or restrict allegedly infringing Content while investigating a legitimate complaint.
+
+---
+
+# 27. THIRD-PARTY CONTENT
+
+The Platform may contain links to or integrations with third-party services.
+
+MedMaster does not necessarily control third-party services.
+
+Third-party services may have their own:
+
+* Terms of service.
+* Privacy policies.
+* Fees.
+* Availability limitations.
+* Security practices.
+* Content policies.
+
+MedMaster is not responsible for the independent operation of third-party services.
+
+---
+
+# 28. HOSTING, STORAGE, VIDEO AND CLOUD SERVICES
+
+MedMaster may rely on external hosting, cloud storage, video delivery, content-delivery networks, databases, analytics services, authentication providers, or other technology providers.
+
+Temporary interruptions or failures of such services may affect Platform availability.
+
+MedMaster will make reasonable efforts to restore affected services but does not guarantee uninterrupted availability.
+
+---
+
+# 29. PLATFORM AVAILABILITY
+
+MedMaster does not guarantee that the Platform will always be:
+
+* Available.
+* Uninterrupted.
+* Error-free.
+* Secure from every possible attack.
+* Compatible with every device.
+* Compatible with every browser.
+* Free of technical defects.
+
+The Platform may occasionally become unavailable because of:
+
+* Maintenance.
+* Updates.
+* Server failures.
+* Hosting problems.
+* Internet outages.
+* Cybersecurity incidents.
+* Software bugs.
+* Third-party failures.
+* Force majeure events.
+* Government action.
+* Events beyond MedMaster's reasonable control.
+
+---
+
+# 30. SOFTWARE AND TECHNICAL REQUIREMENTS
+
+Certain Platform features may require a compatible:
+
+* Computer.
+* Smartphone.
+* Tablet.
+* Browser.
+* Operating system.
+* Internet connection.
+
+You are responsible for maintaining the hardware, software, browser, and Internet connection necessary to use the Platform.
+
+MedMaster is not responsible for problems caused exclusively by your device, Internet connection, browser, operating system, extensions, security software, or incompatible hardware.
+
+---
+
+# 31. SECURITY
+
+You must not attempt to compromise Platform security.
+
+Prohibited activities include:
+
+* Unauthorized penetration testing.
+* Vulnerability exploitation.
+* Brute-force attacks.
+* Credential stuffing.
+* Denial-of-service attacks.
+* Malware deployment.
+* Unauthorized database access.
+* Unauthorized API access.
+* Accessing restricted administrative interfaces.
+* Attempting to obtain other users' information.
+* Circumventing security controls.
+
+If you discover a security vulnerability, you should report it responsibly to MedMaster rather than exploiting it.
+
+---
+
+# 32. AUTOMATED ACCESS AND SCRAPING
+
+Unless expressly authorized by MedMaster, you may not use bots, crawlers, scrapers, automated scripts, data-mining tools, or similar systems to systematically access or extract Platform data.
+
+This includes attempts to automatically collect:
+
+* Questions.
+* Answers.
+* Explanations.
+* User information.
+* Scores.
+* Course materials.
+* URLs.
+* API responses.
+* Database content.
+
+---
+
+# 33. PROHIBITED USE
+
+You agree not to use the Platform:
+
+1. For unlawful purposes.
+2. To violate another person's rights.
+3. To commit fraud.
+4. To impersonate another person.
+5. To distribute malware.
+6. To attack the Platform.
+7. To circumvent access controls.
+8. To redistribute paid Content.
+9. To build unauthorized competing services using MedMaster Content.
+10. To interfere with other users' access.
+11. To manipulate rankings or scores.
+12. To exploit bugs for unfair advantage.
+13. To access data belonging to another user.
+14. To upload unlawful Content.
+15. To conduct unauthorized security testing.
+16. To use the Platform in a manner that creates unreasonable legal or operational risk for MedMaster.
+
+---
+
+# 34. SUSPENSION AND TERMINATION
+
+MedMaster may suspend, restrict, or terminate an Account if it reasonably believes that the user:
+
+* Violated these Terms.
+* Engaged in fraud.
+* Shared paid Content.
+* Circumvented access restrictions.
+* Attacked or attempted to compromise the Platform.
+* Used multiple Accounts to circumvent restrictions.
+* Submitted unlawful or harmful Content.
+* Misused payment systems.
+* Engaged in harassment or abuse.
+* Created legal or security risks.
+
+Where appropriate and legally required, MedMaster may provide notice before termination.
+
+However, immediate suspension or termination may occur where necessary to prevent fraud, security threats, piracy, abuse, or significant harm.
+
+---
+
+# 35. EFFECT OF TERMINATION
+
+Upon termination:
+
+* Your right to use restricted Platform features may end immediately.
+* Your Subscription may be cancelled.
+* Access to paid Content may be removed.
+* Certain Account information may be retained where legally required or reasonably necessary for legitimate business purposes.
+* Provisions concerning intellectual property, liability, indemnification, dispute resolution, and other provisions intended to survive termination will remain effective.
+
+Termination does not automatically release you from obligations incurred before termination.
+
+---
+
+# 36. DISCLAIMER OF WARRANTIES
+
+To the maximum extent permitted by applicable law, the Platform and its Content are provided on an "AS IS" and "AS AVAILABLE" basis.
+
+MedMaster makes no representation or warranty that the Platform will be:
+
+* Accurate in every respect.
+* Complete.
+* Continuously available.
+* Error-free.
+* Free from harmful code.
+* Suitable for every particular purpose.
+* Compatible with every device.
+* Consistent with every educational institution's curriculum.
+* Consistent with every examination.
+
+To the extent permitted by applicable law, all warranties not expressly stated in these Terms are excluded.
+
+Nothing in these Terms excludes any warranty or right that cannot legally be excluded.
+
+---
+
+# 37. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by applicable law, MedMaster and its owners, operators, employees, contractors, affiliates, representatives, and service providers shall not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages arising from or relating to your use of the Platform.
+
+This may include, to the extent legally permitted:
+
+* Loss of academic opportunities.
+* Loss of examination opportunities.
+* Loss of grades.
+* Loss of income.
+* Loss of business.
+* Loss of data.
+* Loss of reputation.
+* Loss of expected results.
+* Loss arising from technical interruption.
+* Loss resulting from reliance on Educational Content.
+
+To the maximum extent permitted by applicable law, MedMaster's aggregate liability arising from your use of the Platform shall not exceed the amount you actually paid to MedMaster for the relevant Service during the [3/6/12] months preceding the event giving rise to the claim.
+
+This limitation does not apply where liability cannot legally be limited or excluded under applicable law.
+
+---
+
+# 38. NO GUARANTEE OF RESULTS
+
+MedMaster does not guarantee any particular educational outcome.
+
+You acknowledge that:
+
+* Studying is your responsibility.
+* Examination results are outside MedMaster's control.
+* Individual performance differs between users.
+* No question bank can guarantee examination questions.
+* No simulator can guarantee clinical competence.
+* No educational platform can guarantee passing an examination.
+
+---
+
+# 39. INDEMNIFICATION
+
+To the maximum extent permitted by applicable law, you agree to indemnify and hold harmless MedMaster, its owners, operators, employees, contractors, representatives, affiliates, and service providers from claims, losses, liabilities, damages, costs, and expenses arising from or related to:
+
+1. Your violation of these Terms.
+2. Your misuse of the Platform.
+3. Your violation of applicable law.
+4. Your infringement of intellectual-property rights.
+5. Your User Content.
+6. Your unauthorized redistribution of Platform Content.
+7. Your fraudulent activity.
+8. Your unauthorized access to another Account.
+9. Your attempts to compromise Platform security.
+10. Your use of Educational Content in a manner inconsistent with these Terms.
+
+This provision applies to the maximum extent permitted by applicable law.
+
+---
+
+# 40. FORCE MAJEURE
+
+MedMaster shall not be responsible for failure or delay caused by circumstances beyond its reasonable control.
+
+Such circumstances may include:
+
+* Natural disasters.
+* Fires.
+* Floods.
+* Severe weather.
+* Wars.
+* Civil unrest.
+* Government actions.
+* Internet infrastructure failures.
+* Telecommunications failures.
+* Major cybersecurity incidents.
+* Widespread service outages.
+* Hosting-provider failures.
+* Power outages.
+* Pandemics or similar events.
+* Labor disruptions.
+* Other events beyond reasonable control.
+
+---
+
+# 41. DATA AND PRIVACY
+
+Your use of MedMaster may involve the collection and processing of personal information.
+
+Such processing will be governed by the MedMaster Privacy Policy and applicable law.
+
+You should review the Privacy Policy before using the Platform.
+
+MedMaster may retain certain information where reasonably necessary for:
+
+* Account management.
+* Payment records.
+* Security.
+* Fraud prevention.
+* Legal compliance.
+* Dispute resolution.
+* Platform operation.
+* Backup and disaster recovery.
+* Enforcement of these Terms.
+
+---
+
+# 42. USER COMMUNICATIONS
+
+By registering for MedMaster, you may receive communications relating to:
+
+* Account activity.
+* Security.
+* Payments.
+* Subscription status.
+* Service updates.
+* Important administrative notices.
+
+Where applicable law requires consent for marketing communications, MedMaster will provide appropriate options to manage such communications.
+
+You may not opt out of essential transactional or security communications where they are necessary to operate your Account.
+
+---
+
+# 43. RANKINGS, POINTS, BADGES AND GAMIFICATION
+
+MedMaster may provide points, rankings, badges, scores, achievements, leaderboards, or other gamification features.
+
+These features are primarily intended to encourage learning and engagement.
+
+MedMaster may:
+
+* Modify scoring systems.
+* Correct erroneous scores.
+* Remove fraudulent points.
+* Reset rankings.
+* Change badge requirements.
+* Remove leaderboard entries obtained through prohibited conduct.
+
+Gamification scores do not necessarily represent official academic grades.
+
+---
+
+# 44. CONTENT CHANGES
+
+MedMaster may add, modify, remove, reorganize, update, replace, or discontinue Content or features.
+
+Educational material may be updated to reflect:
+
+* New information.
+* Corrections.
+* Curriculum changes.
+* User feedback.
+* Technical improvements.
+* Changes in educational strategy.
+
+MedMaster does not guarantee that a particular Content item will remain permanently available.
+
+---
+
+# 45. ERRORS AND CORRECTIONS
+
+MedMaster may contain typographical, technical, educational, pricing, or other errors.
+
+MedMaster reserves the right to correct errors without prior notice.
+
+If an error materially affects access, payment, or functionality, MedMaster may take reasonable corrective action.
+
+---
+
+# 46. USER RESPONSIBILITY FOR BACKUP
+
+Where users are permitted to upload or store their own materials on the Platform, users should maintain independent backups.
+
+MedMaster does not guarantee permanent storage of User Content.
+
+MedMaster may delete or lose User Content due to technical failures, account termination, storage policies, security incidents, or other circumstances.
+
+---
+
+# 47. UNIVERSITY AND INSTITUTIONAL AFFILIATION
+
+Unless expressly stated otherwise, MedMaster is not affiliated with, endorsed by, sponsored by, or officially associated with any university, medical school, hospital, government authority, examination board, professional organization, or licensing authority.
+
+References to universities, medical schools, examinations, courses, curricula, or academic subjects are for educational or informational purposes unless expressly stated otherwise.
+
+---
+
+# 48. THIRD-PARTY TRADEMARKS
+
+Names, logos, trademarks, course names, university names, product names, or other marks belonging to third parties remain the property of their respective owners.
+
+Their appearance on the Platform does not necessarily imply endorsement, sponsorship, or affiliation.
+
+---
+
+# 49. LINKS TO OTHER WEBSITES
+
+The Platform may contain links to external websites.
+
+These links are provided for convenience or educational reference.
+
+MedMaster does not control and is not responsible for:
+
+* Third-party website content.
+* Third-party security.
+* Third-party privacy practices.
+* Third-party availability.
+* Third-party transactions.
+* Third-party terms.
+
+You access third-party websites at your own risk.
+
+---
+
+# 50. NO PROFESSIONAL RELATIONSHIP
+
+Use of MedMaster does not create:
+
+* A doctor-patient relationship.
+* A teacher-student relationship beyond the educational service explicitly provided.
+* A lawyer-client relationship.
+* A financial-advisor relationship.
+* Any other professional relationship unless expressly established through a separate agreement.
+
+---
+
+# 51. ELECTRONIC COMMUNICATIONS
+
+You agree that communications between you and MedMaster may occur electronically.
+
+You consent, to the extent permitted by applicable law, to receiving agreements, notices, updates, receipts, and other communications electronically.
+
+Electronic records may be used as evidence of communications and transactions to the extent permitted by law.
+
+---
+
+# 52. RECORDS AND LOGS
+
+For security, fraud prevention, troubleshooting, and operational purposes, MedMaster may maintain technical records relating to Platform use, including relevant Account activity, authentication events, subscription events, examination attempts, and security events, subject to applicable law and the Privacy Policy.
+
+Such records may be used to investigate suspected violations.
+
+---
+
+# 53. INVESTIGATIONS
+
+MedMaster may investigate suspected violations of these Terms.
+
+Where reasonably necessary, MedMaster may:
+
+* Review relevant technical records.
+* Restrict Account access.
+* Preserve relevant information.
+* Remove prohibited Content.
+* Cancel fraudulent attempts.
+* Cooperate with lawful authorities.
+* Take legal or administrative action.
+
+Nothing in this section obligates MedMaster to investigate every complaint.
+
+---
+
+# 54. REPORTING ABUSE
+
+Users may report suspected:
+
+* Account theft.
+* Content piracy.
+* Fraud.
+* Security vulnerabilities.
+* Unauthorized access.
+* Harassment.
+* Copyright infringement.
+* Platform abuse.
+
+Reports should contain sufficient information for MedMaster to investigate.
+
+False or malicious reports may themselves constitute a violation of these Terms.
+
+---
+
+# 55. SEVERABILITY
+
+If any provision of these Terms is determined to be invalid, illegal, or unenforceable, that provision shall be interpreted or modified to the minimum extent necessary to make it enforceable where legally possible.
+
+If it cannot be made enforceable, it shall be severed from these Terms.
+
+The remaining provisions shall continue in full force and effect.
+
+---
+
+# 56. NO WAIVER
+
+Failure by MedMaster to enforce any provision of these Terms does not constitute a waiver of the right to enforce that provision later.
+
+Any waiver must be intentional and legally valid.
+
+---
+
+# 57. ASSIGNMENT
+
+You may not transfer, assign, sell, or otherwise transfer your rights or obligations under these Terms without MedMaster's prior written consent.
+
+MedMaster may assign or transfer its rights and obligations where reasonably necessary for business operations, restructuring, acquisition, merger, sale of assets, or similar transactions, subject to applicable law.
+
+---
+
+# 58. ENTIRE AGREEMENT
+
+These Terms, together with the MedMaster Privacy Policy and any additional terms expressly applicable to specific Services, constitute the agreement between you and MedMaster regarding your use of the Platform.
+
+They supersede prior communications or understandings concerning the same subject matter to the extent permitted by law.
+
+---
+
+# 59. ADDITIONAL TERMS
+
+Certain features or Services may have additional rules.
+
+For example:
+
+* Specific Subscription rules.
+* Examination rules.
+* Promotional terms.
+* Community rules.
+* Competition rules.
+* Special access terms.
+
+Where applicable, such additional terms form part of your agreement with MedMaster.
+
+If there is a conflict between these Terms and specific additional terms, the specific terms may control only with respect to the relevant Service.
+
+---
+
+# 60. GOVERNING LAW
+
+These Terms shall be governed by and interpreted in accordance with the laws applicable in the Arab Republic of Egypt, without prejudice to any mandatory rights or protections that may apply to users under applicable law.
+
+Any dispute shall be handled in accordance with the applicable legal and judicial framework.
+
+**IMPORTANT:** The final governing-law and jurisdiction clause should be reviewed by qualified Egyptian legal counsel before publication, particularly if MedMaster accepts users or payments from outside Egypt.
+
+---
+
+# 61. DISPUTE RESOLUTION
+
+If a dispute arises between you and MedMaster, you agree, where reasonably possible, to first contact MedMaster and attempt to resolve the matter informally.
+
+You should provide:
+
+* Your name.
+* Account information.
+* A description of the dispute.
+* Relevant transaction information.
+* The resolution you are requesting.
+
+MedMaster will make reasonable efforts to review legitimate disputes.
+
+Nothing in this section prevents either party from exercising rights that cannot legally be waived.
+
+---
+
+# 62. CONSUMER RIGHTS
+
+Nothing in these Terms is intended to remove, restrict, or waive any mandatory rights granted to consumers under applicable law.
+
+Where applicable law provides a user with rights that cannot legally be excluded by contract, those rights shall remain unaffected.
+
+If any provision of these Terms conflicts with a mandatory legal requirement, the mandatory legal requirement shall prevail to the extent of the conflict.
+
+---
+
+# 63. AGE AND PARENTAL RESPONSIBILITY
+
+Where required by applicable law, users below the applicable age must obtain parental or legal-guardian consent before using paid Services.
+
+If a parent or legal guardian permits a minor to use MedMaster, the parent or legal guardian is responsible for ensuring that the minor uses the Platform appropriately and in accordance with these Terms, to the extent permitted by applicable law.
+
+---
+
+# 64. LOCAL LAWS AND USER RESPONSIBILITY
+
+You are responsible for ensuring that your use of MedMaster complies with the laws applicable to you.
+
+MedMaster does not represent that the Platform is appropriate or legally available in every country or jurisdiction.
+
+---
+
+# 65. INTERNATIONAL USERS
+
+If you access MedMaster from outside Egypt, you do so at your own initiative and are responsible for complying with applicable local laws.
+
+Some Content, payment methods, Services, or features may not be available in every country.
+
+---
+
+# 66. NO UNAUTHORIZED COMMERCIAL USE
+
+Unless expressly authorized by MedMaster, the Platform may not be used as part of a commercial service operated by another person or organization.
+
+Examples include:
+
+* Coaching businesses.
+* Commercial tutoring services.
+* Competing educational platforms.
+* Paid study groups.
+* Commercial Content redistribution.
+* Commercial question-bank services.
+
+---
+
+# 67. COMPETITIVE USE
+
+You may not systematically copy, reproduce, extract, analyze, or use substantial portions of MedMaster Content to develop, train, populate, or improve a competing commercial educational product or service, except where such use is expressly permitted by law.
+
+---
+
+# 68. AI AND AUTOMATED SYSTEMS
+
+Unless expressly authorized by MedMaster, you may not use automated systems, artificial-intelligence systems, bots, scraping systems, or other automated technologies to systematically extract, reproduce, catalog, or redistribute substantial portions of MedMaster Content.
+
+Nothing in this section is intended to prohibit uses that cannot legally be restricted under applicable law.
+
+---
+
+# 69. CONFIDENTIALITY OF RESTRICTED MATERIAL
+
+Certain Content may be designated as restricted, private, or confidential.
+
+Users must not disclose restricted Content outside the permitted use of the Platform.
+
+This includes unreleased questions, examination materials, internal announcements, private communications, or other materials that MedMaster reasonably identifies as restricted.
+
+---
+
+# 70. MODERATION
+
+MedMaster may moderate user interactions and community features.
+
+Moderation decisions may include:
+
+* Removing Content.
+* Restricting posting.
+* Suspending Accounts.
+* Limiting participation.
+* Removing fraudulent rankings.
+* Blocking abusive users.
+
+MedMaster does not guarantee that every violation will be detected.
+
+---
+
+# 71. THIRD-PARTY PAYMENT DISPUTES
+
+Where a payment is processed by a third-party provider, that provider may have separate policies governing:
+
+* Payment processing.
+* Refund processing.
+* Chargebacks.
+* Authentication.
+* Fraud prevention.
+
+Users agree to comply with applicable provider requirements.
+
+---
+
+# 72. TECHNICAL MAINTENANCE
+
+MedMaster may temporarily disable portions of the Platform for:
+
+* Maintenance.
+* Security updates.
+* Database maintenance.
+* Software upgrades.
+* Server migration.
+* Infrastructure changes.
+* Emergency repairs.
+
+Where reasonably possible, MedMaster may provide advance notice for planned maintenance.
+
+Emergency maintenance may occur without advance notice.
+
+---
+
+# 73. BETA FEATURES
+
+MedMaster may provide experimental, beta, preview, or incomplete features.
+
+Such features may:
+
+* Contain bugs.
+* Change without notice.
+* Be removed.
+* Produce incorrect results.
+* Have limited availability.
+
+Beta features are provided for testing and improvement unless otherwise stated.
+
+---
+
+# 74. AVAILABILITY OF CONTENT
+
+MedMaster may not guarantee permanent availability of every individual video, document, question, simulation, or other Content.
+
+Content may be removed because of:
+
+* Copyright issues.
+* Licensing restrictions.
+* Educational corrections.
+* Security concerns.
+* Technical problems.
+* Provider restrictions.
+* Curriculum changes.
+* Business decisions.
+* Legal requirements.
+
+---
+
+# 75. BACKUP AND DATA LOSS
+
+Although MedMaster may use backup systems, MedMaster does not guarantee that all data can always be recovered following every technical failure.
+
+Users should maintain independent copies of any permitted User Content that they consider important.
+
+---
+
+# 76. SECURITY INCIDENTS
+
+In the event of a cybersecurity incident, MedMaster may take measures reasonably necessary to protect the Platform and its users, including:
+
+* Temporarily disabling features.
+* Requiring password resets.
+* Restricting suspicious Accounts.
+* Invalidating sessions.
+* Blocking traffic.
+* Migrating infrastructure.
+* Temporarily suspending access.
+
+Where legally required, MedMaster will handle notification obligations in accordance with applicable law.
+
+---
+
+# 77. NO GUARANTEE AGAINST CYBERATTACKS
+
+MedMaster uses reasonable security measures but no Internet-connected system can be guaranteed to be completely secure.
+
+You acknowledge that cybersecurity risks may exist despite reasonable security measures.
+
+To the maximum extent permitted by law, MedMaster shall not be responsible for losses resulting solely from criminal or malicious activity by third parties that could not reasonably have been prevented.
+
+---
+
+# 78. USER SECURITY OBLIGATIONS
+
+You are responsible for:
+
+* Using a reasonably secure password.
+* Not sharing credentials.
+* Keeping your device secure.
+* Logging out of shared devices.
+* Not installing suspicious software.
+* Reporting suspicious Account activity.
+
+MedMaster is not responsible for security incidents caused by your failure to protect your credentials or device.
+
+---
+
+# 79. CONTACT INFORMATION
+
+Questions regarding these Terms may be directed to:
+
+**MedMaster**
+
+Website: [WEBSITE URL]
+
+Email: [OFFICIAL EMAIL]
+
+Support: [SUPPORT EMAIL]
+
+Business Address: [BUSINESS ADDRESS, IF APPLICABLE]
+
+---
+
+# 80. ACKNOWLEDGEMENT
+
+By using MedMaster, you acknowledge that:
+
+1. You have read these Terms.
+2. You understand these Terms.
+3. You agree to comply with these Terms.
+4. MedMaster is an educational platform.
+5. Educational Content does not guarantee academic success.
+6. Medical Content is educational and should not be treated as individualized medical advice.
+7. Paid access does not transfer ownership of MedMaster Content.
+8. Sharing paid Content is prohibited.
+9. Attempts to circumvent Platform security or access controls are prohibited.
+10. MedMaster may suspend Accounts that violate these Terms.
+11. The Platform may experience technical interruptions.
+12. MedMaster does not guarantee uninterrupted or error-free operation.
+13. You remain responsible for your own use of the Platform.
+14. Mandatory rights provided by applicable law remain unaffected.
+
+---
+
+# 81. FINAL ACCEPTANCE
+
+By selecting "I Agree", creating an Account, purchasing a Subscription, accessing restricted Content, or otherwise using MedMaster, you confirm that you have read and accepted these Terms & Conditions.
+
+If you do not agree to these Terms, you must immediately stop using the Platform.
+
+**END OF TERMS & CONDITIONS**
+
+---
+
+**MedMaster**
+
+*Learn. Practice. Master.*
+

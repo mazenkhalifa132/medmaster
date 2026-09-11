@@ -22,6 +22,7 @@
         ['id_subject', 'id_week'].forEach((id) => {
             const select = document.getElementById(id);
             if (!select) return;
+
             const selectedModule = moduleSelect.value;
             let selectedOptionIsValid = false;
             Array.from(select.options).forEach((option) => {
@@ -40,6 +41,7 @@
         const yearSelect = document.getElementById('id_year');
         const moduleSelect = document.getElementById('id_module');
         if (!yearSelect || !moduleSelect) return;
+
         filterModules();
         filterModuleSettings();
         yearSelect.addEventListener('change', () => {

@@ -54,12 +54,14 @@ class OSCEAnswerInline(nested_admin.NestedTabularInline):
     model = OSCEAnswer
     formset = AnswerInlineFormSet
     extra = 2
+    can_delete = False
     fields = ('order', 'text', 'is_correct')
 
 
 class OSCEQuestionInline(nested_admin.NestedStackedInline):
     model = OSCEQuestion
     extra = 1
+    can_delete = True
     fields = ('order', 'question', 'image_link', 'explanation')
     inlines = (OSCEAnswerInline,)
 

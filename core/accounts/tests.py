@@ -6,6 +6,18 @@ from progress.models import StudentProgress
 
 
 class AuthFlowTests(TestCase):
+    def test_terms_page_is_public_and_signup_links_to_it(self):
+        response = self.client.get(reverse('terms'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Terms &amp; Conditions')
+        self.assertContains(response, 'MEDICAL DISCLAIMER')
+
+        response = self.client.get(reverse('auth'))
+
+        self.assertContains(response, f'href="{reverse("terms")}"')
+        self.assertContains(response, 'target="_blank"')
+
     def test_student_signup_and_login(self):
         response = self.client.post(
             reverse('signup'),

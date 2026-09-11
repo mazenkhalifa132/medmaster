@@ -76,8 +76,8 @@
                         <option value="1">1st Year</option>
                         <option value="2">2nd Year</option>
                         <option value="3">3rd Year</option>
-                        <option value="4">4th Year</option>
-                        <option value="5">5th Year</option>
+                        <!--<option value="4">4th Year</option>
+                        <option value="5">5th Year</option>-->
                     </select>
                 </div>
                 <div class="mt-3">
@@ -91,7 +91,7 @@
                 <div class="form-check mb-4">
                     <input class="form-check-input" type="checkbox" id="signup-terms" name="agree_terms" required>
                     <label class="form-check-label small text-muted" for="signup-terms">
-                        I agree to the terms and conditions.
+                        I agree to the <a href="{% url 'terms' %}" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>.
                     </label>
                 </div>
                 <div class="text-center">

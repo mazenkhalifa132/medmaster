@@ -268,6 +268,7 @@ def home(request):
             student__role='student',
             student__is_staff=False,
             student__is_superuser=False,
+            student__academic_year=request.user.academic_year,
         ).select_related('student').order_by('-total_points', 'student_id')[:10]
     )
     leaderboard_student_ids = [progress.student_id for progress in leaderboard_progress]

@@ -1,4 +1,5 @@
 from datetime import timedelta
+import re
 
 from django.test import TestCase
 from django.urls import reverse
@@ -12,6 +13,33 @@ from progress.models import Badge, StudentBadge, StudentProgress
 
 
 class QuizDashboardTests(TestCase):
+    def test_admin_can_select_every_dashboard_year(self):
+        admin = User.objects.create_superuser(
+            username='year-admin', email='year-admin@example.com', password='StrongPass1', role='admin',
+        )
+        self.client.force_login(admin)
+
+        response = self.client.get(reverse('home'))
+        year_cards = re.findall(r'<div class="year-card(?: [^"]*)?"[^>]*>', response.content.decode())
+
+        self.assertEqual(response.content.decode().count('onclick="selectYear('), 5)
+        self.assertEqual(len(year_cards), 5)
+        self.assertFalse(any('aria-disabled="true"' in card for card in year_cards))
+        self.assertContains(response, 'const canSelectAllYears = true;')
+
+    def test_student_can_select_only_assigned_dashboard_year(self):
+        student = User.objects.create_user(
+            username='year-student', email='year-student@example.com', password='StrongPass1', academic_year=3,
+        )
+        self.client.force_login(student)
+
+        response = self.client.get(reverse('home'))
+        year_cards = re.findall(r'<div class="year-card(?: [^"]*)?"[^>]*>', response.content.decode())
+
+        self.assertEqual(response.content.decode().count('onclick="selectYear('), 1)
+        self.assertEqual(sum('aria-disabled="true"' in card for card in year_cards), 4)
+        self.assertContains(response, 'const canSelectAllYears = false;')
+
     def test_earned_badge_exposes_modal_details(self):
         user = User.objects.create_user(
             username='badge-student', email='badge-student@example.com', password='StrongPass1', academic_year=1,
@@ -58,10 +86,15 @@ class QuizDashboardTests(TestCase):
         users = []
         for number in range(11):
             user = User.objects.create_user(
-                username=f'student-{number}', email=f'student-{number}@example.com', password='StrongPass1'
+                username=f'student-{number}', email=f'student-{number}@example.com',
+                password='StrongPass1', academic_year=1,
             )
             StudentProgress.objects.create(student=user, total_points=number * 10)
             users.append(user)
+        other_year_student = User.objects.create_user(
+            username='year-two-student', email='year-two@example.com', password='StrongPass1', academic_year=2,
+        )
+        StudentProgress.objects.create(student=other_year_student, total_points=9999)
         admin = User.objects.create_superuser(
             username='admin', email='admin@example.com', password='StrongPass1', role='admin'
         )
@@ -80,6 +113,7 @@ class QuizDashboardTests(TestCase):
         self.assertEqual(leaderboard[0]['name'], 'student-10')
         self.assertEqual(leaderboard[0]['average_score'], 80)
         self.assertNotIn(admin.pk, [entry['student_id'] for entry in leaderboard])
+        self.assertNotIn(other_year_student.pk, [entry['student_id'] for entry in leaderboard])
         self.assertContains(response, 'Top 10 students by Points')
 
     def test_dashboard_serializes_database_quizzes_with_retries(self):

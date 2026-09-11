@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
@@ -16,6 +17,12 @@ def auth_page(request):
     if request.user.is_authenticated:
         return redirect('home')
     return render(request, 'accounts/auth.html', {'request': request})
+
+
+@require_http_methods(['GET'])
+def terms_view(request):
+    terms_text = Path(__file__).with_name('terms_source.txt').read_text(encoding='utf-8').rstrip('\n')
+    return render(request, 'accounts/terms.html', {'terms_text': terms_text})
 
 
 @require_http_methods(["POST"])

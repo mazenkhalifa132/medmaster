@@ -1,8 +1,9 @@
 from django.test import SimpleTestCase, TestCase
 
+from .admin import ExamAdminForm
 from .bulk_import import BulkQuestionImportError, parse_questions
 from .models import Exam
-from modules.models import Module
+from modules.models import Module, ModuleExamSubject, ModuleExamWeek
 
 
 class ExamOrderingTests(TestCase):
@@ -28,6 +29,25 @@ class ExamOrderingTests(TestCase):
         )
 
         self.assertEqual(list(module.exams.all()), [first_exam, later_exam])
+
+
+class ExamAdminFormTests(TestCase):
+    def test_dependent_select_options_include_their_parent_ids(self):
+        first_module = Module.objects.create(
+            year=1, name='Anatomy', image_url='https://example.com/anatomy.png'
+        )
+        second_module = Module.objects.create(
+            year=2, name='Physiology', image_url='https://example.com/physiology.png'
+        )
+        subject = ModuleExamSubject.objects.create(module=first_module, name='Upper limb')
+        week = ModuleExamWeek.objects.create(module=second_module, name='Week 1')
+
+        form_html = ExamAdminForm().as_p()
+
+        self.assertIn(f'value="{first_module.pk}" data-year="1"', form_html)
+        self.assertIn(f'value="{second_module.pk}" data-year="2"', form_html)
+        self.assertIn(f'value="{subject.pk}" data-module="{first_module.pk}"', form_html)
+        self.assertIn(f'value="{week.pk}" data-module="{second_module.pk}"', form_html)
 
 
 class BulkQuestionParserTests(SimpleTestCase):

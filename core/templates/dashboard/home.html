@@ -23,9 +23,9 @@
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
             {% for year in years %}
             <div class="col d-flex">
-                <div class="year-card w-100{% if year.number == request.user.academic_year|default:1 %} active{% else %} locked{% endif %}" data-year="{{ year.number }}"{% if year.number == request.user.academic_year|default:1 %} onclick="selectYear({{ year.number }})"{% else %} aria-disabled="true"{% endif %}>
+                <div class="year-card w-100{% if year.number == request.user.academic_year|default:1 %} active{% elif not request.user.is_admin %} locked{% endif %}" data-year="{{ year.number }}"{% if request.user.is_admin or year.number == request.user.academic_year|default:1 %} onclick="selectYear({{ year.number }})"{% else %} aria-disabled="true"{% endif %}>
                     <div class="year-card-content"><i class='bx bxs-graduation'></i><h6>Year {{ year.number }}</h6><small>{{ year.module_count }} Module{{ year.module_count|pluralize }}</small></div>
-                    {% if year.number != request.user.academic_year|default:1 %}<i class="bx bx-lock-alt year-card-lock" aria-hidden="true"></i>{% endif %}
+                    {% if not request.user.is_admin and year.number != request.user.academic_year|default:1 %}<i class="bx bx-lock-alt year-card-lock" aria-hidden="true"></i>{% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -640,12 +640,13 @@
     });
 
     const defaultAcademicYear = {{ request.user.academic_year|default:1 }};
+    const canSelectAllYears = {% if request.user.is_admin %}true{% else %}false{% endif %};
     let currentYear = defaultAcademicYear;
     let currentModulePage = 0;
     const MODULES_PER_PAGE = 4;
     function selectYear(year) { currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
     function updateOverallProgress(year) { const modules = yearData[year].modules; const progress = modules.length ? Math.round(modules.reduce((total, module) => total + module.progress, 0) / modules.length) : 0; document.getElementById('overall-progress-value').innerText = `${progress}%`; document.getElementById('overall-progress-ring').style.background = `conic-gradient(#2563eb 0% ${progress}%, rgba(255,255,255,0.2) ${progress}% 100%)`; }
-    function selectYear(year) { if (Number(year) !== defaultAcademicYear) return; currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); updateOverallProgress(year); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
+    function selectYear(year) { if (!canSelectAllYears && Number(year) !== defaultAcademicYear) return; currentYear = year; currentModulePage = 0; document.querySelectorAll('.year-card').forEach(el => { el.classList.remove('active'); if (el.dataset.year == year) el.classList.add('active'); }); updateOverallProgress(year); renderModules(year); renderTable(year); renderCourses(year); renderOSCE(year); renderQuizzes(year); document.getElementById('modules-section-title').innerText = `Year ${year} Modules`; document.getElementById('table-section-title').innerText = `All Modules in Year ${year}`; document.getElementById('courses-page-title').innerText = `My Courses — Year ${year}`; resetOSCEFilters(); resetQuizFilters(); }
     function renderModules(year) {
         const data = yearData[year].modules;
         const totalPages = Math.ceil(data.length / MODULES_PER_PAGE);

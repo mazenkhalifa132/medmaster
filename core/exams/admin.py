@@ -44,7 +44,7 @@ class ExamAdminForm(ModelForm):
         }
 
     class Media:
-        js = ('exams/admin/exam_module_filter.js',)
+        js = ('exams/admin/exam_module_filter_v2.js',)
 
 
 class AnswerInlineFormSet(BaseInlineFormSet):
@@ -66,12 +66,14 @@ class MCQAnswerInline(nested_admin.NestedTabularInline):
     model = MCQAnswer
     formset = AnswerInlineFormSet
     extra = 2
+    can_delete = False
     fields = ('order', 'text', 'is_correct')
 
 
 class ExamQuestionInline(nested_admin.NestedStackedInline):
     model = ExamQuestion
     extra = 1
+    can_delete = True
     fields = ('order', 'text', 'image_url', 'answer_explanation')
     inlines = (MCQAnswerInline,)
 
