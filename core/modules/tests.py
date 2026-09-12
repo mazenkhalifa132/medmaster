@@ -2,11 +2,49 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import User
+from exams.models import Exam
 from files.models import FileSubcategory, StudyFile
-from .models import Module
+from .models import Module, ModuleExamSubject, ModuleExamWeek
 
 
 class ModuleFilesTests(TestCase):
+    def test_module_exams_can_be_filtered_by_subject_week_and_type(self):
+        user = User.objects.create_user(username='student', password='StrongPass1')
+        module = Module.objects.create(
+            year=1, name='Anatomy', image_url='https://api.iconify.design/solar:heart-bold.svg'
+        )
+        subject = ModuleExamSubject.objects.create(module=module, name='Upper limb')
+        week = ModuleExamWeek.objects.create(module=module, name='Week 1')
+        exam = Exam.objects.create(
+            year=1, module=module, subject=subject, week=week, name='Upper limb quiz',
+            exam_type='practice', time_limit=20,
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse('module-detail', args=[module.pk]))
+
+        self.assertContains(response, 'id="exam-subject-filter"')
+        self.assertContains(response, 'id="exam-week-filter"')
+        self.assertContains(response, 'id="exam-type-filter"')
+        self.assertContains(
+            response,
+            f'data-exam-row data-subject="{subject.pk}" data-week="{week.pk}" data-exam-type="practice"',
+        )
+
+    def test_module_exams_tab_shows_an_empty_state_when_no_exams_exist(self):
+        user = User.objects.create_user(username='student', password='StrongPass1')
+        module = Module.objects.create(
+            year=1,
+            name='Anatomy',
+            image_url='https://api.iconify.design/solar:heart-bold.svg',
+            has_exams=True,
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse('module-detail', args=[module.pk]))
+
+        self.assertContains(response, 'There are no exams available for this module yet.')
+
     def test_files_are_grouped_by_subcategory(self):
         user = User.objects.create_user(username='student', password='StrongPass1')
         module = Module.objects.create(

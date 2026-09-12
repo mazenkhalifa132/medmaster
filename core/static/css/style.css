@@ -244,7 +244,9 @@ body.auth-page {
     .page-container img, .page-container video, .page-container canvas { max-width: 100%; height: auto; }
     .page-container input, .page-container select, .page-container textarea, .page-container button { max-width: 100%; }
     .right-panel { width: min(320px, 100vw); }
-    .welcome-banner { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px; }
+    .welcome-banner { flex-direction: row; align-items: center; gap: 16px; padding: 24px; }
+    .welcome-user-name { display: block; }
+    .overall-progress { align-self: flex-end; }
     .auth-page-content { min-height: 100vh; min-height: 100svh; min-height: 100dvh; padding-top: 1.5rem !important; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important; }
     .auth-card { margin: 0 auto; padding: 24px; }
     .modules-list-container { padding: 16px; }

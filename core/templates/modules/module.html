@@ -120,14 +120,33 @@
             {% empty %}<p class="text-muted mb-0">No files are available for this module yet.</p>{% endfor %}
         </div></div>{% endif %}
         {% if module.has_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files %} show active{% endif %} module-tab-pane" id="exams" role="tabpanel">
+            {% if exam_groups %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-4" aria-label="Filter exams">
+                    <select class="form-select form-select-sm" id="exam-subject-filter" style="width: auto;">
+                        <option value="">All subjects</option>
+                        {% for subject in module.exam_subjects.all %}<option value="{{ subject.pk }}">{{ subject.name }}</option>{% endfor %}
+                    </select>
+                    <select class="form-select form-select-sm" id="exam-week-filter" style="width: auto;">
+                        <option value="">All weeks</option>
+                        {% for week in module.exam_weeks.all %}<option value="{{ week.pk }}">{{ week.name }}</option>{% endfor %}
+                    </select>
+                    <select class="form-select form-select-sm" id="exam-type-filter" style="width: auto;">
+                        <option value="">All exam types</option>
+                        {% for group in exam_groups %}<option value="{{ group.exam_type }}">{{ group.label }}</option>{% endfor %}
+                    </select>
+                </div>
+            {% endif %}
             {% for group in exam_groups %}
-                <section class="mb-4{% if forloop.last %} mb-0{% endif %}">
+                <section class="mb-4{% if forloop.last %} mb-0{% endif %}" data-exam-section>
                     <h5 class="fw-bold mb-3">{{ group.label }} Exams</h5>
                     <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th style="width:40%;">Exam Name</th><th>Questions</th><th>Time</th><th>Result</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>
-                        {% for exam in group.exams %}<tr><td class="fw-bold">{{ exam.name }}{% if exam.is_locked %}<small class="text-warning-emphasis d-block fw-normal">Premium subscription required</small>{% endif %}</td><td>{{ exam.question_count }}</td><td>{{ exam.time_limit }} min</td><td>{{ exam.student_result }}</td><td>{{ exam.retries_remaining }} remaining</td><td class="text-end">{% if exam.is_locked %}<button class="btn btn-secondary btn-sm px-3" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% elif exam.can_start %}<a href="{% url 'exam-detail' exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>Completed</button>{% endif %}</td></tr>{% endfor %}
+                        {% for exam in group.exams %}<tr data-exam-row data-subject="{{ exam.subject_id|default:'' }}" data-week="{{ exam.week_id|default:'' }}" data-exam-type="{{ exam.exam_type }}"><td class="fw-bold">{{ exam.name }}{% if exam.is_locked %}<small class="text-warning-emphasis d-block fw-normal">Premium subscription required</small>{% endif %}</td><td>{{ exam.question_count }}</td><td>{{ exam.time_limit }} min</td><td>{{ exam.student_result }}</td><td>{{ exam.retries_remaining }} remaining</td><td class="text-end">{% if exam.is_locked %}<button class="btn btn-secondary btn-sm px-3" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% elif exam.can_start %}<a href="{% url 'exam-detail' exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>Completed</button>{% endif %}</td></tr>{% endfor %}
                     </tbody></table></div>
                 </section>
+            {% empty %}
+                <p class="text-muted mb-0">There are no exams available for this module yet.</p>
             {% endfor %}
+            <p class="text-muted text-center py-4 mb-0 d-none" id="exam-filter-empty">No exams match the selected filters.</p>
         </div>{% endif %}
         {% if module.has_text %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams %} show active{% endif %} module-tab-pane" id="text" role="tabpanel"><div class="d-flex flex-column gap-4">{% for group in text_groups %}<section><h5 class="fw-bold mb-3">{{ group.name }}</h5><div class="d-flex flex-column gap-3">{% for text_content in group.text_contents %}<div class="p-3 bg-light rounded-3 border{% if text_content.is_locked %} opacity-75{% endif %}"><h6 class="fw-bold">{{ text_content.title }}</h6>{% if text_content.is_locked %}<p class="small text-warning-emphasis mb-0">Premium subscription required</p><button class="btn btn-outline-secondary btn-sm mt-2" type="button" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% else %}<p class="small text-muted mb-0">{{ text_content.content|striptags|truncatechars:180 }}</p><button class="btn btn-link small text-primary fw-bold mt-2 p-0" type="button" data-bs-toggle="modal" data-bs-target="#textContentModal" data-text-title="{{ text_content.title }}" data-text-content="textContent{{ text_content.pk }}">Read Full Text <i class='bx bx-right-arrow-alt'></i></button>{% endif %}</div>{% endfor %}</div></section>{% empty %}<p class="text-muted mb-0">No published text content is available for this module yet.</p>{% endfor %}</div></div>{% endif %}
         {% if module.has_osce or total_osce_exams %}<div class="tab-pane fade{% if not module.has_lessons and not module.has_videos and not module.has_files and not module.has_exams and not module.has_text %} show active{% endif %} module-tab-pane" id="osce" role="tabpanel"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>OSCE assessment</th><th>Station</th><th>Questions</th><th>Result</th><th>Retries</th><th class="text-end">Action</th></tr></thead><tbody>{% for osce_exam in osce_exams %}<tr><td class="fw-bold">{{ osce_exam.name }}{% if osce_exam.is_locked %}<small class="text-warning-emphasis d-block fw-normal">Premium subscription required</small>{% endif %}</td><td>{{ osce_exam.get_osce_station_display }}</td><td>{{ osce_exam.graded_question_count }}</td><td>{{ osce_exam.student_result }}</td><td>{{ osce_exam.retries_remaining }} remaining</td><td class="text-end">{% if osce_exam.is_locked %}<button class="btn btn-secondary btn-sm px-3" disabled><i class='bx bx-lock-alt'></i> Premium</button>{% elif osce_exam.can_start %}<a href="{% url 'osce-detail' osce_exam.pk %}" class="btn btn-primary btn-sm px-3">Start</a>{% else %}<button class="btn btn-secondary btn-sm px-3" disabled>{% if osce_exam.question_count %}Completed{% else %}Unavailable{% endif %}</button>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="text-muted text-center py-4">No OSCE assessments are available for this module yet.</td></tr>{% endfor %}</tbody></table></div></div>{% endif %}
@@ -191,6 +210,28 @@
             this.querySelector('i').className = expanded ? 'bx bx-chevron-down fs-5' : 'bx bx-chevron-up fs-5';
         });
     });
+
+    const examFilters = ['exam-subject-filter', 'exam-week-filter', 'exam-type-filter']
+        .map(function (id) { return document.getElementById(id); });
+    if (examFilters.every(Boolean)) {
+        const examRows = document.querySelectorAll('[data-exam-row]');
+        const emptyMessage = document.getElementById('exam-filter-empty');
+        const applyExamFilters = function () {
+            let visibleCount = 0;
+            examRows.forEach(function (row) {
+                const matches = (!examFilters[0].value || row.dataset.subject === examFilters[0].value)
+                    && (!examFilters[1].value || row.dataset.week === examFilters[1].value)
+                    && (!examFilters[2].value || row.dataset.examType === examFilters[2].value);
+                row.hidden = !matches;
+                if (matches) visibleCount += 1;
+            });
+            document.querySelectorAll('[data-exam-section]').forEach(function (section) {
+                section.hidden = !section.querySelector('[data-exam-row]:not([hidden])');
+            });
+            emptyMessage.classList.toggle('d-none', visibleCount > 0);
+        };
+        examFilters.forEach(function (filter) { filter.addEventListener('change', applyExamFilters); });
+    }
 
     document.getElementById('videoModal').addEventListener('show.bs.modal', function (event) {
         const video = event.relatedTarget;

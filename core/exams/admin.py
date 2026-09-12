@@ -84,7 +84,7 @@ class ExamAdmin(nested_admin.NestedModelAdmin):
     inlines = (ExamQuestionInline,)
     change_form_template = 'admin/exams/exam/change_form.html'
     list_display = ('name', 'order', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'is_trial', 'result', 'is_active')
-    list_filter = ('exam_type', 'year', 'module', 'is_trial', 'is_active')
+    list_filter = ('exam_type', 'year', 'module', 'subject', 'week', 'is_trial', 'is_active')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'order', 'name')
     fields = ('year', 'module', 'subject', 'week', 'order', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_trial', 'is_active')
