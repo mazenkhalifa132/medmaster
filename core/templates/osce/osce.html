@@ -26,6 +26,10 @@
         #station-control-panel[data-mobile-panel] { position:fixed; z-index:1000; top:0; right:-340px; width:320px!important; height:100vh; height:100dvh; padding:16px; overflow-y:auto; background:#fff; box-shadow:-8px 0 24px rgba(0,0,0,.12); transition:right .3s ease; }
         #station-control-panel[data-mobile-panel].open { right:0; }
     }
+    @media (max-width:768px) {
+        #station-control-panel[data-mobile-panel] { position:static; right:auto; width:100%!important; height:auto; padding:0; overflow:visible; background:transparent; box-shadow:none; }
+        body.osce-mobile-controls-active #rightPanelToggle { display:none; }
+    }
     @media (max-width:991.98px) { #osce-station #canvas-container { height:600px; min-height:500px; } }
 </style>
 
@@ -80,6 +84,13 @@
 {% if exam.osce_station == 'ecg' %}<script src="{% static 'osce/ecg/ecg.js' %}" defer></script>{% endif %}
 {% endif %}
 <script>
+    const osceMobileControlsQuery = window.matchMedia('(max-width: 768px)');
+    function syncOsceMobileControls() {
+        document.body.classList.toggle('osce-mobile-controls-active', osceMobileControlsQuery.matches);
+    }
+    syncOsceMobileControls();
+    osceMobileControlsQuery.addEventListener('change', syncOsceMobileControls);
+
     const QUESTIONS = JSON.parse(document.getElementById('osce-questions').textContent);
     let currentQuestion = 0;
     let revealTimer = null;

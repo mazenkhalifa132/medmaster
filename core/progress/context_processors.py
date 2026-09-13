@@ -1,9 +1,23 @@
+from datetime import timedelta
+
 from django.db.models import Count, F, Max, OuterRef, Q, Subquery
+from django.utils import timezone
 
 from exams.models import ExamAnswer, ExamAttempt, ExamQuestion
 from osce.models import OSCEAnswerRecord, OSCEAttempt, OSCEExam, OSCEQuestion
 
-from .models import Badge, StudentBadge
+from .models import Badge, DailyActivity, StudentBadge
+
+
+def _login_streak_for(student):
+    """Return the student's current consecutive daily-login streak."""
+    activity_dates = set(DailyActivity.objects.filter(student=student).values_list('date', flat=True))
+    streak = 0
+    day = timezone.localdate()
+    while day in activity_dates:
+        streak += 1
+        day -= timedelta(days=1)
+    return streak
 
 
 def _recent_badges_for(student):
@@ -88,10 +102,12 @@ def recent_badges(request):
     if not request.user.is_authenticated:
         return {
             'recent_badges': [],
+            'login_streak': 0,
             'highest_score': None,
             'highest_score_date': None,
             'latest_score': None,
             'latest_score_date': None,
+            'year_question_count': 0,
             'performance_overview': {
                 'correct': 0, 'incorrect': 0, 'unattempted': 0, 'accuracy': 0,
                 'correct_percentage': 0, 'answered_percentage': 0,
@@ -102,7 +118,9 @@ def recent_badges(request):
     if not academic_year:
         return {
             'recent_badges': _recent_badges_for(request.user),
+            'login_streak': _login_streak_for(request.user),
             **_score_summary_for(request.user, academic_year),
+            'year_question_count': 0,
             'performance_overview': {
                 'correct': 0, 'incorrect': 0, 'unattempted': 0, 'accuracy': 0,
                 'correct_percentage': 0, 'answered_percentage': 0,
@@ -185,6 +203,8 @@ def recent_badges(request):
 
     return {
         'recent_badges': _recent_badges_for(request.user),
+        'login_streak': _login_streak_for(request.user),
         **_score_summary_for(request.user, academic_year),
+        'year_question_count': available_questions,
         'performance_overview': performance_overview,
     }

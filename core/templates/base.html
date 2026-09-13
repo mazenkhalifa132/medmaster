@@ -11,7 +11,16 @@
     <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     {# Keep dashboard additions, including Academic Progress, from being hidden by a stale cached stylesheet. #}
-    <link href="{% static 'css/style.css' %}?v=20260907-locked-year-cards" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=20260913-dark-mode" rel="stylesheet" />
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('medmaster-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark-mode');
+            }
+        }());
+    </script>
 </head>
 <body{% if not request.user.is_authenticated %} class="auth-page"{% endif %}>
     {% if messages %}
@@ -46,6 +55,13 @@
                         </div>-->
                     </div>
                     <div class="user-area">
+                        <!--<button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle dark mode">
+                            <i class='bx bx-moon'></i>
+                        </button>-->
+                        <a class="login-streak" href="{% url 'home' %}#progress" aria-label="{{ login_streak }} day login streak" title="{{ login_streak }} day login streak" onclick="if (document.querySelector('.app-page')) { document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']')?.click(); return false; }">
+                            <i class='bx bxs-flame'></i>
+                            <span>{{ login_streak }}</span>
+                        </a>
                         <div class="dropdown position-relative">
                             <button class="notification-bell" id="notificationBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
                                 <i class='bx bx-bell'></i>
@@ -126,11 +142,28 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const menuToggle = document.getElementById('menuToggle');
+            const themeToggle = document.getElementById('themeToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const rightPanelToggle = document.getElementById('rightPanelToggle');
             const rightPanel = document.getElementById('rightPanel') || document.querySelector('[data-mobile-panel]');
             const rightPanelOverlay = document.getElementById('rightPanelOverlay');
+
+            function updateThemeToggle() {
+                if (!themeToggle) return;
+                const isDark = document.documentElement.classList.contains('dark-mode');
+                themeToggle.setAttribute('aria-pressed', String(isDark));
+                themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                themeToggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                themeToggle.querySelector('i').className = isDark ? 'bx bx-sun' : 'bx bx-moon';
+            }
+
+            updateThemeToggle();
+            themeToggle?.addEventListener('click', function () {
+                const isDark = document.documentElement.classList.toggle('dark-mode');
+                localStorage.setItem('medmaster-theme', isDark ? 'dark' : 'light');
+                updateThemeToggle();
+            });
 
             if (!rightPanel) rightPanelToggle?.setAttribute('hidden', '');
             if (rightPanel?.id) rightPanelToggle?.setAttribute('aria-controls', rightPanel.id);

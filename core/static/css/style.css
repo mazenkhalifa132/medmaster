@@ -88,6 +88,12 @@ body.auth-page {
 .user-area img { width: 36px; height: 36px; border-radius: 50%; }
 .notification-bell { position: relative; padding: 0; border: 0; background: transparent; color: var(--text-gray); font-size: 20px; line-height: 1; cursor: pointer; }
 .notification-bell:hover { color: var(--text-dark); }
+.login-streak { display: inline-flex; align-items: center; gap: 3px; transform: translateY(-5px); color: #f97316; font-size: 18px; font-weight: 700; line-height: 1; text-decoration: none; }
+.login-streak:hover { color: #ea580c; }
+.login-streak span { font-size: 13px; }
+.theme-toggle { display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text-gray); font-size: 20px; cursor: pointer; transition: color .2s ease, background .2s ease, border-color .2s ease; }
+.theme-toggle:hover { color: var(--primary-blue); background: #eff6ff; border-color: #dbeafe; }
+.theme-toggle:focus-visible { outline: 3px solid rgba(37, 99, 235, .35); outline-offset: 2px; }
 .notification-count { position: absolute; top: -8px; right: -10px; min-width: 17px; height: 17px; padding: 0 4px; border: 2px solid #fff; border-radius: 999px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; line-height: 13px; }
 .notification-menu { min-width: min(360px, calc(100vw - 2rem)); max-height: min(460px, calc(100vh - 5rem)); overflow-y: auto; padding: 10px 0; }
 .notification-badge-image { width: 28px; height: 28px; object-fit: contain; flex: 0 0 auto; }
@@ -133,6 +139,10 @@ body.auth-page {
 .right-panel { width: 320px; background: #fff; border-left: 1px solid #e5e7eb; padding: 20px; overflow-y: auto; flex-shrink: 0; }
 .right-panel-toggle { display: none; border: 0; padding: 0; background: transparent; color: var(--text-gray); font-size: 24px; line-height: 1; cursor: pointer; }
 .right-panel-toggle:hover { color: var(--text-dark); }
+.year-question-total { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #dbeafe; border-radius: 12px; background: #eff6ff; }
+.year-question-total__icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: #2563eb; color: #fff; font-size: 22px; }
+.year-question-total strong { color: #1e3a8a; font-size: 24px; line-height: 1; }
+.year-question-total span { font-size: 12px; }
 .premium-locked-section { position: relative; min-height: 120px; display: grid; place-items: center; }
 .premium-locked-section .premium-lock-content { filter: blur(4px); opacity: .55; pointer-events: none; user-select: none; width: 100%; }
 .premium-lock-label { position: absolute; z-index: 1; display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: 999px; background: #1e3a8a; color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 4px 14px rgba(30, 58, 138, .3); }
@@ -237,7 +247,12 @@ body.auth-page {
         height: auto;
         overflow: visible;
     }
-    .topbar { flex-direction: column; gap: 12px; align-items: stretch; padding: 16px; }
+    .topbar { flex-direction: row; justify-content: space-between; gap: 8px; align-items: center; padding: 16px; }
+    .topbar > .d-flex { flex: 0 0 auto; gap: 12px !important; }
+    .user-area { min-width: 0; margin-left: auto; gap: 12px; }
+    .user-area .d-md-block { display: block !important; max-width: 72px; }
+    .user-area .lh-1 h6 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px !important; }
+    .user-area .lh-1 small { display: none; }
     .search-box { width: 100%; }
     .page-container { flex: 0 0 auto; overflow: visible; padding: 16px; padding-bottom: max(32px, env(safe-area-inset-bottom)); }
     .topbar, .page-container { width: 100%; max-width: 100%; }
@@ -455,3 +470,70 @@ body.auth-page {
     font-size: 9px;
     color: #9ca3af;
 }
+
+/* --- Dark mode ---------------------------------------------------------- */
+html.dark-mode {
+    color-scheme: dark;
+    --primary-dark: #101a32;
+    --primary-blue: #79a9ff;
+    --bg-light: #111827;
+    --text-dark: #e6edf7;
+    --text-gray: #a7b3c7;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .22);
+}
+
+.dark-mode body { background: var(--bg-light); }
+.dark-mode .main-content-area { background: var(--bg-light); }
+.dark-mode .topbar, .dark-mode .right-panel { background: #172033; border-color: #2a3952; }
+.dark-mode .year-question-total { background: #1e3a5f; border-color: #315783; }
+.dark-mode .year-question-total strong { color: #bfdbfe; }
+.dark-mode .sidebar { background: #10182a; }
+.dark-mode .sidebar-menu .nav-link { color: #bcc9dc; }
+.dark-mode .sidebar-menu .nav-link:hover, .dark-mode .sidebar-menu .nav-link.active { background: #253552; color: #fff; }
+.dark-mode .theme-toggle { color: #f8c56b; background: #26324a; border-color: #3a4b6b; }
+.dark-mode .theme-toggle:hover { background: #324363; border-color: #5774a9; }
+.dark-mode .notification-count { border-color: #172033; }
+
+/* Bootstrap components and the few page-specific white surfaces. */
+.dark-mode .card, .dark-mode .modal-content, .dark-mode .dropdown-menu,
+.dark-mode .year-card, .dark-mode .module-card, .dark-mode .modules-list-container,
+.dark-mode .acad-stat-card, .dark-mode .badge-card, .dark-mode .auth-card {
+    background-color: #172033 !important;
+    color: var(--text-dark);
+    border-color: #2a3952 !important;
+}
+.dark-mode .bg-white, .dark-mode .bg-light, .dark-mode .list-group-item { background-color: #1d293d !important; color: var(--text-dark) !important; }
+.dark-mode .text-dark { color: var(--text-dark) !important; }
+.dark-mode .text-muted, .dark-mode .form-text { color: var(--text-gray) !important; }
+.dark-mode .border, .dark-mode .border-bottom, .dark-mode .border-top, .dark-mode hr, .dark-mode .dropdown-divider { border-color: #2a3952 !important; }
+.dark-mode .dropdown-item, .dark-mode .dropdown-header { color: var(--text-dark); }
+.dark-mode .dropdown-item:hover, .dark-mode .dropdown-item:focus { background: #263552; color: #fff; }
+.dark-mode .table { --bs-table-color: var(--text-dark); --bs-table-bg: #172033; --bs-table-border-color: #2a3952; --bs-table-striped-bg: #1d293d; --bs-table-hover-bg: #253552; }
+.dark-mode .form-control, .dark-mode .form-select, .dark-mode textarea,
+.dark-mode .input-group-text { background-color: #111a2b; color: var(--text-dark); border-color: #3a4a66; }
+.dark-mode .form-control::placeholder { color: #8391a8; }
+.dark-mode .form-control:focus, .dark-mode .form-select:focus { background-color: #111a2b; color: var(--text-dark); border-color: #79a9ff; box-shadow: 0 0 0 .25rem rgba(121, 169, 255, .18); }
+.dark-mode .form-control:read-only, .dark-mode .form-select:disabled { background-color: #202d42; }
+.dark-mode .btn-light { --bs-btn-color: var(--text-dark); --bs-btn-bg: #263552; --bs-btn-border-color: #3a4a66; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #324363; }
+.dark-mode .progress, .dark-mode .progress-bar-custom, .dark-mode .subj-track { background-color: #2a3952; }
+.dark-mode .quick-item, .dark-mode .badge-detail-stat, .dark-mode .score-card { background: #1d293d; border-color: #2a3952; }
+.dark-mode .quick-item:hover { background: #263552; }
+.dark-mode .year-card.active { background: #1a2d4d; }
+.dark-mode .year-card.locked, .dark-mode .year-card.locked::after { background: rgba(23, 32, 51, .82); }
+.dark-mode .year-card-lock { background: #2a3952; color: #c8d5e9 !important; }
+.dark-mode .modules-list-header { border-color: #3a4a66; }
+.dark-mode .modules-list-row, .dark-mode .activity-item { border-color: #2a3952; }
+.dark-mode .ml-icon { background: #263552; }
+.dark-mode .donut-inner { background: #172033; }
+.dark-mode #textContentModalBody table, .dark-mode #textContentModalBody th, .dark-mode #textContentModalBody td { background: #172033; color: var(--text-dark); border-color: #3a4a66; }
+.dark-mode #textContentModalBody th { background: #1d3358; color: #cfe0ff; }
+.dark-mode #textContentModalBody .medical-callout { background: #172b4a; }
+.dark-mode #textContentModalBody .medical-clinical-pearl { background: #12372f; }
+.dark-mode #textContentModalBody .medical-warning { background: #3a2d15; }
+.dark-mode #textContentModalBody .medical-clinical-case { background: #2c2149; }
+.dark-mode #textContentModalBody .medical-diagnosis { background: #421f2a; }
+.dark-mode #textContentModalBody .medical-treatment { background: #123640; }
+.dark-mode #textContentModalBody .medical-pathophysiology { background: #202b50; }
+.dark-mode .status-progress { background: #173a66; color: #a8c9ff; }
+.dark-mode .status-completed { background: #123d35; color: #8ee5c3; }
+.dark-mode .status-locked, .dark-mode .status-not-started { background: #2a3952; color: #b8c5d8; }

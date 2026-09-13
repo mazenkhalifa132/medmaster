@@ -28,6 +28,9 @@
     }
     .module-description-preview.is-expanded { display: block; width: 100%; }
     .module-completion-area { align-self: flex-start; margin-top: 2rem; }
+    .module-exam-question-total { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid #dbeafe; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-size: 12px; white-space: nowrap; }
+    .module-exam-question-total i { font-size: 16px; }
+    .module-exam-question-total strong { font-size: 14px; }
 </style>
 <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-secondary px-0 mb-3 d-inline-flex align-items-center gap-1">
     <i class='bx bx-arrow-back fs-5'></i> Back to Dashboard
@@ -134,6 +137,9 @@
                         <option value="">All exam types</option>
                         {% for group in exam_groups %}<option value="{{ group.exam_type }}">{{ group.label }}</option>{% endfor %}
                     </select>
+                    <div class="module-exam-question-total ms-auto" aria-label="{{ module_question_count }} questions in this module">
+                        <i class='bx bx-help-circle'></i><span><strong>{{ module_question_count }}</strong> Questions</span>
+                    </div>
                 </div>
             {% endif %}
             {% for group in exam_groups %}

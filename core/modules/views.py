@@ -145,6 +145,7 @@ def module_detail(request, pk):
         osce_exam.retries_remaining = max(osce_exam.retry_times - osce_exam.attempts_used, 0)
         osce_exam.can_start = not osce_exam.is_locked and osce_exam.question_count > 0 and osce_exam.retries_remaining > 0
 
+    module_question_count = sum(exam.question_count for exam in exams)
     exam_progress = round((completed_exams / total_exams) * 100) if total_exams else 0
     average_exam_score = round((total_score / total_possible_score) * 100) if total_possible_score else 0
 
@@ -163,6 +164,7 @@ def module_detail(request, pk):
         {
             'module': module,
             'exam_groups': exam_groups,
+            'module_question_count': module_question_count,
             'total_exams': total_exams,
             'completed_exams': completed_exams,
             'exam_progress': exam_progress,
