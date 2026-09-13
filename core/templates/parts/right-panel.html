@@ -28,14 +28,14 @@
     <div class="mb-4{% if not has_active_academic_year %} premium-locked-section{% endif %}">
         <div class="premium-lock-content">
             <h6 class="fw-bold mb-3">Performance Overview</h6>
-            <div class="year-question-total mb-4" aria-label="Total questions available for your selected academic year">
+            <!--<div class="year-question-total mb-4" aria-label="Total questions available for your selected academic year">
                 <div class="year-question-total__icon"><i class='bx bx-help-circle'></i></div>
                 <div>
                     <small class="text-muted d-block">{% if request.user.academic_year %}Questions in Year {{ request.user.academic_year }}{% else %}Questions in selected year{% endif %}</small>
                     <strong>{{ year_question_count }}</strong>
                     <span class="text-muted">available</span>
                 </div>
-            </div>
+            </div>-->
             <div class="d-flex align-items-center gap-3">
             <div style="width:100px; height:100px; border-radius:50%; background:conic-gradient(from -90deg, #2563eb 0% {{ performance_overview.correct_percentage }}%, #8b5cf6 {{ performance_overview.correct_percentage }}% {{ performance_overview.answered_percentage }}%, #e5e7eb {{ performance_overview.answered_percentage }}% 100%); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <div style="width:68px; height:68px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column;">

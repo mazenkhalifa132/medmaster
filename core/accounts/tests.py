@@ -1,12 +1,19 @@
-from django.test import TestCase
+from unittest.mock import patch
+
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import User
 from progress.models import StudentProgress
 
 
+@override_settings(
+    TURNSTILE_SITE_KEY='test-site-key',
+    TURNSTILE_SECRET_KEY='test-secret-key',
+)
+@patch('accounts.views.verify_turnstile', return_value=True)
 class AuthFlowTests(TestCase):
-    def test_terms_page_is_public_and_signup_links_to_it(self):
+    def test_terms_page_is_public_and_signup_links_to_it(self, _verify_turnstile):
         response = self.client.get(reverse('terms'))
 
         self.assertEqual(response.status_code, 200)
@@ -17,8 +24,9 @@ class AuthFlowTests(TestCase):
 
         self.assertContains(response, f'href="{reverse("terms")}"')
         self.assertContains(response, 'target="_blank"')
+        self.assertContains(response, 'data-sitekey="test-site-key"')
 
-    def test_student_signup_and_login(self):
+    def test_student_signup_and_login(self, _verify_turnstile):
         response = self.client.post(
             reverse('signup'),
             {
@@ -44,7 +52,7 @@ class AuthFlowTests(TestCase):
         )
         self.assertEqual(login_response.status_code, 302)
 
-    def test_signup_cannot_assign_admin_role(self):
+    def test_signup_cannot_assign_admin_role(self, _verify_turnstile):
         response = self.client.post(
             reverse('signup'),
             {
@@ -65,7 +73,29 @@ class AuthFlowTests(TestCase):
         self.assertEqual(user.role, 'student')
         self.assertFalse(user.is_staff)
 
-    def test_admin_login_updates_last_login_without_validating_existing_phone(self):
+    def test_invalid_signup_keeps_entered_values_and_shows_signup_form(self, _verify_turnstile):
+        response = self.client.post(
+            reverse('signup'),
+            {
+                'first_name': 'Mazen',
+                'last_name': 'Ahmed',
+                'email': 'mazen@example.com',
+                'phone': '+201000000000',
+                'academic_year': '3',
+                'password1': 'StrongPass123!',
+                'password2': 'DifferentPass123!',
+                'agree_terms': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, 'Passwords do not match.', status_code=400)
+        self.assertContains(response, 'value="Mazen"', status_code=400)
+        self.assertContains(response, 'value="mazen@example.com"', status_code=400)
+        self.assertContains(response, 'value="3" selected', status_code=400)
+        self.assertContains(response, 'id="signup-form" class="auth-form"', status_code=400)
+
+    def test_admin_login_updates_last_login_without_validating_existing_phone(self, _verify_turnstile):
         user = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
@@ -82,7 +112,7 @@ class AuthFlowTests(TestCase):
         user.refresh_from_db()
         self.assertIsNotNone(user.last_login)
 
-    def test_phone_must_be_unique(self):
+    def test_phone_must_be_unique(self, _verify_turnstile):
         User.objects.create_user(
             username='firstuser',
             email='first@example.com',
@@ -100,7 +130,7 @@ class AuthFlowTests(TestCase):
                 role='student',
             )
 
-    def test_password_must_meet_strength_requirements(self):
+    def test_password_must_meet_strength_requirements(self, _verify_turnstile):
         with self.assertRaises(Exception):
             User.objects.create_user(
                 username='weakpass',
@@ -109,7 +139,7 @@ class AuthFlowTests(TestCase):
                 role='student',
             )
 
-    def test_logout_clears_session(self):
+    def test_logout_clears_session(self, _verify_turnstile):
         user = User.objects.create_user(
             username='logoutuser',
             email='logout@example.com',
@@ -123,7 +153,7 @@ class AuthFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-    def test_student_profile_cannot_change_academic_year(self):
+    def test_student_profile_cannot_change_academic_year(self, _verify_turnstile):
         user = User.objects.create_user(
             username='profileuser',
             email='profile@example.com',
@@ -149,7 +179,7 @@ class AuthFlowTests(TestCase):
         self.assertEqual(user.first_name, 'Updated')
         self.assertEqual(user.academic_year, 1)
 
-    def test_admin_can_delete_student_with_progress(self):
+    def test_admin_can_delete_student_with_progress(self, _verify_turnstile):
         admin_user = User.objects.create_superuser(
             username='deleteadmin',
             email='deleteadmin@example.com',
@@ -172,3 +202,11 @@ class AuthFlowTests(TestCase):
         self.assertRedirects(response, reverse('admin:accounts_user_changelist'))
         self.assertFalse(User.objects.filter(pk=student.pk).exists())
         self.assertFalse(StudentProgress.objects.filter(pk=progress.pk).exists())
+
+    def test_signup_rejects_failed_turnstile_check(self, _verify_turnstile):
+        _verify_turnstile.return_value = False
+
+        response = self.client.post(reverse('signup'), {'first_name': 'Mazen'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, 'Please complete the security check and try again.', status_code=400)

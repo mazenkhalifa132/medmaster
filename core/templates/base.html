@@ -15,7 +15,7 @@
     <script>
         (function () {
             const savedTheme = localStorage.getItem('medmaster-theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Light mode is the default; dark mode is used only after an explicit choice.
             if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark-mode');
             }
@@ -58,10 +58,10 @@
                         <!--<button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle dark mode">
                             <i class='bx bx-moon'></i>
                         </button>-->
-                        <a class="login-streak" href="{% url 'home' %}#progress" aria-label="{{ login_streak }} day login streak" title="{{ login_streak }} day login streak" onclick="if (document.querySelector('.app-page')) { document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']')?.click(); return false; }">
+                        <!--<a class="login-streak" href="{% url 'home' %}#progress" aria-label="{{ login_streak }} day login streak" title="{{ login_streak }} day login streak" onclick="if (document.querySelector('.app-page')) { document.querySelector('.sidebar-menu .nav-link[data-page=\'progress\']')?.click(); return false; }">
                             <i class='bx bxs-flame'></i>
                             <span>{{ login_streak }}</span>
-                        </a>
+                        </a>-->
                         <div class="dropdown position-relative">
                             <button class="notification-bell" id="notificationBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
                                 <i class='bx bx-bell'></i>

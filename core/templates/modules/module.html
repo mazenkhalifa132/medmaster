@@ -137,9 +137,9 @@
                         <option value="">All exam types</option>
                         {% for group in exam_groups %}<option value="{{ group.exam_type }}">{{ group.label }}</option>{% endfor %}
                     </select>
-                    <div class="module-exam-question-total ms-auto" aria-label="{{ module_question_count }} questions in this module">
+                    <!--<div class="module-exam-question-total ms-auto" aria-label="{{ module_question_count }} questions in this module">
                         <i class='bx bx-help-circle'></i><span><strong>{{ module_question_count }}</strong> Questions</span>
-                    </div>
+                    </div>-->
                 </div>
             {% endif %}
             {% for group in exam_groups %}
