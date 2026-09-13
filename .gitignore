@@ -16,3 +16,12 @@ venv/
 staticfiles/
 media/
 *.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+staticfiles/
+media/
+*.log
