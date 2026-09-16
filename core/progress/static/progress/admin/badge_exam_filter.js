@@ -2,7 +2,9 @@
     function filterOptions(select, attribute, value) {
         let selectedIsValid = false;
         Array.from(select.options).forEach((option) => {
-            const visible = !option.value || (Boolean(value) && option.dataset[attribute] === value);
+            // Keep prior selections available so staff can add exams from
+            // another module without losing selections already made.
+            const visible = !option.value || option.selected || (Boolean(value) && option.dataset[attribute] === value);
             option.hidden = !visible;
             option.disabled = !visible;
             if (option.selected && visible) selectedIsValid = true;
@@ -31,7 +33,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        setupTargeting('id_exam_year', 'id_exam_module', 'id_exam');
+        setupTargeting('id_exam_year', 'id_exam_module', 'id_exams');
         setupTargeting('id_module_year', 'id_target_module');
     });
 })();

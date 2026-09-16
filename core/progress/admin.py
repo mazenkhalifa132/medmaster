@@ -24,7 +24,7 @@ class ModuleByYearSelect(forms.Select):
         return option
 
 
-class ExamByModuleSelect(forms.Select):
+class ExamByModuleSelect(forms.SelectMultiple):
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
         option = super().create_option(name, value, label, selected, index, subindex, attrs)
         if value and hasattr(value, 'instance'):
@@ -401,14 +401,15 @@ class BadgeAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        selected_exam = self.instance.exam if self.instance and self.instance.pk else None
+        selected_exams = self.instance.exams.all() if self.instance and self.instance.pk else Exam.objects.none()
+        selected_exam = selected_exams.first()
         selected_module = self.instance.module if self.instance and self.instance.pk else None
         exam_year = self.data.get('exam_year') or (selected_exam.year if selected_exam else None)
         exam_module = self.data.get('exam_module') or (selected_exam.module_id if selected_exam else None)
         module_year = self.data.get('module_year') or (selected_module.year if selected_module else None)
         target_module = self.data.get('target_module') or (selected_module.pk if selected_module else None)
-        self.fields['exam'].queryset = Exam.objects.select_related('module').all()
-        self.fields['exam'].widget = ExamByModuleSelect(choices=self.fields['exam'].choices)
+        self.fields['exams'].queryset = Exam.objects.select_related('module').all()
+        self.fields['exams'].widget = ExamByModuleSelect(choices=self.fields['exams'].choices)
         self.fields['threshold'].required = False
         self.initial.update({
             'exam_year': exam_year,
@@ -422,12 +423,8 @@ class BadgeAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
         exam_year = cleaned_data.get('exam_year')
         exam_module = cleaned_data.get('exam_module')
-        exam = cleaned_data.get('exam')
+        exams = cleaned_data.get('exams')
         rule_type = cleaned_data.get('rule_type')
-        if exam and (not exam_year or not exam_module):
-            raise forms.ValidationError('Choose the year and module for the selected exam.')
-        if exam and (exam.year != exam_year or exam.module_id != exam_module.pk):
-            raise forms.ValidationError('The selected exam must belong to the chosen year and module.')
         if rule_type == Badge.MODULE_PROGRESS:
             module_year = cleaned_data.get('module_year')
             target_module = cleaned_data.get('target_module')
@@ -438,9 +435,8 @@ class BadgeAdminForm(forms.ModelForm):
                 raise forms.ValidationError('The selected module must belong to the chosen year.')
             cleaned_data['module'] = target_module
             cleaned_data['threshold'] = percentage
-            cleaned_data['exam'] = None
+            cleaned_data['exams'] = Exam.objects.none()
             self.instance.module = target_module
-            self.instance.exam = None
         return cleaned_data
 
 
@@ -452,8 +448,8 @@ class BadgeAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'color', 'image_url', 'xp_reward', 'rule_type', 'is_active'),
         }),
         ('Exam targeting', {
-            'fields': ('exam_year', 'exam_module', 'exam'),
-            'description': 'Choose a year, then a module, then the exam this badge should apply to.',
+            'fields': ('exam_year', 'exam_module', 'exams'),
+            'description': 'Choose a year and module, then select one or more exams this badge should apply to.',
             'classes': ('exam-targeting',),
         }),
         ('Module details', {
@@ -467,7 +463,7 @@ class BadgeAdmin(admin.ModelAdmin):
             'classes': ('threshold-targeting',),
         }),
     )
-    list_display = ('name', 'rule_type', 'threshold_requirement', 'xp_reward', 'is_active', 'exam', 'module')
+    list_display = ('name', 'rule_type', 'threshold_requirement', 'xp_reward', 'is_active', 'attached_exams', 'module')
     list_filter = ('rule_type', 'is_active')
     list_editable = ('xp_reward', 'is_active')
     search_fields = ('name',)
@@ -475,6 +471,10 @@ class BadgeAdmin(admin.ModelAdmin):
     @admin.display(description='Requirement')
     def threshold_requirement(self, obj):
         return obj.threshold_requirement
+
+    @admin.display(description='Attached exams')
+    def attached_exams(self, obj):
+        return ', '.join(obj.exams.values_list('name', flat=True)) or 'All exams'
 
 
 @admin.register(WeeklyGoal)

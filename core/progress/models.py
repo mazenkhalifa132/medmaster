@@ -120,13 +120,11 @@ class Badge(models.Model):
     )
     color = models.CharField(max_length=20, default='#7c3aed', help_text='CSS color, for example #7c3aed.')
     image_url = models.URLField(help_text='Public URL of the badge image.')
-    exam = models.ForeignKey(
+    exams = models.ManyToManyField(
         'exams.Exam',
-        on_delete=models.CASCADE,
         related_name='badges',
         blank=True,
-        null=True,
-        help_text='Optional. Limit this badge to one exam; leave blank to award it for every exam.',
+        help_text='Optional. Attach this badge to one or more exams; leave blank to award it for every exam.',
     )
     module = models.ForeignKey(
         'modules.Module',

@@ -52,9 +52,10 @@ class ExamBadgeTests(TestCase):
             rule_type=Badge.EXAM_SCORE, threshold=80,
         )
         self.target_badge = Badge.objects.create(
-            name='Target high score', image_url='https://example.com/target.svg', exam=self.target_exam,
+            name='Target high score', image_url='https://example.com/target.svg',
             rule_type=Badge.EXAM_SCORE, threshold=80,
         )
+        self.target_badge.exams.add(self.target_exam)
 
     def test_exam_badge_is_awarded_only_for_its_selected_exam(self):
         award_exam_badges(
@@ -70,6 +71,17 @@ class ExamBadgeTests(TestCase):
         awarded_badge_ids = set(StudentBadge.objects.values_list('badge_id', flat=True))
         self.assertIn(self.global_badge.pk, awarded_badge_ids)
         self.assertIn(self.target_badge.pk, awarded_badge_ids)
+
+    def test_exam_badge_is_awarded_for_each_of_its_attached_exams(self):
+        self.target_badge.exams.add(self.other_exam)
+
+        for exam in (self.target_exam, self.other_exam):
+            StudentBadge.objects.all().delete()
+            award_exam_badges(
+                student=self.student, score=9, total_questions=10,
+                attempt_key=f'exam:{exam.pk}', exam=exam,
+            )
+            self.assertTrue(StudentBadge.objects.filter(badge=self.target_badge).exists())
 
     def test_module_progress_badge_uses_combined_first_attempt_scores(self):
         module_badge = Badge.objects.create(

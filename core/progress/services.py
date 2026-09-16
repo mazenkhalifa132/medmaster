@@ -74,9 +74,9 @@ def award_exam_badges(*, student, score, total_questions, attempt_key, exam=None
         threshold__lte=percentage,
     )
     if exam is None:
-        badges = badges.filter(exam__isnull=True)
+        badges = badges.filter(exams__isnull=True)
     else:
-        badges = badges.filter(models.Q(exam__isnull=True) | models.Q(exam=exam))
+        badges = badges.filter(models.Q(exams__isnull=True) | models.Q(exams=exam)).distinct()
     return [
         _award_badge(student=student, badge=badge, source_key=f'badge:{attempt_key}:{badge.pk}')[0]
         for badge in badges
