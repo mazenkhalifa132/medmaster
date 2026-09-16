@@ -120,6 +120,39 @@ class AdminLeaderboardTests(TestCase):
         self.assertEqual(leaderboard[0]['correct_answers'], 0)
         self.assertEqual(leaderboard[0]['incorrect_answers'], 0)
 
+    def test_admin_can_open_student_progress_from_leaderboard(self):
+        User = get_user_model()
+        admin_user = User.objects.create_superuser(
+            username='admin', email='admin@example.com', password='StrongPass1', role='admin',
+        )
+        student = User.objects.create_user(
+            username='student', email='student@example.com', phone='01000000001',
+            first_name='First', last_name='Second', academic_year=3, password='StrongPass1',
+        )
+        module = Module.objects.create(year=3, name='Medicine', image_url='https://example.com/medicine.svg')
+        entered_exam = Exam.objects.create(year=3, module=module, name='Entered exam', time_limit=20)
+        missed_exam = Exam.objects.create(year=3, module=module, name='Missed exam', time_limit=20)
+        ExamAttempt.objects.create(exam=entered_exam, student=student, score=6, total_questions=10)
+        ExamAttempt.objects.create(exam=entered_exam, student=student, score=10, total_questions=10)
+
+        self.client.force_login(admin_user)
+        response = self.client.get(
+            reverse('admin:progress_studentprogress_student_detail', args=(student.pk,))
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'First')
+        self.assertContains(response, 'Second')
+        self.assertContains(response, 'student@example.com')
+        self.assertContains(response, '01000000001')
+        self.assertContains(response, 'Year 3')
+        self.assertContains(response, '6/10 (60.0%)')
+        self.assertContains(response, 'Not entered')
+        self.assertContains(response, missed_exam.name)
+
+        filtered = self.client.get(response.wsgi_request.path, {'entered': 'yes', 'percentage': '75'})
+        self.assertContains(filtered, 'No exams match these filters.')
+
 
 class PointScoringTests(TestCase):
     def setUp(self):

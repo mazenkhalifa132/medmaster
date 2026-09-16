@@ -21,7 +21,7 @@
                 {% for entry in leaderboard %}
                     <tr>
                         <td>{{ entry.position }}</td>
-                        <th scope="row">{{ entry.student.get_full_name|default:entry.student.username }}</th>
+                        <th scope="row"><a href="{{ entry.detail_url }}">{{ entry.student.get_full_name|default:entry.student.username }}</a></th>
                         <td>{{ entry.student.email }}</td>
                         <td>{{ entry.student.phone|default:"—" }}</td>
                         <td>{{ entry.percentage }}%</td>

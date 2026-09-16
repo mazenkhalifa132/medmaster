@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-from exams.models import Exam, ExamAttempt
+from exams.models import Exam, ExamAnswer, ExamAttempt
 from dashboard.models import TelegramGroup
 from modules.models import Module
 from notes.models import Note
@@ -104,6 +104,7 @@ def home(request):
     modules_by_year = {year: [] for year in range(1, 6)}
     quizzes_by_year = {year: [] for year in range(1, 6)}
     osce_exams_by_year = {year: [] for year in range(1, 6)}
+    flashcards = []
     modules = Module.objects.filter(is_active=True).annotate(
         total_exams=Count('exams', filter=Q(exams__is_active=True), distinct=True),
         completed_exams=Count(
@@ -184,7 +185,16 @@ def home(request):
     exams = Exam.objects.filter(
         is_active=True,
         module__is_active=True,
-    ).select_related('module', 'subject', 'week').prefetch_related('questions', 'attempts')
+    ).select_related('module', 'subject', 'week').prefetch_related('questions__answers', 'attempts')
+    latest_answers = {}
+    for answer in ExamAnswer.objects.filter(
+        attempt__student=request.user,
+        question__exam__is_active=True,
+        question__exam__module__is_active=True,
+    ).select_related('question', 'selected_answer', 'attempt').order_by(
+        'question_id', '-attempt__submitted_at', '-attempt_id'
+    ):
+        latest_answers.setdefault(answer.question_id, answer)
     for exam in exams:
         is_locked = not can_access_content(request.user, exam)
         attempts = [attempt for attempt in exam.attempts.all() if attempt.student_id == request.user.id]
@@ -221,6 +231,29 @@ def home(request):
             'status': 'Premium required' if is_locked else ('Completed' if retries_available == 0 else ('Unavailable' if not exam.questions.all() else 'Available')),
             'statusClass': 'bg-secondary' if is_locked or retries_available == 0 else ('bg-light text-muted' if not exam.questions.all() else badge),
         })
+        if not is_locked:
+            for question in exam.questions.all():
+                correct_answer = next((answer for answer in question.answers.all() if answer.is_correct), None)
+                if not correct_answer:
+                    continue
+                latest_answer = latest_answers.get(question.pk)
+                # Flashcards are for review, so only include questions the
+                # student has already answered.
+                if not latest_answer or not latest_answer.selected_answer_id:
+                    continue
+                status = 'right' if latest_answer.selected_answer.is_correct else 'wrong'
+                flashcards.append({
+                    'id': question.pk,
+                    'question': question.text,
+                    'answer': correct_answer.text,
+                    'explanation': question.answer_explanation,
+                    'year': exam.year,
+                    'moduleId': exam.module_id,
+                    'module': exam.module.name,
+                    'subject': exam.subject.name if exam.subject_id else 'General',
+                    'week': exam.week.name if exam.week_id else 'Unscheduled',
+                    'status': status,
+                })
 
     osce_exams = OSCEExam.objects.filter(
         is_active=True,
@@ -332,6 +365,7 @@ def home(request):
         'years': years,
         'modules_by_year': modules_by_year,
         'quizzes_by_year': quizzes_by_year,
+        'flashcards': flashcards,
         'osce_exams_by_year': osce_exams_by_year,
         'notes': notes,
         'note_modules': Module.objects.filter(is_active=True).order_by('year', 'order', 'name'),

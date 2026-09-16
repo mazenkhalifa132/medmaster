@@ -111,7 +111,9 @@
             </div>
             {% block right_panel %}{% include 'parts/right-panel.html' %}{% endblock %}
         </div>
-        {% block security_watermark %}{% include 'parts/security-watermark.html' %}{% endblock %}
+        {% if not request.user.is_admin %}
+            {% block security_watermark %}{% include 'parts/security-watermark.html' %}{% endblock %}
+        {% endif %}
     {% else %}
         {% block auth_content %}{% endblock %}
     {% endif %}

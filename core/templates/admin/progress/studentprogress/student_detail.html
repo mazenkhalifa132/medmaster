@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module aligned">
+        <h2>Personal information</h2>
+        <div class="form-row"><div><strong>First name:</strong> {{ student.first_name|default:"—" }}</div><div><strong>Second name:</strong> {{ student.last_name|default:"—" }}</div></div>
+        <div class="form-row"><div><strong>Email:</strong> {{ student.email }}</div><div><strong>Phone number:</strong> {{ student.phone|default:"—" }}</div></div>
+        <div class="form-row"><div><strong>Academic year:</strong> {% if student.academic_year %}Year {{ student.academic_year }}{% else %}Not assigned{% endif %}</div></div>
+    </div>
+
+    <div class="module aligned">
+        <h2>Academic information</h2>
+        <div class="form-row"><div><strong>Total points:</strong> {{ progress.total_points }}</div><div><strong>Correct answers:</strong> {{ progress.correct_answers }}</div></div>
+        <div class="form-row"><div><strong>Incorrect answers:</strong> {{ progress.incorrect_answers }}</div><div><strong>Total percentage:</strong> {% widthratio progress.correct_answers progress.questions_answered 100 %}%</div></div>
+        <div class="form-row"><div><strong>Rank:</strong> {{ rank.name|default:"Unranked" }}</div><div><strong>Given badges:</strong> {% for award in badges %}{{ award.badge.name }}{% if not forloop.last %}, {% endif %}{% empty %}No badges awarded{% endfor %}</div></div>
+    </div>
+
+    <div class="module">
+        <h2>Exam information</h2>
+        <form method="get" id="exam-filters" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end;margin:16px 0;">
+            <div><label for="filter-search">Exam name</label><input id="filter-search" name="search" value="{{ filters.search }}" type="search"></div>
+            <div><label for="filter-year">Year</label><select id="filter-year" name="year"><option value="">All years</option>{% for value, label in year_choices %}<option value="{{ value }}"{% if filters.year == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div><label for="filter-module">Module</label><select id="filter-module" name="module"><option value="">All modules</option>{% for module in modules %}<option value="{{ module.pk }}" data-year="{{ module.year }}"{% if filters.module == module.pk|stringformat:"s" %} selected{% endif %}>{{ module.name }}</option>{% endfor %}</select></div>
+            <div><label for="filter-subject">Subject</label><select id="filter-subject" name="subject"><option value="">All subjects</option>{% for subject in subjects %}<option value="{{ subject.pk }}" data-module="{{ subject.module_id }}"{% if filters.subject == subject.pk|stringformat:"s" %} selected{% endif %}>{{ subject.name }}</option>{% endfor %}</select></div>
+            <div><label for="filter-week">Week</label><select id="filter-week" name="week"><option value="">All weeks</option>{% for week in weeks %}<option value="{{ week.pk }}" data-module="{{ week.module_id }}"{% if filters.week == week.pk|stringformat:"s" %} selected{% endif %}>{{ week.name }}</option>{% endfor %}</select></div>
+            <div><label for="filter-entered">Entered</label><select id="filter-entered" name="entered"><option value="">All</option><option value="yes"{% if filters.entered == "yes" %} selected{% endif %}>Entered</option><option value="no"{% if filters.entered == "no" %} selected{% endif %}>Not entered</option></select></div>
+            <div><label for="filter-percentage">Percentage</label><select id="filter-percentage" name="percentage"><option value="">Any percentage</option>{% for value in percentage_choices %}<option value="{{ value }}"{% if filters.percentage == value|stringformat:"s" %} selected{% endif %}>{{ value }}% and above</option>{% endfor %}</select></div>
+            <div><button type="submit" class="button default">Apply filters</button> <a href="?">Clear</a></div>
+        </form>
+        <table id="result_list">
+            <thead><tr><th>Exam</th><th>Year</th><th>Module</th><th>Subject</th><th>Week</th><th>First score</th><th>Entered</th><th>First attempt</th></tr></thead>
+            <tbody>{% for row in exam_rows %}<tr><th>{{ row.exam.name }}</th><td>Year {{ row.exam.year }}</td><td>{{ row.exam.module.name }}</td><td>{{ row.exam.subject.name|default:"—" }}</td><td>{{ row.exam.week.name|default:"—" }}</td><td>{% if row.entered %}{{ row.attempt.score }}/{{ row.attempt.total_questions }} ({{ row.percentage }}%){% else %}—{% endif %}</td><td>{% if row.entered %}<span style="color:#15803d;font-weight:600">Entered</span>{% else %}<span style="color:#b91c1c;font-weight:600">Not entered</span>{% endif %}</td><td>{% if row.entered %}{{ row.attempt.submitted_at|date:"M d, Y, P" }}{% else %}—{% endif %}</td></tr>{% empty %}<tr><td colspan="8">No exams match these filters.</td></tr>{% endfor %}</tbody>
+        </table>
+    </div>
+    <p><a href="{% url 'admin:progress_studentprogress_changelist' %}">Back to student progress</a></p>
+</div>
+<script>
+(() => {
+    const year = document.getElementById('filter-year');
+    const module = document.getElementById('filter-module');
+    const subject = document.getElementById('filter-subject');
+    const week = document.getElementById('filter-week');
+    const filter = (select, attribute, value) => {
+        [...select.options].forEach(option => {
+            if (!option.value) return;
+            option.hidden = Boolean(value && option.dataset[attribute] !== value);
+        });
+        if (select.selectedOptions[0]?.hidden) select.value = '';
+    };
+    const refresh = () => {
+        filter(module, 'year', year.value);
+        filter(subject, 'module', module.value);
+        filter(week, 'module', module.value);
+    };
+    year.addEventListener('change', () => { module.value = ''; subject.value = ''; week.value = ''; refresh(); });
+    module.addEventListener('change', () => { subject.value = ''; week.value = ''; refresh(); });
+    refresh();
+})();
+</script>
+{% endblock %}

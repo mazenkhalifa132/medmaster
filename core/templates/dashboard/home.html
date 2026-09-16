@@ -53,6 +53,78 @@
     </div>
 </div>
 
+<div id="page-flashcards" class="app-page">
+    <style>
+        .flashcards-hero { background: radial-gradient(circle at 100% 0%, rgba(129, 140, 248, .45), transparent 36%), linear-gradient(135deg, #172554, #312e81 55%, #4f46e5); border-radius: 22px; color: #fff; overflow: hidden; position: relative; }
+        .flashcards-hero::after { content: ''; width: 210px; height: 210px; position: absolute; right: -55px; bottom: -115px; border: 32px solid rgba(255,255,255,.1); border-radius: 50%; }
+        .flashcard-study { min-height: 355px; border: 0; border-radius: 22px; background: linear-gradient(145deg, #fff, #f7f9ff); box-shadow: 0 16px 44px rgba(30, 41, 59, .1); }
+        .flashcard-label { letter-spacing: .08em; font-size: .7rem; text-transform: uppercase; font-weight: 800; color: #6366f1; }
+        .flashcard-answer { background: #eef2ff; border-radius: 14px; border: 1px solid #dbeafe; }
+        .flashcard-filter { min-width: 135px; border-radius: 10px; }
+        .flashcard-status .btn { border-radius: 10px; font-size: .84rem; font-weight: 700; }
+        .flashcard-progress { height: 7px; border-radius: 10px; background: #e9edf5; overflow: hidden; }
+        .flashcard-progress > div { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); border-radius: inherit; transition: width .25s ease; }
+        @media (max-width: 576px) { .flashcards-hero { border-radius: 16px; } .flashcard-study { min-height: 390px; } .flashcard-filter { width: 100%; } }
+    </style>
+    <div class="flashcards-hero p-4 p-md-5 mb-4">
+        <div class="position-relative" style="z-index:1; max-width: 650px;">
+            <span class="badge rounded-pill text-bg-light text-primary mb-3"><i class='bx bx-brain me-1'></i> Active recall</span>
+            <h2 class="fw-bold mb-2">Turn questions into lasting knowledge.</h2>
+            <p class="mb-0 text-white-50">Review an answer, reveal the explanation, and focus your next session exactly where it matters.</p>
+        </div>
+    </div>
+
+    <div class="bg-white border shadow-sm rounded-4 p-3 p-md-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <div class="flashcard-label">Study queue</div>
+                <h5 class="fw-bold mb-0"><span id="flashcard-total">0</span> cards ready to review</h5>
+            </div>
+            <button type="button" class="btn btn-light border btn-sm" onclick="resetFlashcardFilters()"><i class='bx bx-reset me-1'></i> Reset filters</button>
+        </div>
+        <div class="btn-group flashcard-status mb-3" role="group" aria-label="Filter cards by answer result">
+            <button type="button" class="btn btn-primary" data-flash-status="all">All questions</button>
+            <button type="button" class="btn btn-outline-danger" data-flash-status="wrong"><i class='bx bx-x-circle me-1'></i> Wrong questions</button>
+            <button type="button" class="btn btn-outline-success" data-flash-status="right"><i class='bx bx-check-circle me-1'></i> Right questions</button>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <select id="flashcard-filter-module" class="form-select form-select-sm flashcard-filter" aria-label="Filter flashcards by module" onchange="updateFlashcardModuleFilters()"><option value="all">All modules</option></select>
+            <select id="flashcard-filter-subject" class="form-select form-select-sm flashcard-filter" aria-label="Filter flashcards by subject" onchange="filterFlashcards()"><option value="all">All subjects</option></select>
+            <select id="flashcard-filter-week" class="form-select form-select-sm flashcard-filter" aria-label="Filter flashcards by week" onchange="filterFlashcards()"><option value="all">All weeks</option></select>
+        </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-8">
+            <div class="flashcard-study card h-100">
+                <div class="card-body p-4 p-md-5 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                        <div id="flashcard-tags" class="d-flex flex-wrap gap-2"></div>
+                        <button id="flashcard-star" type="button" class="btn btn-light border rounded-circle d-inline-flex align-items-center justify-content-center p-0" style="width:40px;height:40px" title="Save this card" aria-label="Save this card"><i class='bx bx-star fs-5'></i></button>
+                    </div>
+                    <div id="flashcard-content" class="flex-grow-1 d-flex flex-column justify-content-center"></div>
+                    <div class="d-flex align-items-center justify-content-between gap-3 mt-4">
+                        <button id="flashcard-previous" type="button" class="btn btn-light border" title="Previous card"><i class='bx bx-left-arrow-alt'></i><span class="d-none d-sm-inline ms-1">Previous</span></button>
+                        <button id="flashcard-reveal" type="button" class="btn btn-primary px-4"><i class='bx bx-show me-1'></i> Reveal answer</button>
+                        <button id="flashcard-next" type="button" class="btn btn-light border" title="Next card"><span class="d-none d-sm-inline me-1">Next</span><i class='bx bx-right-arrow-alt'></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-2 mb-3"><span class="rounded-3 p-2" style="background:#eef2ff;color:#4f46e5"><i class='bx bx-pulse fs-4'></i></span><div><div class="flashcard-label">Session progress</div><strong id="flashcard-position">0 / 0</strong></div></div>
+                    <div class="flashcard-progress mb-2"><div id="flashcard-progress-fill"></div></div>
+                    <small class="text-muted mb-4">Move through your filtered study queue at your own pace.</small>
+                    <button id="flashcard-shuffle" type="button" class="btn btn-outline-primary w-100 mb-3"><i class='bx bx-shuffle me-1'></i> Shuffle this queue</button>
+                    <div class="mt-auto rounded-3 p-3" style="background:#f8fafc"><strong class="small d-block mb-2">Quick controls</strong><div class="small text-muted d-flex justify-content-between"><span>Reveal answer</span><kbd>Space</kbd></div><div class="small text-muted d-flex justify-content-between mt-2"><span>Move between cards</span><span><kbd>←</kbd> <kbd>→</kbd></span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="page-courses" class="app-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold" id="courses-page-title">My Courses — Year 1</h4>
@@ -614,6 +686,7 @@
 {{ modules_by_year|json_script:"modules-by-year-data" }}
 {{ quizzes_by_year|json_script:"quizzes-by-year-data" }}
 {{ osce_exams_by_year|json_script:"osce-exams-by-year-data" }}
+{{ flashcards|json_script:"flashcards-data" }}
 {{ xp_chart_data|json_script:"xp-chart-data" }}
 <script>
     const yearData = {
@@ -638,7 +711,97 @@
     Object.entries(databaseOsceExams).forEach(([year, exams]) => {
         yearData[year].osce = exams;
     });
+    const flashcards = JSON.parse(document.getElementById('flashcards-data').textContent);
+    const flashcardAcademicYear = {{ request.user.academic_year|default:1 }};
+    let filteredFlashcards = [...flashcards];
+    let flashcardIndex = 0;
+    let flashcardRevealed = false;
+    let flashcardStatus = 'all';
+    let savedFlashcardIds = new Set();
+    try { savedFlashcardIds = new Set(JSON.parse(localStorage.getItem('medmaster-saved-flashcards') || '[]')); } catch (error) { /* Storage is optional. */ }
 
+    const flashEscape = value => String(value || '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+    function fillFlashcardSelect(id, values, label) {
+        const select = document.getElementById(id);
+        const selected = select.value;
+        select.innerHTML = `<option value="all">All ${label}</option>` + values.map(value => {
+            const option = typeof value === 'object' ? value : { value, label: value };
+            return `<option value="${flashEscape(option.value)}">${flashEscape(option.label)}</option>`;
+        }).join('');
+        if (values.map(value => String(typeof value === 'object' ? value.value : value)).includes(selected)) select.value = selected;
+    }
+    function academicYearFlashcards() {
+        return flashcards.filter(card => Number(card.year) === Number(flashcardAcademicYear));
+    }
+    function setupFlashcardFilters() {
+        const cards = academicYearFlashcards();
+        const modules = [...new Map(cards.map(card => [card.moduleId, card.module])).entries()]
+            .sort((a, b) => a[1].localeCompare(b[1]))
+            .map(([value, label]) => ({ value, label }));
+        fillFlashcardSelect('flashcard-filter-module', modules, 'modules');
+        updateFlashcardModuleFilters(false);
+    }
+    function updateFlashcardModuleFilters(shouldFilter = true) {
+        const moduleId = document.getElementById('flashcard-filter-module').value;
+        const cards = academicYearFlashcards().filter(card => moduleId === 'all' || String(card.moduleId) === moduleId);
+        fillFlashcardSelect('flashcard-filter-subject', [...new Set(cards.map(card => card.subject))].sort(), 'subjects');
+        fillFlashcardSelect('flashcard-filter-week', [...new Set(cards.map(card => card.week))].sort(), 'weeks');
+        if (shouldFilter) filterFlashcards();
+    }
+    function renderFlashcard() {
+        const content = document.getElementById('flashcard-content');
+        const tags = document.getElementById('flashcard-tags');
+        const total = filteredFlashcards.length;
+        document.getElementById('flashcard-total').textContent = total;
+        document.getElementById('flashcard-position').textContent = total ? `${flashcardIndex + 1} / ${total}` : '0 / 0';
+        document.getElementById('flashcard-progress-fill').style.width = total ? `${((flashcardIndex + 1) / total) * 100}%` : '0%';
+        ['flashcard-previous', 'flashcard-next', 'flashcard-reveal', 'flashcard-star', 'flashcard-shuffle'].forEach(id => { document.getElementById(id).disabled = !total; });
+        if (!total) {
+            tags.innerHTML = '';
+            content.innerHTML = `<div class="text-center py-5"><div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;background:#eef2ff;color:#4f46e5"><i class='bx bx-search-alt fs-2'></i></div><h5 class="fw-bold">No cards match these filters</h5><p class="text-muted mb-0">Try clearing a filter or choose another question group.</p></div>`;
+            return;
+        }
+        const card = filteredFlashcards[flashcardIndex];
+        const statusClass = card.status === 'right' ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger-emphasis';
+        const statusText = card.status === 'right' ? 'Answered right' : 'Answered wrong';
+        tags.innerHTML = `<span class="badge rounded-pill text-bg-light border">Year ${card.year}</span><span class="badge rounded-pill text-bg-light border">${flashEscape(card.module)}</span><span class="badge rounded-pill text-bg-light border">${flashEscape(card.subject)}</span><span class="badge rounded-pill text-bg-light border">${flashEscape(card.week)}</span><span class="badge rounded-pill ${statusClass}">${statusText}</span>`;
+        const answer = flashcardRevealed ? `<div class="flashcard-answer p-3 mt-4"><div class="flashcard-label mb-1">Answer</div><div class="fw-semibold">${flashEscape(card.answer)}</div>${card.explanation ? `<div class="border-top mt-3 pt-3 small text-muted"><strong class="text-dark">Why?</strong> ${flashEscape(card.explanation)}</div>` : ''}</div>` : `<button type="button" class="btn btn-link text-decoration-none p-0 mt-3 align-self-start" onclick="toggleFlashcardAnswer()"><i class='bx bx-show me-1'></i> Tap to reveal the answer</button>`;
+        content.innerHTML = `<div class="flashcard-label mb-2">Question</div><div class="fs-5 fw-semibold lh-base">${flashEscape(card.question)}</div>${answer}`;
+        const star = document.getElementById('flashcard-star');
+        const saved = savedFlashcardIds.has(card.id);
+        star.innerHTML = `<i class='bx ${saved ? 'bxs-star text-warning' : 'bx-star'} fs-5'></i>`;
+        star.title = saved ? 'Remove saved card' : 'Save this card';
+        document.getElementById('flashcard-reveal').innerHTML = flashcardRevealed ? "<i class='bx bx-hide me-1'></i> Hide answer" : "<i class='bx bx-show me-1'></i> Reveal answer";
+    }
+    function filterFlashcards() {
+        const module = document.getElementById('flashcard-filter-module').value;
+        const subject = document.getElementById('flashcard-filter-subject').value;
+        const week = document.getElementById('flashcard-filter-week').value;
+        filteredFlashcards = flashcards.filter(card => Number(card.year) === Number(flashcardAcademicYear) && (flashcardStatus === 'all' || card.status === flashcardStatus) && (module === 'all' || String(card.moduleId) === module) && (subject === 'all' || card.subject === subject) && (week === 'all' || card.week === week));
+        flashcardIndex = 0;
+        flashcardRevealed = false;
+        renderFlashcard();
+    }
+    function resetFlashcardFilters() {
+        flashcardStatus = 'all';
+        document.querySelectorAll('[data-flash-status]').forEach(button => button.className = `btn ${button.dataset.flashStatus === 'all' ? 'btn-primary' : button.dataset.flashStatus === 'wrong' ? 'btn-outline-danger' : 'btn-outline-success'}`);
+        ['flashcard-filter-module', 'flashcard-filter-subject', 'flashcard-filter-week'].forEach(id => { document.getElementById(id).value = 'all'; });
+        updateFlashcardModuleFilters(false);
+        filterFlashcards();
+    }
+    function moveFlashcard(direction) { if (!filteredFlashcards.length) return; flashcardIndex = (flashcardIndex + direction + filteredFlashcards.length) % filteredFlashcards.length; flashcardRevealed = false; renderFlashcard(); }
+    function toggleFlashcardAnswer() { if (!filteredFlashcards.length) return; flashcardRevealed = !flashcardRevealed; renderFlashcard(); }
+    function shuffleFlashcards() { for (let index = filteredFlashcards.length - 1; index > 0; index--) { const randomIndex = Math.floor(Math.random() * (index + 1)); [filteredFlashcards[index], filteredFlashcards[randomIndex]] = [filteredFlashcards[randomIndex], filteredFlashcards[index]]; } flashcardIndex = 0; flashcardRevealed = false; renderFlashcard(); }
+    function toggleSavedFlashcard() { const card = filteredFlashcards[flashcardIndex]; if (!card) return; savedFlashcardIds.has(card.id) ? savedFlashcardIds.delete(card.id) : savedFlashcardIds.add(card.id); try { localStorage.setItem('medmaster-saved-flashcards', JSON.stringify([...savedFlashcardIds])); } catch (error) { /* Storage is optional. */ } renderFlashcard(); }
+    setupFlashcardFilters();
+    filterFlashcards();
+    document.querySelectorAll('[data-flash-status]').forEach(button => button.addEventListener('click', function() { flashcardStatus = this.dataset.flashStatus; document.querySelectorAll('[data-flash-status]').forEach(item => item.className = `btn ${item.dataset.flashStatus === flashcardStatus ? 'btn-primary' : item.dataset.flashStatus === 'wrong' ? 'btn-outline-danger' : 'btn-outline-success'}`); filterFlashcards(); }));
+    document.getElementById('flashcard-previous').addEventListener('click', () => moveFlashcard(-1));
+    document.getElementById('flashcard-next').addEventListener('click', () => moveFlashcard(1));
+    document.getElementById('flashcard-reveal').addEventListener('click', toggleFlashcardAnswer);
+    document.getElementById('flashcard-shuffle').addEventListener('click', shuffleFlashcards);
+    document.getElementById('flashcard-star').addEventListener('click', toggleSavedFlashcard);
+    document.addEventListener('keydown', event => { if (!document.getElementById('page-flashcards').classList.contains('active-page') || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return; if (event.code === 'Space') { event.preventDefault(); toggleFlashcardAnswer(); } if (event.key === 'ArrowLeft') moveFlashcard(-1); if (event.key === 'ArrowRight') moveFlashcard(1); });
     const defaultAcademicYear = {{ request.user.academic_year|default:1 }};
     const canSelectAllYears = {% if request.user.is_admin %}true{% else %}false{% endif %};
     let currentYear = defaultAcademicYear;
