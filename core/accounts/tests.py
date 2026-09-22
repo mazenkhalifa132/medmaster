@@ -153,7 +153,7 @@ class AuthFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-    def test_student_profile_cannot_change_academic_year(self, _verify_turnstile):
+    def test_student_can_change_academic_year_once_from_profile(self, _verify_turnstile):
         user = User.objects.create_user(
             username='profileuser',
             email='profile@example.com',
@@ -169,7 +169,6 @@ class AuthFlowTests(TestCase):
             {
                 'first_name': 'Updated',
                 'last_name': 'Student',
-                # A forged form submission must not allow year switching.
                 'academic_year': '5',
             },
         )
@@ -177,7 +176,35 @@ class AuthFlowTests(TestCase):
         self.assertRedirects(response, reverse('profile'))
         user.refresh_from_db()
         self.assertEqual(user.first_name, 'Updated')
-        self.assertEqual(user.academic_year, 1)
+        self.assertEqual(user.academic_year, 5)
+        self.assertTrue(user.academic_year_change_used)
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'first_name': 'Updated Again',
+                'last_name': 'Student',
+                'academic_year': '3',
+            },
+            follow=True,
+        )
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, 'Updated Again')
+        self.assertEqual(user.academic_year, 5)
+        self.assertContains(response, 'already used your one academic-year change')
+
+    def test_profile_shows_one_time_year_change_warning(self, _verify_turnstile):
+        user = User.objects.create_user(
+            username='yearwarning',
+            email='yearwarning@example.com',
+            password='ProfilePass123!',
+            academic_year=2,
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse('profile'))
+
+        self.assertContains(response, 'You can change your academic year only once.')
 
     def test_admin_can_delete_student_with_progress(self, _verify_turnstile):
         admin_user = User.objects.create_superuser(

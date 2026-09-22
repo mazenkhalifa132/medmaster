@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'notifications.apps.NotificationsConfig',
     'verification.apps.VerificationConfig',
     'websitesettings.apps.WebsitesettingsConfig',
+    'feedback.apps.FeedbackConfig',
 ]
 
 # ----------------------------------------

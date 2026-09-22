@@ -44,6 +44,10 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
     phone = models.CharField(max_length=20, unique=True, blank=True, null=True, default=None)
     academic_year = models.PositiveSmallIntegerField(blank=True, null=True)
+    academic_year_change_used = models.BooleanField(
+        default=False,
+        help_text='Whether the student has already used their one profile academic-year change.',
+    )
     email = models.EmailField(unique=True)
 
     objects = UserManager()

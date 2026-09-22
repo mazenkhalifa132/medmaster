@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from exams.models import ExamAttempt
 from osce.models import OSCEAttempt
+from websitesettings.models import WebsiteSettings
 
 from .models import (
     Badge, DailyActivity, PointTransaction, StudentBadge, StudentProgress,
@@ -14,32 +15,39 @@ from .models import (
 )
 
 
-CORRECT_POINTS = 2
-INCORRECT_POINTS = -1
-
-
 def record_answer_points(*, student, source_key, source_label, is_correct):
-    """Record +2/-1 exactly once for a scored question or OSCE station."""
-    points = CORRECT_POINTS if is_correct else INCORRECT_POINTS
+    """Record first-attempt answer progress once, using the site scoring settings."""
     with transaction.atomic():
-        _, created = PointTransaction.objects.get_or_create(
-            source_key=source_key,
-            defaults={
-                'student': student,
-                'source_label': source_label,
-                'points': points,
-                'is_correct': is_correct,
-            },
+        if PointTransaction.objects.filter(source_key=source_key).exists():
+            return False
+
+        StudentProgress.objects.get_or_create(student=student)
+        progress = StudentProgress.objects.select_for_update().get(student=student)
+        scoring = WebsiteSettings.objects.order_by('pk').first()
+        correct_points = scoring.correct_answer_points if scoring else 1
+        wrong_answers_per_deduction = scoring.wrong_answers_per_deduction if scoring else 2
+        wrong_answer_deduction = scoring.wrong_answer_deduction if scoring else 1
+
+        next_incorrect_count = progress.incorrect_answers + (0 if is_correct else 1)
+        points = correct_points if is_correct else (
+            -wrong_answer_deduction
+            if next_incorrect_count % wrong_answers_per_deduction == 0 else 0
         )
-        if created:
-            StudentProgress.objects.get_or_create(student=student)
-            StudentProgress.objects.filter(student=student).update(
-                total_points=F('total_points') + points,
-                correct_answers=F('correct_answers') + (1 if is_correct else 0),
-                incorrect_answers=F('incorrect_answers') + (0 if is_correct else 1),
-            )
-            evaluate_weekly_goals(student=student)
-    return created
+        PointTransaction.objects.create(
+            student=student,
+            source_key=source_key,
+            source_label=source_label,
+            points=points,
+            is_correct=is_correct,
+        )
+        progress.total_points += points
+        progress.correct_answers += 1 if is_correct else 0
+        progress.incorrect_answers += 0 if is_correct else 1
+        progress.save(update_fields=(
+            'total_points', 'correct_answers', 'incorrect_answers', 'updated_at',
+        ))
+        evaluate_weekly_goals(student=student)
+    return True
 
 
 def _award_badge(*, student, badge, source_key):
@@ -134,7 +142,14 @@ def record_daily_activity(*, student):
         threshold__lte=streak,
     )
     for badge in badges:
-        _award_badge(student=student, badge=badge, source_key=f'badge:streak:{activity.pk}:{badge.pk}')
+        # A streak badge is an achievement, rather than a daily repeatable reward.
+        # Keep its source key stable for this student and badge so reaching (or
+        # maintaining) the streak on later days cannot award it again.
+        _award_badge(
+            student=student,
+            badge=badge,
+            source_key=f'badge:streak:student:{student.pk}:{badge.pk}',
+        )
     return streak
 
 

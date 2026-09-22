@@ -34,7 +34,22 @@
                 <div class="col-md-6"><label class="form-label text-muted small" for="last-name">Last Name</label><input type="text" class="form-control profile-editable" id="last-name" name="last_name" value="{{ request.user.last_name }}" maxlength="150" readonly required></div>
                 <div class="col-md-6"><label class="form-label text-muted small" for="email">Email Address</label><input type="email" class="form-control" id="email" value="{{ request.user.email }}" readonly></div>
                 <div class="col-md-6"><label class="form-label text-muted small" for="phone">Phone Number</label><input type="tel" class="form-control" id="phone" value="{{ request.user.phone|default:'' }}" readonly></div>
-                <div class="col-md-6"><label class="form-label text-muted small" for="academic-year">Academic Year</label><input class="form-control" id="academic-year" value="{% if request.user.academic_year %}Year {{ request.user.academic_year }}{% else %}Not assigned{% endif %}" readonly><div class="form-text">Your academic year is assigned by an administrator.</div></div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted small" for="academic-year">Academic Year</label>
+                    {% if request.user.academic_year_change_used %}
+                        <input class="form-control" id="academic-year" value="{% if request.user.academic_year %}Year {{ request.user.academic_year }}{% else %}Not assigned{% endif %}" readonly>
+                        <div class="alert alert-secondary small mt-2 mb-0">You have already used your one academic-year change.</div>
+                    {% else %}
+                        <select class="form-select profile-editable" id="academic-year" name="academic_year" disabled>
+                            <option value="1"{% if request.user.academic_year == 1 %} selected{% endif %}>Year 1</option>
+                            <option value="2"{% if request.user.academic_year == 2 %} selected{% endif %}>Year 2</option>
+                            <option value="3"{% if request.user.academic_year == 3 %} selected{% endif %}>Year 3</option>
+                            <option value="4"{% if request.user.academic_year == 4 %} selected{% endif %}>Year 4</option>
+                            <option value="5"{% if request.user.academic_year == 5 %} selected{% endif %}>Year 5</option>
+                        </select>
+                        <div class="alert alert-warning small mt-2 mb-0">You can change your academic year only once. Please confirm your selection before saving.</div>
+                    {% endif %}
+                </div>
             </div>
 
             <hr>
@@ -54,7 +69,10 @@
         const saveButton = document.getElementById('save-button');
         const fields = form.querySelectorAll('.profile-editable');
         const setEditing = editing => {
-            fields.forEach(field => { field.readOnly = !editing; });
+            fields.forEach(field => {
+                if (field.tagName === 'SELECT') field.disabled = !editing;
+                else field.readOnly = !editing;
+            });
             editButton.classList.toggle('d-none', editing);
             cancelButton.classList.toggle('d-none', !editing);
             saveButton.classList.toggle('d-none', !editing);

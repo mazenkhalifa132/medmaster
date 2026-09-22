@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post">{% csrf_token %}
+        <p>Are you sure you want to delete all {{ feedback_count }} feedback item(s)? This allows affected students to submit feedback again.</p>
+        <input type="submit" value="Yes, delete all feedback" class="default">
+        <a href="{% url 'admin:feedback_feedback_changelist' %}" class="button cancel-link">Cancel</a>
+    </form>
+</div>
+{% endblock %}

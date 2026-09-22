@@ -7,7 +7,10 @@ from .models import WebsiteSettings
 class WebsiteSettingsAdminForm(forms.ModelForm):
     class Meta:
         model = WebsiteSettings
-        fields = ('unlock_all_features', 'lock_all_features')
+        fields = (
+            'unlock_all_features', 'lock_all_features',
+            'correct_answer_points', 'wrong_answers_per_deduction', 'wrong_answer_deduction',
+        )
         widgets = {
             'unlock_all_features': forms.CheckboxInput(attrs={
                 'onclick': (
@@ -27,7 +30,10 @@ class WebsiteSettingsAdminForm(forms.ModelForm):
 @admin.register(WebsiteSettings)
 class WebsiteSettingsAdmin(admin.ModelAdmin):
     form = WebsiteSettingsAdminForm
-    fields = ('unlock_all_features', 'lock_all_features')
+    fields = (
+        'unlock_all_features', 'lock_all_features',
+        'correct_answer_points', 'wrong_answers_per_deduction', 'wrong_answer_deduction',
+    )
 
     def has_add_permission(self, request):
         return not WebsiteSettings.objects.exists()

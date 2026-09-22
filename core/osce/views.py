@@ -144,23 +144,29 @@ def submit_osce(request, pk):
     attempt.save(update_fields=('practical_passed', 'practical_details', 'practical_score', 'practical_total', 'mcq_score', 'total_questions'))
 
     answer_records = attempt.answers.select_related('question', 'selected_answer').prefetch_related('question__answers')
-    for answer_record in answer_records:
-        # Do not penalize MCQs that the student did not answer.
-        if answer_record.selected_answer_id:
-            is_correct = answer_record.selected_answer.is_correct
-            record_answer_points(
-                student=request.user,
+    is_first_completed_attempt = not OSCEAttempt.objects.filter(
+        exam=exam,
+        student=request.user,
+        total_questions__gt=0,
+    ).exclude(pk=attempt.pk).exists()
+    if is_first_completed_attempt:
+        for answer_record in answer_records:
+            # Do not penalize MCQs that the student did not answer.
+            if answer_record.selected_answer_id:
+                is_correct = answer_record.selected_answer.is_correct
+                record_answer_points(
+                    student=request.user,
                 source_key=f'osce-mcq:{attempt.pk}:{answer_record.question_id}',
                 source_label=f'{exam.name} — MCQ {answer_record.question.order}',
-                is_correct=is_correct,
-            )
-    if exam.osce_station != 'none':
-        record_answer_points(
-            student=request.user,
+                    is_correct=is_correct,
+                )
+        if exam.osce_station != 'none':
+            record_answer_points(
+                student=request.user,
             source_key=f'osce-station:{attempt.pk}',
             source_label=f'{exam.name} — {exam.get_osce_station_display()} station',
-            is_correct=attempt.practical_score == attempt.practical_total == 1,
-        )
+                is_correct=attempt.practical_score == attempt.practical_total == 1,
+            )
     is_first_completed_attempt = not OSCEAttempt.objects.filter(
         exam=exam,
         student=request.user,

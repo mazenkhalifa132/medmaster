@@ -178,14 +178,36 @@ def profile_view(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
+        academic_year = request.POST.get('academic_year', '').strip()
 
         if not first_name or not last_name:
             messages.error(request, 'First name and last name are required.')
         else:
             request.user.first_name = first_name
             request.user.last_name = last_name
-            request.user.save(update_fields=['first_name', 'last_name'])
-            messages.success(request, 'Your profile has been updated.')
+            update_fields = ['first_name', 'last_name']
+            year_changed = False
+
+            if academic_year:
+                try:
+                    selected_year = int(academic_year)
+                except ValueError:
+                    selected_year = None
+                if selected_year not in range(1, 6):
+                    messages.error(request, 'Choose a valid academic year.')
+                elif selected_year != request.user.academic_year:
+                    if request.user.academic_year_change_used:
+                        messages.error(request, 'You have already used your one academic-year change.')
+                    else:
+                        request.user.academic_year = selected_year
+                        request.user.academic_year_change_used = True
+                        update_fields.extend(['academic_year', 'academic_year_change_used'])
+                        year_changed = True
+                        messages.success(request, 'Your academic year has been updated. This change cannot be made again.')
+
+            request.user.save(update_fields=update_fields)
+            if not year_changed:
+                messages.success(request, 'Your profile has been updated.')
             return redirect('profile')
 
     return render(request, 'accounts/profile.html')

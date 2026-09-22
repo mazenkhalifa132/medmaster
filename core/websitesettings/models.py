@@ -1,5 +1,6 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.db import models
 
 
 class WebsiteSettings(models.Model):
@@ -12,6 +13,21 @@ class WebsiteSettings(models.Model):
     lock_all_features = models.BooleanField(
         default=True,
         help_text='Restrict unactivated users to trial content only.',
+    )
+    correct_answer_points = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        help_text='Points awarded for each correct answer on an exam first attempt.',
+    )
+    wrong_answers_per_deduction = models.PositiveSmallIntegerField(
+        default=2,
+        validators=[MinValueValidator(1)],
+        help_text='Apply a deduction after this many incorrect answers on exam first attempts.',
+    )
+    wrong_answer_deduction = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        help_text='Points deducted whenever the incorrect-answer threshold is reached.',
     )
 
     class Meta:

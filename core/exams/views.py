@@ -112,16 +112,22 @@ def submit_exam(request, pk):
         'question__answers'
     ).order_by('question__order', 'question__pk')
     if exam.exam_type != 'saq':
-        for answer_record in answer_records:
-            # An unanswered item was not solved, so it earns neither points nor a deduction.
-            if answer_record.selected_answer_id:
-                is_correct = answer_record.selected_answer.is_correct
-                record_answer_points(
-                    student=request.user,
+        is_first_completed_attempt = not ExamAttempt.objects.filter(
+            exam=exam,
+            student=request.user,
+            total_questions__gt=0,
+        ).exclude(pk=attempt.pk).exists()
+        if is_first_completed_attempt:
+            for answer_record in answer_records:
+                # An unanswered item was not solved, so it earns neither points nor a deduction.
+                if answer_record.selected_answer_id:
+                    is_correct = answer_record.selected_answer.is_correct
+                    record_answer_points(
+                        student=request.user,
                     source_key=f'exam-answer:{attempt.pk}:{answer_record.question_id}',
                     source_label=f'{exam.name} — question {answer_record.question.order}',
-                    is_correct=is_correct,
-                )
+                        is_correct=is_correct,
+                    )
         is_first_completed_attempt = not ExamAttempt.objects.filter(
             exam=exam,
             student=request.user,

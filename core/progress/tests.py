@@ -1,4 +1,5 @@
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -7,10 +8,11 @@ from django.utils import timezone
 
 from exams.models import Exam, ExamAttempt
 from modules.models import Module
+from websitesettings.models import WebsiteSettings
 from .models import Badge, PointTransaction, Rank, StudentBadge, StudentProgress, StudentWeeklyGoal, WeeklyGoal
 from .services import (
     award_exam_badges, award_module_progress_badges, evaluate_weekly_goals,
-    record_answer_points, weekly_goal_progress,
+    record_answer_points, record_daily_activity, weekly_goal_progress,
 )
 
 
@@ -103,6 +105,28 @@ class ExamBadgeTests(TestCase):
         self.assertFalse(StudentBadge.objects.filter(badge=retry_badge, student=self.student).exists())
 
 
+class StreakBadgeTests(TestCase):
+    def test_streak_badge_is_awarded_only_once_after_its_threshold_is_met(self):
+        student = get_user_model().objects.create_user(username='streak-student', password='SafePassword1!')
+        badge = Badge.objects.create(
+            name='Two day streak', image_url='https://example.com/streak.svg',
+            rule_type=Badge.LOGIN_STREAK, threshold=2, xp_reward=10,
+        )
+
+        with patch('progress.services.timezone.localdate', return_value=date(2026, 1, 1)):
+            self.assertEqual(record_daily_activity(student=student), 1)
+        with patch('progress.services.timezone.localdate', return_value=date(2026, 1, 2)):
+            self.assertEqual(record_daily_activity(student=student), 2)
+        with patch('progress.services.timezone.localdate', return_value=date(2026, 1, 3)):
+            self.assertEqual(record_daily_activity(student=student), 3)
+
+        self.assertEqual(StudentBadge.objects.filter(student=student, badge=badge).count(), 1)
+        self.assertEqual(
+            PointTransaction.objects.filter(student=student, source_key__startswith='badge-award:').count(), 1
+        )
+        self.assertEqual(StudentProgress.objects.get(student=student).total_points, 10)
+
+
 class AdminLeaderboardTests(TestCase):
     def test_admin_leaderboard_lists_only_students_in_score_order(self):
         User = get_user_model()
@@ -192,6 +216,39 @@ class PointScoringTests(TestCase):
         self.assertEqual(progress.incorrect_answers, 1)
         self.assertEqual(progress.questions_answered, 2)
 
+        record_answer_points(
+            student=self.student,
+            source_key='exam-answer:1:3',
+            source_label='Anatomy question 3',
+            is_correct=False,
+        )
+        progress.refresh_from_db()
+        self.assertEqual(progress.total_points, 0)
+        self.assertEqual(progress.incorrect_answers, 2)
+
+    def test_scoring_uses_website_settings(self):
+        WebsiteSettings.objects.create(
+            unlock_all_features=False,
+            lock_all_features=True,
+            correct_answer_points=3,
+            wrong_answers_per_deduction=3,
+            wrong_answer_deduction=2,
+        )
+        for number, is_correct in enumerate((True, False, False, False), start=1):
+            record_answer_points(
+                student=self.student,
+                source_key=f'exam-answer:settings:{number}',
+                source_label=f'Question {number}',
+                is_correct=is_correct,
+            )
+
+        progress = StudentProgress.objects.get(student=self.student)
+        self.assertEqual(progress.total_points, 1)
+        self.assertEqual(
+            list(PointTransaction.objects.order_by('source_key').values_list('points', flat=True)),
+            [3, 0, 0, -2],
+        )
+
     def test_same_answer_cannot_be_scored_twice(self):
         kwargs = {
             'student': self.student,
@@ -202,7 +259,7 @@ class PointScoringTests(TestCase):
         self.assertTrue(record_answer_points(**kwargs))
         self.assertFalse(record_answer_points(**kwargs))
 
-        self.assertEqual(StudentProgress.objects.get(student=self.student).total_points, 2)
+        self.assertEqual(StudentProgress.objects.get(student=self.student).total_points, 1)
         self.assertEqual(PointTransaction.objects.count(), 1)
 
     def test_questions_solved_goal_awards_xp_once_when_reached(self):

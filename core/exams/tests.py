@@ -1,9 +1,13 @@
+from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
 
 from .admin import ExamAdminForm
 from .bulk_import import BulkQuestionImportError, parse_questions
-from .models import Exam
+from .models import Exam, ExamQuestion, MCQAnswer
 from modules.models import Module, ModuleExamSubject, ModuleExamWeek
+from progress.models import PointTransaction, StudentProgress
+from websitesettings.models import WebsiteSettings
 
 
 class ExamOrderingTests(TestCase):
@@ -48,6 +52,48 @@ class ExamAdminFormTests(TestCase):
         self.assertIn(f'value="{second_module.pk}" data-year="2"', form_html)
         self.assertIn(f'value="{subject.pk}" data-module="{first_module.pk}"', form_html)
         self.assertIn(f'value="{week.pk}" data-module="{second_module.pk}"', form_html)
+
+
+class ExamFirstAttemptScoringTests(TestCase):
+    def setUp(self):
+        self.student = get_user_model().objects.create_user(
+            username='first-attempt-student',
+            email='first-attempt@example.com',
+            password='StrongPass1',
+            academic_year=1,
+        )
+        WebsiteSettings.objects.create(unlock_all_features=True, lock_all_features=False)
+        module = Module.objects.create(year=1, name='Anatomy', image_url='https://example.com/anatomy.png')
+        self.exam = Exam.objects.create(
+            year=1, module=module, name='First attempt only', time_limit=20, retry_times=2,
+        )
+        question = ExamQuestion.objects.create(exam=self.exam, text='Question', order=1)
+        self.correct_answer = MCQAnswer.objects.create(question=question, text='Correct', is_correct=True)
+        self.wrong_answer = MCQAnswer.objects.create(question=question, text='Wrong')
+
+    def test_retry_answers_do_not_change_points(self):
+        self.client.force_login(self.student)
+
+        first_attempt = self.client.get(reverse('exam-detail', args=(self.exam.pk,))).context['attempt_id']
+        self.client.post(reverse('exam-submit', args=(self.exam.pk,)), {
+            'attempt_id': first_attempt,
+            f'question_{self.correct_answer.question_id}': self.correct_answer.pk,
+        })
+        progress_after_first = StudentProgress.objects.get(student=self.student)
+        points_after_first = progress_after_first.total_points
+        retry_attempt = self.client.get(reverse('exam-detail', args=(self.exam.pk,))).context['attempt_id']
+        self.client.post(reverse('exam-submit', args=(self.exam.pk,)), {
+            'attempt_id': retry_attempt,
+            f'question_{self.wrong_answer.question_id}': self.wrong_answer.pk,
+        })
+
+        progress = StudentProgress.objects.get(student=self.student)
+        self.assertEqual(progress.total_points, points_after_first)
+        self.assertEqual(progress.correct_answers, 1)
+        self.assertEqual(progress.incorrect_answers, 0)
+        self.assertEqual(
+            PointTransaction.objects.filter(student=self.student, source_key__startswith='exam-answer:').count(), 1
+        )
 
 
 class BulkQuestionParserTests(SimpleTestCase):

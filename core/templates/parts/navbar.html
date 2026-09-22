@@ -24,12 +24,13 @@
             <div class="nav-link nav-link-locked" aria-disabled="true"><i class='bx bx-note'></i> Notes <small class="nav-premium-label">Premium</small></div>
             <div class="nav-link nav-link-locked" aria-disabled="true"><i class='bx bx-bar-chart-alt-2'></i> Progress <small class="nav-premium-label">Premium</small></div>
         {% endif %}
-        <a class="nav-link" href="{% url 'home' %}#community" data-page="community"><i class='bx bx-user-voice'></i> Community</a>
+        <a class="nav-link" href="{% url 'home' %}#community" data-page="community"><i class='bx bx-community'></i> Community</a>
         <!--<a class="nav-link{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'profile' %}"><i class='bx bx-user-circle'></i> Profile</a>-->
         <!--<a class="nav-link" href="{% url 'home' %}#calendar" data-page="calendar"><i class='bx bx-calendar'></i> Calendar</a>-->
         <!--{% if request.user.is_admin %}
             <a class="nav-link" href="/admin/" target="_blank"><i class='bx bx-shield'></i> Admin Panel</a>
         {% endif %}-->
+        {% if feedback_is_active %}<a class="nav-link{% if request.resolver_match.url_name == 'submit' %} active{% endif %}" href="{% url 'feedback:submit' %}"><i class='bx bx-user-voice'></i> Feedback</a>{% endif %}
     </div>
 
     {% if not has_active_academic_year %}<div class="premium-box">
