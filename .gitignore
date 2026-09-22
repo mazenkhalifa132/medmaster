@@ -25,3 +25,4 @@ venv/
 staticfiles/
 media/
 *.log
+core/core/settings.py
