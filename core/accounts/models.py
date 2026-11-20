@@ -3,6 +3,7 @@ import re
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class UserManager(DjangoUserManager):
@@ -36,6 +37,15 @@ class UserManager(DjangoUserManager):
 
 
 class User(AbstractUser):
+    BAN_NONE = 'none'
+    BAN_TEMPORARY = 'temporary'
+    BAN_PERMANENT = 'permanent'
+    BAN_CHOICES = (
+        (BAN_NONE, 'Not banned'),
+        (BAN_TEMPORARY, 'Temporary'),
+        (BAN_PERMANENT, 'Permanent'),
+    )
+
     ROLE_CHOICES = (
         ('student', 'Student'),
         ('admin', 'Admin'),
@@ -49,14 +59,36 @@ class User(AbstractUser):
         help_text='Whether the student has already used their one profile academic-year change.',
     )
     email = models.EmailField(unique=True)
+    ban_type = models.CharField(max_length=12, choices=BAN_CHOICES, default=BAN_NONE)
+    banned_until = models.DateTimeField(
+        blank=True, null=True,
+        help_text='Required for a temporary ban. The ban ends automatically at this time.',
+    )
+    ban_reason = models.CharField(max_length=255, blank=True)
 
     objects = UserManager()
 
     def is_admin(self):
         return self.role == 'admin' or self.is_superuser
 
+    @property
+    def is_banned(self):
+        if self.ban_type == self.BAN_PERMANENT:
+            return True
+        return (
+            self.ban_type == self.BAN_TEMPORARY
+            and self.banned_until is not None
+            and self.banned_until > timezone.now()
+        )
+
     def clean(self):
         super().clean()
+        if self.ban_type == self.BAN_TEMPORARY and not self.banned_until:
+            raise ValidationError({'banned_until': 'Set an end date and time for a temporary ban.'})
+        if self.ban_type != self.BAN_TEMPORARY:
+            self.banned_until = None
+        if self.ban_type == self.BAN_NONE:
+            self.ban_reason = ''
         password = self.password
         if password and not password.startswith('pbkdf2_sha256$'):
             self.validate_password_strength(password)

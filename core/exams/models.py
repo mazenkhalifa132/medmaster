@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 from modules.models import Module, ModuleExamSubject, ModuleExamWeek
 
@@ -45,6 +46,12 @@ class Exam(models.Model):
     )
     is_trial = models.BooleanField(default=False, help_text='Make this exam available to every authenticated student.')
     is_active = models.BooleanField(default=True)
+    auto_activate = models.BooleanField(
+        default=False,
+        verbose_name='Auto activate by date',
+        help_text='Automatically make this exam active on the selected date.',
+    )
+    activation_date = models.DateField(blank=True, null=True)
 
     class Meta:
         ordering = ('year', 'module__order', 'order', 'name')
@@ -56,6 +63,12 @@ class Exam(models.Model):
 
     def clean(self):
         super().clean()
+        if self.auto_activate and not self.activation_date:
+            raise ValidationError({'activation_date': 'Choose a date for automatic activation.'})
+        if not self.auto_activate:
+            self.activation_date = None
+        elif self.activation_date:
+            self.is_active = self.activation_date <= timezone.localdate()
         if self.module_id and self.year != self.module.year:
             raise ValidationError({'module': 'The module must belong to the selected exam year.'})
         if self.subject_id and self.subject.module_id != self.module_id:
@@ -74,6 +87,25 @@ class Exam(models.Model):
 
     def __str__(self):
         return f'Year {self.year} - {self.module.name}: {self.name} ({self.get_exam_type_display()})'
+
+
+class ExamActivationAnnouncement(models.Model):
+    """Tracks delivery and retries for the Telegram notice sent on activation."""
+
+    exam = models.OneToOneField(
+        Exam, on_delete=models.CASCADE, related_name='activation_announcement',
+    )
+    sent_at = models.DateTimeField(blank=True, null=True)
+    last_attempt_at = models.DateTimeField(blank=True, null=True)
+    attempt_count = models.PositiveIntegerField(default=0)
+    last_error = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = 'exam activation announcement'
+        verbose_name_plural = 'exam activation announcements'
+
+    def __str__(self):
+        return f'Telegram notice for {self.exam}'
 
 
 class ExamQuestion(models.Model):

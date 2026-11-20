@@ -6,6 +6,7 @@ from django.db.models import ExpressionWrapper, F, IntegerField, OuterRef, Subqu
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect
 from django.utils.html import format_html, format_html_join
+from uuid import uuid4
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 
@@ -14,6 +15,7 @@ from modules.models import Module
 from osce.models import OSCEAttempt
 
 from .models import Badge, Rank, StudentBadge, StudentProgress, WeeklyGoal, rank_for_points
+from .services import _award_badge
 
 
 class ModuleByYearSelect(forms.Select):
@@ -389,7 +391,8 @@ class BadgeAdminForm(forms.ModelForm):
         help_texts = {
             'threshold': (
                 'Exam score: enter the required percentage (for example, 80 for 80%). '
-                'Daily login streak: enter the required consecutive number of days.'
+                'Daily login streak: enter the required consecutive number of days. '
+                'VIP badges are awarded manually and do not use a threshold.'
             ),
         }
         widgets = {
@@ -437,6 +440,11 @@ class BadgeAdminForm(forms.ModelForm):
             cleaned_data['threshold'] = percentage
             cleaned_data['exams'] = Exam.objects.none()
             self.instance.module = target_module
+        elif rule_type == Badge.VIP:
+            cleaned_data['threshold'] = 0
+            cleaned_data['module'] = None
+            cleaned_data['exams'] = Exam.objects.none()
+            self.instance.module = None
         return cleaned_data
 
 
@@ -475,6 +483,35 @@ class BadgeAdmin(admin.ModelAdmin):
     @admin.display(description='Attached exams')
     def attached_exams(self, obj):
         return ', '.join(obj.exams.values_list('name', flat=True)) or 'All exams'
+
+
+@admin.register(StudentBadge)
+class StudentBadgeAdmin(admin.ModelAdmin):
+    """Let staff manually award a configured badge to a selected student."""
+    list_display = ('student', 'badge', 'awarded_at')
+    list_filter = ('badge', 'awarded_at')
+    search_fields = (
+        'student__first_name', 'student__last_name', 'student__email',
+        'student__phone', 'student__username', 'badge__name',
+    )
+    autocomplete_fields = ('student', 'badge')
+    readonly_fields = ('awarded_at', 'source_key')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('student', 'badge')
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            award, _ = _award_badge(
+                student=obj.student,
+                badge=obj.badge,
+                source_key=f'manual:{uuid4()}',
+            )
+            obj.pk = award.pk
+            obj.source_key = award.source_key
+            obj.awarded_at = award.awarded_at
+            return
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(WeeklyGoal)

@@ -157,7 +157,13 @@ def login_view(request):
     password = request.POST.get('password', '')
 
     user = User.objects.filter(email__iexact=email).first()
-    if user and user.check_password(password):
+    if user and user.is_active and user.check_password(password):
+        if user.is_banned:
+            if user.ban_type == User.BAN_PERMANENT:
+                messages.error(request, 'This account is permanently banned.')
+            else:
+                messages.error(request, f'This account is banned until {user.banned_until:%Y-%m-%d %H:%M}.')
+            return redirect('auth')
         auth_login(request, user)
         messages.success(request, f'Welcome back, {user.first_name or user.email}.')
         return redirect('home')

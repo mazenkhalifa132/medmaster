@@ -10,7 +10,8 @@ from django.db.models import Max
 import nested_admin
 
 from .bulk_import import BulkQuestionImportError, parse_questions
-from .models import Exam, ExamQuestion, MCQAnswer
+from .models import Exam, ExamActivationAnnouncement, ExamQuestion, MCQAnswer
+from .telegram import send_exam_activation_announcement
 
 
 class ModuleByYearSelect(Select):
@@ -44,7 +45,7 @@ class ExamAdminForm(ModelForm):
         }
 
     class Media:
-        js = ('exams/admin/exam_module_filter_v2.js',)
+        js = ('exams/admin/exam_module_filter_v2.js', 'exams/admin/exam_auto_activate.js')
 
 
 class AnswerInlineFormSet(BaseInlineFormSet):
@@ -83,11 +84,24 @@ class ExamAdmin(nested_admin.NestedModelAdmin):
     form = ExamAdminForm
     inlines = (ExamQuestionInline,)
     change_form_template = 'admin/exams/exam/change_form.html'
-    list_display = ('name', 'order', 'exam_type', 'year', 'module', 'time_limit', 'retry_times', 'is_trial', 'result', 'is_active')
-    list_filter = ('exam_type', 'year', 'module', 'subject', 'week', 'is_trial', 'is_active')
+    list_display = (
+        'name', 'order', 'exam_type', 'year', 'module', 'time_limit',
+        'retry_times', 'is_trial', 'auto_activate', 'activation_date', 'result', 'is_active',
+    )
+    list_filter = ('exam_type', 'year', 'module', 'subject', 'week', 'is_trial', 'is_active', 'auto_activate')
     search_fields = ('name', 'module__name')
     ordering = ('year', 'module__order', 'order', 'name')
-    fields = ('year', 'module', 'subject', 'week', 'order', 'name', 'exam_type', 'time_limit', 'retry_times', 'is_trial', 'is_active')
+    fields = (
+        'year', 'module', 'subject', 'week', 'order', 'name', 'exam_type',
+        'time_limit', 'retry_times', 'is_trial', 'is_active', 'auto_activate',
+        'activation_date',
+    )
+
+    def save_model(self, request, obj, form, change):
+        was_active = Exam.objects.filter(pk=obj.pk).values_list('is_active', flat=True).first() if change else False
+        super().save_model(request, obj, form, change)
+        if obj.is_active and not was_active:
+            transaction.on_commit(lambda exam_id=obj.pk: send_exam_activation_announcement(exam_id))
 
     def get_urls(self):
         urls = super().get_urls()
@@ -168,4 +182,22 @@ class ExamQuestionAdmin(nested_admin.NestedModelAdmin):
 
     def has_module_permission(self, request):
         """Questions are managed from the Exam editor, not as a top-level section."""
+        return False
+
+
+@admin.register(ExamActivationAnnouncement)
+class ExamActivationAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('exam', 'exam_year', 'sent_at', 'attempt_count', 'last_attempt_at')
+    search_fields = ('exam__name', 'exam__module__name')
+    list_filter = ('sent_at', 'exam__year')
+    readonly_fields = ('exam', 'sent_at', 'last_attempt_at', 'attempt_count', 'last_error')
+
+    @admin.display(description='Academic year')
+    def exam_year(self, obj):
+        return obj.exam.get_year_display()
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False

@@ -107,10 +107,12 @@ class Badge(models.Model):
     EXAM_SCORE = 'exam_score'
     MODULE_PROGRESS = 'module_progress'
     LOGIN_STREAK = 'login_streak'
+    VIP = 'vip_badge'
     RULE_CHOICES = (
         (EXAM_SCORE, 'Exam score'),
         (MODULE_PROGRESS, 'Module progress'),
         (LOGIN_STREAK, 'Daily login streak'),
+        (VIP, 'VIP Badge'),
     )
 
     name = models.CharField(max_length=100, unique=True)
@@ -158,6 +160,8 @@ class Badge(models.Model):
                 raise ValidationError({'threshold': 'Enter a module percentage from 0 to 100.'})
             if not self.module_id:
                 raise ValidationError({'module': 'Select a module for a module-progress badge.'})
+        if self.rule_type == self.VIP:
+            self.module = None
 
     @property
     def colored_image_url(self):
@@ -173,6 +177,8 @@ class Badge(models.Model):
             return f'{self.threshold}% exam score'
         if self.rule_type == self.MODULE_PROGRESS:
             return f'{self.threshold}% module progress'
+        if self.rule_type == self.VIP:
+            return 'Manually awarded'
         return f'{self.threshold} day login streak'
 
 

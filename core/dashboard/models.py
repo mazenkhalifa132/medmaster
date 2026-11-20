@@ -12,6 +12,11 @@ class TelegramGroup(models.Model):
         default='medmaster012',
         help_text='Public Telegram handle, without @ or the t.me/ prefix.',
     )
+    bot_chat_id = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text='Telegram numeric chat ID or public @username. The bot must be able to post there.',
+    )
 
     class Meta:
         ordering = ('year',)
