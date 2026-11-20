@@ -1,0 +1,28 @@
+{% extends "admin/base_site.html" %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> › <a href="{% url 'admin:exams_exam_changelist' %}">Exams</a> › <a href="{% url 'admin:exams_exam_change' exam.pk %}">{{ exam.name }}</a> › Statistics</div>
+{% endblock %}
+{% block content %}
+<h1>{{ exam.name }} statistics</h1>
+<p>Exam entries count completed submissions. Student degrees below show each student's latest completed attempt.</p>
+<div class="module">
+<table><tbody>
+<tr><th>Number of students (Year {{ exam.year }})</th><td>{{ cohort_count }}</td></tr>
+<tr><th>Students who completed</th><td>{{ completed_count }}</td></tr>
+<tr><th>Students who have not completed</th><td>{{ not_entered_count }}</td></tr>
+<tr><th>Entries (completed attempts)</th><td>{{ entry_count }}</td></tr>
+<tr><th>Average degree per entry</th><td>{% if average_score != None %}{{ average_score|floatformat:2 }} / {{ exam.question_count }} ({{ average_percentage|floatformat:1 }}%){% else %}—{% endif %}</td></tr>
+</tbody></table>
+</div>
+<h2>Question statistics</h2>
+<div class="module"><table>
+<thead><tr><th>Question</th><th>Entries answered</th><th>Solved correctly</th><th>Solved Wrong</th><th>Not Entered</th><th>Average degree</th></tr></thead>
+<tbody>{% for row in question_rows %}<tr><th>{{ row.question.text|truncatewords:30 }}</th><td>{{ row.entries }}</td><td>{{ row.solved }}</td><td>{{ row.not_solved }}</td><td>{{ row.not_answered }}</td><td>{% if entry_count %}{{ row.solved|floatformat:2 }} / {{ entry_count }} ({% widthratio row.solved entry_count 100 %}%){% else %}—{% endif %}</td></tr>{% empty %}<tr><td colspan="6">No questions in this exam.</td></tr>{% endfor %}</tbody>
+</table></div>
+<h2>Student degrees</h2>
+<div class="module"><table>
+<thead><tr><th>Student</th><th>Email</th><th>Entries</th><th>Latest degree</th><th>Percentage</th></tr></thead>
+<tbody>{% for row in student_rows %}<tr><th>{{ row.student.get_full_name|default:row.student.username }}</th><td>{{ row.student.email }}</td><td>{{ row.entries }}</td><td>{{ row.attempt.score }} / {{ row.attempt.total_questions }}</td><td>{% widthratio row.attempt.score row.attempt.total_questions 100 %}%</td></tr>{% empty %}<tr><td colspan="5">No students have completed this exam.</td></tr>{% endfor %}</tbody>
+</table></div>
+<p><a href="{% url 'admin:exams_exam_change' exam.pk %}">Back to exam</a></p>
+{% endblock %}

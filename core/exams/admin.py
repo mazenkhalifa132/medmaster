@@ -7,10 +7,12 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.db.models import Max
+from django.contrib.auth import get_user_model
+from django.db.models import Count, Q
 import nested_admin
 
 from .bulk_import import BulkQuestionImportError, parse_questions
-from .models import Exam, ExamActivationAnnouncement, ExamQuestion, MCQAnswer
+from .models import Exam, ExamActivationAnnouncement, ExamQuestion, ExamAttempt, MCQAnswer
 from .telegram import send_exam_activation_announcement
 
 
@@ -107,12 +109,70 @@ class ExamAdmin(nested_admin.NestedModelAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
+                '<int:object_id>/statistics/',
+                self.admin_site.admin_view(self.statistics_view),
+                name='exams_exam_statistics',
+            ),
+            path(
                 '<path:object_id>/bulk-upload/',
                 self.admin_site.admin_view(self.bulk_upload_view),
                 name='exams_exam_bulk_upload',
             ),
         ]
         return custom_urls + urls
+
+    def statistics_view(self, request, object_id):
+        exam = self.get_object(request, object_id)
+        if exam is None:
+            return HttpResponseRedirect(reverse('admin:exams_exam_changelist'))
+        if not self.has_view_or_change_permission(request, exam):
+            raise PermissionDenied
+
+        attempts = ExamAttempt.objects.filter(exam=exam, total_questions__gt=0)
+        attempt_list = list(attempts.select_related('student').order_by('-submitted_at', '-pk'))
+        attempt_count = len(attempt_list)
+        completed = attempts.order_by().values('student_id').distinct().count()
+        cohort = get_user_model().objects.filter(role='student', academic_year=exam.year).count()
+        question_rows = []
+        for question in exam.questions.all():
+            answers = question.examanswer_set.filter(attempt__total_questions__gt=0)
+            answered = answers.exclude(Q(selected_answer__isnull=True) & Q(text_answer='')).count()
+            correct = answers.filter(selected_answer__is_correct=True).count()
+            question_rows.append({
+                'question': question,
+                'entries': answered,
+                'solved': correct,
+                'not_solved': max(0, answered - correct),
+                'not_answered': max(0, attempt_count - answered),
+            })
+
+        students = get_user_model().objects.filter(
+            pk__in=attempts.values('student_id').distinct()
+        ).annotate(
+            entries=Count('exam_attempts', filter=Q(exam_attempts__exam=exam, exam_attempts__total_questions__gt=0)),
+        ).prefetch_related('exam_attempts')
+        student_rows = []
+        for student in students.order_by('username'):
+            latest = attempts.filter(student=student).order_by('-submitted_at', '-pk').first()
+            student_rows.append({'student': student, 'entries': student.entries, 'attempt': latest})
+
+        context = {
+            **self.admin_site.each_context(request),
+            'opts': self.model._meta,
+            'title': f'Exam statistics: {exam.name}',
+            'exam': exam,
+            'entry_count': attempt_count,
+            'completed_count': completed,
+            'not_entered_count': max(0, cohort - completed),
+            'cohort_count': cohort,
+            'average_score': (sum(attempt.score for attempt in attempt_list) / attempt_count) if attempt_count else None,
+            'average_percentage': (
+                sum(100 * attempt.score / attempt.total_questions for attempt in attempt_list) / attempt_count
+            ) if attempt_count else None,
+            'question_rows': question_rows,
+            'student_rows': student_rows,
+        }
+        return TemplateResponse(request, 'admin/exams/exam/statistics.html', context)
 
     def bulk_upload_view(self, request, object_id):
         exam = self.get_object(request, object_id)
