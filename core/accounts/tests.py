@@ -189,9 +189,10 @@ class AuthFlowTests(TestCase):
             follow=True,
         )
         user.refresh_from_db()
-        self.assertEqual(user.first_name, 'Updated Again')
+        self.assertEqual(user.first_name, 'Updated')
         self.assertEqual(user.academic_year, 5)
         self.assertContains(response, 'already used your one academic-year change')
+        self.assertContains(response, 'already used your one name change')
 
     def test_profile_shows_one_time_year_change_warning(self, _verify_turnstile):
         user = User.objects.create_user(

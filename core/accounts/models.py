@@ -58,6 +58,10 @@ class User(AbstractUser):
         default=False,
         help_text='Whether the student has already used their one profile academic-year change.',
     )
+    name_change_used = models.BooleanField(
+        default=False,
+        help_text='Whether the student has already used their one name change.',
+    )
     email = models.EmailField(unique=True)
     ban_type = models.CharField(max_length=12, choices=BAN_CHOICES, default=BAN_NONE)
     banned_until = models.DateTimeField(

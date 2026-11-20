@@ -30,8 +30,9 @@
             </div>
 
             <div class="row g-3 mb-4">
-                <div class="col-md-6"><label class="form-label text-muted small" for="first-name">First Name</label><input type="text" class="form-control profile-editable" id="first-name" name="first_name" value="{{ request.user.first_name }}" maxlength="150" readonly required></div>
-                <div class="col-md-6"><label class="form-label text-muted small" for="last-name">Last Name</label><input type="text" class="form-control profile-editable" id="last-name" name="last_name" value="{{ request.user.last_name }}" maxlength="150" readonly required></div>
+                <div class="col-md-6"><label class="form-label text-muted small" for="first-name">First Name</label><input type="text" class="form-control{% if not request.user.name_change_used %} profile-editable{% endif %}" id="first-name" name="first_name" value="{{ request.user.first_name }}" maxlength="150" readonly required></div>
+                <div class="col-md-6"><label class="form-label text-muted small" for="last-name">Last Name</label><input type="text" class="form-control{% if not request.user.name_change_used %} profile-editable{% endif %}" id="last-name" name="last_name" value="{{ request.user.last_name }}" maxlength="150" readonly required></div>
+                {% if request.user.name_change_used %}<div class="col-12"><div class="alert alert-secondary small mb-0">You have already used your one name change.</div></div>{% else %}<div class="col-12"><div class="alert alert-warning small mb-0">You can change your name only once.</div></div>{% endif %}
                 <div class="col-md-6"><label class="form-label text-muted small" for="email">Email Address</label><input type="email" class="form-control" id="email" value="{{ request.user.email }}" readonly></div>
                 <div class="col-md-6"><label class="form-label text-muted small" for="phone">Phone Number</label><input type="tel" class="form-control" id="phone" value="{{ request.user.phone|default:'' }}" readonly></div>
                 <div class="col-md-6">

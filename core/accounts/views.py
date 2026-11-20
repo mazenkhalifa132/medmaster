@@ -189,9 +189,18 @@ def profile_view(request):
         if not first_name or not last_name:
             messages.error(request, 'First name and last name are required.')
         else:
-            request.user.first_name = first_name
-            request.user.last_name = last_name
-            update_fields = ['first_name', 'last_name']
+            name_changed = (first_name, last_name) != (request.user.first_name, request.user.last_name)
+            name_change_blocked = name_changed and request.user.name_change_used
+            update_fields = []
+            if name_change_blocked:
+                messages.error(request, 'You have already used your one name change.')
+            else:
+                request.user.first_name = first_name
+                request.user.last_name = last_name
+                update_fields.extend(['first_name', 'last_name'])
+                if name_changed:
+                    request.user.name_change_used = True
+                    update_fields.append('name_change_used')
             year_changed = False
 
             if academic_year:
@@ -211,9 +220,11 @@ def profile_view(request):
                         year_changed = True
                         messages.success(request, 'Your academic year has been updated. This change cannot be made again.')
 
-            request.user.save(update_fields=update_fields)
+            if update_fields:
+                request.user.save(update_fields=update_fields)
             if not year_changed:
-                messages.success(request, 'Your profile has been updated.')
+                if not name_change_blocked:
+                    messages.success(request, 'Your profile has been updated.')
             return redirect('profile')
 
     return render(request, 'accounts/profile.html')
