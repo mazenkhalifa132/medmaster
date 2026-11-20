@@ -8,3 +8,4 @@ INSTALLED_APPS must include:
 TEMPLATES[0]['OPTIONS']['context_processors'] must include:
     'feedback.context_processors.feedback_status',
     'verification.services.activation_status',
+'feedback' in INSTALLED_APPS + feedback_status context_processor required
