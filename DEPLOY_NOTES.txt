@@ -1,0 +1,10 @@
+
+## Required settings.py edits (not tracked in git)
+
+INSTALLED_APPS must include:
+    'feedback',
+    ... other apps ...
+
+TEMPLATES[0]['OPTIONS']['context_processors'] must include:
+    'feedback.context_processors.feedback_status',
+    'verification.services.activation_status',
