@@ -12,4 +12,5 @@ urlpatterns = [
     path('text/', include('text.urls')),
     path('notifications/', include('notifications.urls')),
     path('', include('dashboard.urls')),
+    path('feedback/', include('feedback.urls')),
 ]
