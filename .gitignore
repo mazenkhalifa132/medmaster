@@ -26,3 +26,7 @@ staticfiles/
 media/
 *.log
 core/core/settings.py
+
+__pycache__/
+*.pyc
+*.pyo
