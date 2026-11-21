@@ -2,6 +2,9 @@
 {% block object-tools-items %}
     {% if original %}
         <li><a href="{% url 'admin:exams_exam_statistics' original.pk %}">View exam statistics</a></li>
+        {% if original.exam_type != 'saq' and has_change_permission %}
+            <li><a href="{% url 'admin:exams_exam_bulk_upload' original.pk %}">Import questions</a></li>
+        {% endif %}
     {% endif %}
     {{ block.super }}
 {% endblock %}
